@@ -5,4 +5,14 @@
     <color name="colorAccent">#03DAC5</color>
 
     <color name="white">#FFFFFF</color>
+
+    <!--Color for background drawables login and text-->
+    <color name="colorGrayTextSpotify">#343434</color>
+    <color name="colorGrayTextSpotifyBG1">#1B1B1B</color>
+    <color name="colorGray2TextSpotify">#A5A5A5</color>
+
+    <color name="colorBlueLight">#0EBFE9	</color>
+
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
 </resources>

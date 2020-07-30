@@ -2,6 +2,7 @@ package com.rober.blogapp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
@@ -20,8 +21,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //NavController
         navController = Navigation.findNavController(this, R.id.container_fragment)
         bottom_navigation.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener{_, destination, _ ->
+            if(destination.id == R.id.loginFragment || destination.id == R.id.registerFragment){
+                bottom_navigation.visibility = View.GONE
+            }else{
+                bottom_navigation.visibility = View.VISIBLE
+            }
+
+        }
+
     }
 }
