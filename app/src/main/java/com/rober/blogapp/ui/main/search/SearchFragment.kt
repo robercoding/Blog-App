@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.Search
+package com.rober.blogapp.ui.main.search
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

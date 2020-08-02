@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.Profile
+package com.rober.blogapp.ui.main.profile
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.rober.blogapp.R
-import com.rober.blogapp.entity.User
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,8 +30,8 @@ class ProfileFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
 
-        viewModel.login()
-        viewModel.saveUser(User(1, "Rober", "Valencia"))
-        viewModel.printSomething()
+//        viewModel.login()
+//        viewModel.saveUser(User(1, "Rober", "Valencia"))
+//        viewModel.printSomething()
     }
 }

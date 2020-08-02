@@ -1,7 +1,6 @@
 package com.rober.blogapp.ui.auth.register
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,14 +13,13 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.util.state.AuthState
+import com.rober.blogapp.util.state.AuthStateEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_register.*
 import kotlinx.android.synthetic.main.fragment_register.etEmail
 import kotlinx.android.synthetic.main.fragment_register.progress_bar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class RegisterFragment : Fragment() {
@@ -77,7 +75,7 @@ class RegisterFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            viewModel.signUpWithEmail(email, password)
+            viewModel.signUpWithEmail(email, password, name)
         }
     }
 
@@ -87,18 +85,19 @@ class RegisterFragment : Fragment() {
         }.launchIn(lifecycleScope)
     }
 
-    private fun handleAuthState(authState: AuthState) {
+    private fun handleAuthState(authState: AuthStateEvent) {
         when(authState){
-            is AuthState.Registering -> {
+            is AuthStateEvent.Registering -> {
                 displayProgressBar(true)
             }
-            is AuthState.SuccessRegister -> {
+            is AuthStateEvent.SuccessRegister -> {
                 displayProgressBar(false)
                 Toast.makeText(activity, "Succesfully registered", Toast.LENGTH_SHORT).show()
                 goToMainFragments()
             }
 
-            is AuthState.Error -> {
+            is AuthStateEvent.Error -> {
+                displayProgressBar(false)
                 errorMessage(authState.message)
             }
         }

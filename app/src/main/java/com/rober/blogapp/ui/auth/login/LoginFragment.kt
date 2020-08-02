@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.util.state.AuthState
+import com.rober.blogapp.util.state.AuthStateEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.flow.launchIn
@@ -65,27 +65,28 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun handleAuthState(state: AuthState){
+    private fun handleAuthState(state: AuthStateEvent){
         when(state) {
-            is AuthState.CheckingUserLoggedIn -> {
+            is AuthStateEvent.CheckingUserLoggedIn -> {
                 displayProgressBar(true)
             }
-            is AuthState.Logging -> {
+            is AuthStateEvent.Logging -> {
                 displayProgressBar(true)
             }
-            is AuthState.UserLoggedIn -> {
+            is AuthStateEvent.UserLoggedIn -> {
                 displayProgressBar(false)
+                viewModel.getAndSetCurrentUser()
                 goToMainFragments()
             }
-            is AuthState.UserLogout -> {
+            is AuthStateEvent.UserLogout -> {
                 displayProgressBar(false)
                 Snackbar.make(requireView(), "Logout", Snackbar.LENGTH_SHORT).show()
             }
-            is AuthState.Error -> {
+            is AuthStateEvent.Error -> {
                 displayProgressBar(false)
                 errorMessage(state.message)
             }
-            is AuthState.Idle -> {
+            is AuthStateEvent.Idle -> {
                 displayProgressBar(false)
                 Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
             }

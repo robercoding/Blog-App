@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         bottom_navigation.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener{_, destination, _ ->
-            if(destination.id == R.id.loginFragment || destination.id == R.id.registerFragment){
+            if(destination.id == R.id.loginFragment || destination.id == R.id.registerFragment || destination.id == R.id.postAddFragment){
                 bottom_navigation.visibility = View.GONE
             }else{
                 bottom_navigation.visibility = View.VISIBLE

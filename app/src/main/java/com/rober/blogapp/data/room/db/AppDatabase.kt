@@ -4,16 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.rober.blogapp.data.room.dao.BlogDao
-import com.rober.blogapp.data.room.dao.UserDao
-import com.rober.blogapp.entity.Blog
+//import com.rober.blogapp.data.room.dao.BlogDao
+//import com.rober.blogapp.data.room.dao.UserDao
+import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 
-@Database(entities = arrayOf(User::class, Blog::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(User::class, Post::class), version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase(){
 
-    abstract fun userDao(): UserDao
-    abstract fun blogDao(): BlogDao
+//    abstract fun userDao(): UserDao
+//    abstract fun blogDao(): BlogDao
 
 
     companion object{

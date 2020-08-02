@@ -37,7 +37,7 @@
             android:backgroundTint="@color/colorGray2TextSpotify"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
-            android:text="testtest"/>
+            android:text="1234567"/>
 
         <TextView
             android:id="@+id/tvPassword"

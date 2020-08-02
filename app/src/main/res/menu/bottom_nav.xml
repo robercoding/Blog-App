@@ -11,6 +11,6 @@
         />
     <item
         android:id="@+id/profileFragment"
-        android:title="search"
+        android:title="Profile"
         />
 </menu>

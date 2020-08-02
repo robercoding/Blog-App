@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.Profile
+package com.rober.blogapp.ui.main.profile
 
 import android.util.Log
 import androidx.hilt.Assisted

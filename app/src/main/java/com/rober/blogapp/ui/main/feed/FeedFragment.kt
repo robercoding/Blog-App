@@ -1,13 +1,21 @@
-package com.rober.blogapp.ui.main.Feed
+package com.rober.blogapp.ui.main.feed
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
+import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
+import com.rober.blogapp.util.state.FeedState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
 class FeedFragment : Fragment() {
@@ -26,8 +34,15 @@ class FeedFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_feed, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupListeners()
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        //private val listPosts = viewModel.getPosts()
 
 //        val user = User(1, "Rober", "Valencia")
 //        insertUser(user)
@@ -45,6 +60,28 @@ class FeedFragment : Fragment() {
     }
 
     private fun subscribeObservers(){
+        viewModel.feedState.observe(viewLifecycleOwner, Observer {dataState ->
+            Log.i(TAG, "$dataState")
+            when(dataState){
+                is FeedState.SuccessListPostState -> {
+                    displayProgressBar(false)
+                    recycler_feed.apply {
+                       layoutManager = LinearLayoutManager(requireContext())
+                        adapter = PostAdapter(requireView(), dataState.data)
+                        setHasFixedSize(true)
+                    }
+                }
+                is FeedState.Error -> {
+                    Toast.makeText(requireContext(), dataState.message, Toast.LENGTH_SHORT).show()
+                }
+
+
+                is FeedState.GettingPostState -> {
+                    displayProgressBar(true)
+
+                }
+            }
+        })
 //        viewModel.usersWithBlogsState.observe(viewLifecycleOwner, Observer {dataState ->
 //            Log.i(TAG, "Data: $dataState")
 //            when(dataState){
@@ -71,5 +108,20 @@ class FeedFragment : Fragment() {
 //    private fun insertBlog(i: Int){
 //        viewModel.insertBlog(i)
 //    }
+
+    fun displayProgressBar(isDisplayed: Boolean){
+        progressbar.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    }
+
+    private fun setupListeners(){
+        fab_to_post_add.setOnClickListener {
+            goToPostAdd()
+        }
+    }
+
+    private fun goToPostAdd(){
+        val navController = findNavController()
+        navController.navigate(R.id.postAddFragment)
+    }
 
 }

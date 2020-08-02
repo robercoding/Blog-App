@@ -8,19 +8,22 @@
 
     <fragment
         android:id="@+id/feedFragment"
-        android:name="com.rober.blogapp.ui.main.Feed.FeedFragment"
+        android:name="com.rober.blogapp.ui.main.feed.FeedFragment"
         android:label="fragment_feed"
         tools:layout="@layout/fragment_feed" >
         <action
-            android:id="@+id/action_feedFragment_to_searchFragment2"
+            android:id="@+id/action_feedFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
         <action
             android:id="@+id/action_feedFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_postAddFragment"
+            app:destination="@id/postAddFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
-        android:name="com.rober.blogapp.ui.main.Search.SearchFragment"
+        android:name="com.rober.blogapp.ui.main.search.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" >
         <action
@@ -29,7 +32,7 @@
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.rober.blogapp.ui.main.Profile.ProfileFragment"
+        android:name="com.rober.blogapp.ui.main.profile.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
     <fragment
@@ -49,4 +52,9 @@
         android:name="com.rober.blogapp.ui.auth.register.RegisterFragment"
         android:label="fragment_register"
         tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/postAddFragment"
+        android:name="com.rober.blogapp.ui.main.post.PostAddFragment"
+        android:label="fragment_post_add"
+        tools:layout="@layout/fragment_post_add" />
 </navigation>
