@@ -30,8 +30,6 @@ class MainActivity : AppCompatActivity() {
             }else{
                 bottom_navigation.visibility = View.VISIBLE
             }
-
         }
-
     }
 }

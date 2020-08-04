@@ -5,6 +5,7 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.FirebaseAuthManager
 import com.rober.blogapp.data.network.firebase.FirebaseFeedManager
+import com.rober.blogapp.data.network.firebase.FirebasePostAddManager
 import com.rober.blogapp.entity.Post
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,14 +14,15 @@ import javax.inject.Inject
 class FirebaseRepository @Inject
 constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
-    private val firebaseFeedManager: FirebaseFeedManager
+    private val firebaseFeedManager: FirebaseFeedManager,
+    private val firebasePostAddManager: FirebasePostAddManager
 ) {
     val TAG ="FirebaseRepository"
 
     val source = Source.CACHE
 
     //Auth
-    suspend fun getAndSetCurrentUser() = firebaseAuthManager.getAndSetCurrentUser()
+    suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
 
     suspend fun getCurrentUser() = firebaseAuthManager.getCurrentUser()
 
@@ -35,7 +37,5 @@ constructor(
     //Feed
     suspend fun retrievePosts() : Flow<ResultData<List<Post>>> = firebaseFeedManager.retrievePosts()
 
-
-
-
+    suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
 }

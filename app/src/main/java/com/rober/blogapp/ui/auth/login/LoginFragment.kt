@@ -56,7 +56,7 @@ class LoginFragment : Fragment() {
         }.launchIn(lifecycleScope)
     }
 
-    private fun activateListeners(){
+    private fun activateListeners() {
         btnLogin.setOnClickListener {
             viewModel.login(etEmail.text.toString(), etPassword.text.toString())
         }

@@ -25,13 +25,23 @@ class FirebaseAuthManager @Inject constructor(
     private var exception = Exception("There was an error in our servers")
     private val authErrors = firebaseErrors.authErrors
 
-    suspend fun getAndSetCurrentUser(){
-        firebaseSource.getCurrentUser()
+    suspend fun setCurrentUser(){
+        Log.i("User", "AuthManager = Setting ")
+        firebaseSource.setCurrentUser()
     }
 
-    suspend fun getCurrentUser(): Flow<ResultData<String>> = flow {
-        val username = firebaseSource.username
-        emit(if(username.equals("")) ResultData.Error(Exception("Sorry, name is empty"), null) else ResultData.Success(firebaseSource.username))
+    suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
+        val user = firebaseSource.user
+        Log.i("User", "AuthManager = Getting currentUser")
+        Log.i("User", "AuthManager = Checking currentUser")
+        if(user!=null){
+            emit(if(user.isEmpty()) ResultData.Error(Exception("Sorry, user is empty"), null) else ResultData.Success(user))
+            Log.i("User", "AuthManager = NOT NULL")
+        }
+        else{
+            Log.i("User", "AuthManager = NULL")
+            firebaseSource.setCurrentUser()
+        }
     }
 
     suspend fun login(email: String, password: String): Flow<ResultAuth> = flow {
@@ -40,6 +50,7 @@ class FirebaseAuthManager @Inject constructor(
         try{
             firebaseSource.auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
+                    firebaseSource.userAuth = it.user
                     loggedIn = true
                     Log.i(TAG, "$loggedIn")
                 }
@@ -157,6 +168,8 @@ class FirebaseAuthManager @Inject constructor(
 
         val user = firebaseSource.userAuth
 
+        firebaseSource.userAuth = null
+
        emit(if(checkUser(user)) ResultAuth.SuccessSignout else ResultAuth.FailureSignout)
     }
 
@@ -165,6 +178,10 @@ class FirebaseAuthManager @Inject constructor(
             return true
         }
         return false
+    }
+
+    fun checkUserLoggedIn(): Boolean{
+        return firebaseSource.checkUser()
     }
 
 //    private fun checkIfUserAlreadyLoggedIn(): Boolean{

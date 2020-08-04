@@ -10,11 +10,19 @@ import com.google.firebase.firestore.Exclude
 @Entity(tableName = "users")
 data class User(
     @PrimaryKey(autoGenerate = true)
-    @get:Exclude val db_user_id: Long,
-    val user_id: String,
-    val username: String,
-    val biography: String?,
-    val location: String?
+    @get:Exclude val db_user_id: Long = 0,
+    val user_id: String = "",
+    val username: String = "",
+    val biography: String = "",
+    val location: String = ""
 ) {
     constructor() : this(0, "", "", "", "")
+
+    fun isEmpty(): Boolean{
+        if(this.username.isEmpty() || this.username.equals("")){
+            return true
+        }
+        return false
+    }
 }
+

@@ -50,6 +50,7 @@ private val firebaseRepository: FirebaseRepository
     }
 
     fun login(email: String, password: String) {
+        Log.i(TAG, "Email: $email")
         viewModelScope.launch {
             firebaseRepository.login(email, password)
                 .collect { resultAuth ->

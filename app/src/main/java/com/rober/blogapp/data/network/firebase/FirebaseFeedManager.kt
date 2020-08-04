@@ -25,21 +25,23 @@ constructor
 
         val date = org.threeten.bp.LocalDateTime.now().minusDays(7)
 
-        var listFollowings: List<Following>? = null
+        var listFollowings: MutableList<Following>? = null
         //var listFollowings : List<Following>? = null
         //+firebaseSource.username+
         try{
             if(firebaseSource.username.equals(""))
-                firebaseSource.getCurrentUser()
+                Log.i("User", "FirebaseFeedManager: Delaying" )
+                kotlinx.coroutines.delay(2000)
 
             Log.i(TAG, "DEBUG: following/${firebaseSource.username}/user_following")
-
+            Log.i("User:", "FirebaseFeedManager: We got a name ${firebaseSource.username}")
             val followingReference = firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
 
             listFollowings = followingReference
                 .get()
                 .await()
-                .toObjects(Following::class.java).toList()
+                .toObjects(Following::class.java)
+
 
             Log.i(TAG, "Following size: ${listFollowings.size}, $listFollowings")
 
@@ -53,6 +55,10 @@ constructor
                 }
             }
             emit(ResultData.Success(newListPost))
+
+        }catch (exception: Exception){
+            emit(ResultData.Error<List<Post>>(exception, null))
+        }
 //
 //            val postsReference = firebaseSource.db.collection("posts")
 //
@@ -66,9 +72,7 @@ constructor
 //            Log.i(TAG, "ListPosts: ${listPosts.size}, $listPosts")
 
 
-        }catch (exception: Exception){
-            emit(ResultData.Error<List<Post>>(exception, null))
-        }
+
 
 //        val newListPost: MutableList<Post> = mutableListOf()
 //

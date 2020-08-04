@@ -14,7 +14,7 @@ data class Post (
     var post_id: String,
     var title: String,
     var text: String,
-    val user_creator_id: String,
+    var user_creator_id: String,
     val created_at: Date,
     var likes: Int
 ){

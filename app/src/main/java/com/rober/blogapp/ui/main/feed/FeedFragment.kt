@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -22,10 +23,6 @@ class FeedFragment : Fragment() {
 
     private val viewModel: FeedViewModel by viewModels()
     private val TAG: String = "FeedFragment"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -109,7 +106,7 @@ class FeedFragment : Fragment() {
 //        viewModel.insertBlog(i)
 //    }
 
-    fun displayProgressBar(isDisplayed: Boolean){
+    private fun displayProgressBar(isDisplayed: Boolean){
         progressbar.visibility = if(isDisplayed) View.VISIBLE else View.GONE
     }
 
@@ -117,11 +114,20 @@ class FeedFragment : Fragment() {
         fab_to_post_add.setOnClickListener {
             goToPostAdd()
         }
+
+    //Example of sending a variable
+//            val navController = findNavController()
+//            val variable = "a variable has been sended"
+//            val bundle = bundleOf("variable" to variable)
+//            navController.navigate(R.id.profileFragment, bundle)
+
     }
 
     private fun goToPostAdd(){
         val navController = findNavController()
         navController.navigate(R.id.postAddFragment)
     }
+
+
 
 }

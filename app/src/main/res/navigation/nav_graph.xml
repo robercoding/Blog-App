@@ -12,29 +12,24 @@
         android:label="fragment_feed"
         tools:layout="@layout/fragment_feed" >
         <action
-            android:id="@+id/action_feedFragment_to_searchFragment"
-            app:destination="@id/searchFragment" />
-        <action
             android:id="@+id/action_feedFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
-        <action
-            android:id="@+id/action_feedFragment_to_postAddFragment"
-            app:destination="@id/postAddFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.rober.blogapp.ui.main.search.SearchFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" >
-        <action
-            android:id="@+id/action_searchFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_search" />
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.rober.blogapp.ui.main.profile.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <argument
+            android:name="uid"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.rober.blogapp.ui.auth.login.LoginFragment"
