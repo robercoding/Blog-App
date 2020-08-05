@@ -13,7 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.util.state.AuthStateEvent
+import com.rober.blogapp.util.state.AuthState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_register.*
 import kotlinx.android.synthetic.main.fragment_register.etEmail
@@ -51,32 +51,36 @@ class RegisterFragment : Fragment() {
 
     private fun activateListeners(){
         btnSignUp.setOnClickListener {
-            val name = etName.text.toString()
-            val email = etEmail.text.toString()
-            val password = etPassword.text.toString()
-            val passwordRepeat = etPasswordRepeat.text.toString()
-
-            if(name.isEmpty()){
-                Toast.makeText(activity, "Name can't be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-                Toast.makeText(activity, "Email must be valid", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if(password.length <= 6){
-                Toast.makeText(activity, "Password must be > 6 characters", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if(!passwordRepeat.equals(password)){
-                Toast.makeText(activity, "Passwords must be equals", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            viewModel.signUpWithEmail(email, password, name)
+            signUp()
         }
+    }
+
+    private fun signUp(){
+        val name = etName.text.toString()
+        val email = etEmail.text.toString()
+        val password = etPassword.text.toString()
+        val passwordRepeat = etPasswordRepeat.text.toString()
+
+        if(name.isEmpty()){
+            Toast.makeText(activity, "Name can't be empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            Toast.makeText(activity, "Email must be valid", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if(password.length <= 6){
+            Toast.makeText(activity, "Password must be > 6 characters", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if(!passwordRepeat.equals(password)){
+            Toast.makeText(activity, "Passwords must be equals", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewModel.setRegisterIntetion(RegisterFragmentEvent.SignUp(email, password, name))
     }
 
     private fun observeViewModel() {
@@ -85,18 +89,18 @@ class RegisterFragment : Fragment() {
         }.launchIn(lifecycleScope)
     }
 
-    private fun handleAuthState(authState: AuthStateEvent) {
+    private fun handleAuthState(authState: AuthState) {
         when(authState){
-            is AuthStateEvent.Registering -> {
+            is AuthState.Registering -> {
                 displayProgressBar(true)
             }
-            is AuthStateEvent.SuccessRegister -> {
+            is AuthState.SuccessRegister -> {
                 displayProgressBar(false)
                 Toast.makeText(activity, "Succesfully registered", Toast.LENGTH_SHORT).show()
                 goToMainFragments()
             }
 
-            is AuthStateEvent.Error -> {
+            is AuthState.Error -> {
                 displayProgressBar(false)
                 errorMessage(authState.message)
             }
@@ -118,4 +122,8 @@ class RegisterFragment : Fragment() {
         else
             Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
     }
+}
+
+sealed class RegisterFragmentEvent{
+    data class SignUp(val email: String, val password: String, val name:String): RegisterFragmentEvent()
 }

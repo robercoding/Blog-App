@@ -1,19 +1,20 @@
 package com.rober.blogapp.util.state
 
-sealed class AuthStateEvent {
+sealed class AuthState {
 
 
     //Login
-    object Logging: AuthStateEvent()
-    object CheckingUserLoggedIn: AuthStateEvent()
-    object UserLoggedIn: AuthStateEvent()
-    object UserLogout: AuthStateEvent()
+    object Logging: AuthState()
+    object CheckingUserLoggedIn: AuthState()
+    object UserLoggedIn: AuthState()
+    object UserLogout: AuthState()
+    object SetUserFirebaseSource: AuthState()
 
     //Register
-    object Registering: AuthStateEvent()
-    object SuccessRegister: AuthStateEvent()
+    object Registering: AuthState()
+    object SuccessRegister: AuthState()
 
     //Generics
-    object Idle : AuthStateEvent()
-    data class Error(val message: String?): AuthStateEvent()
+    object Idle : AuthState()
+    data class Error(val message: String?): AuthState()
 }

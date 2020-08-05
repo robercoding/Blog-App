@@ -72,6 +72,14 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
+        firebaseSource.setCurrentUser()
+
+        if(loggedIn){
+            while (firebaseSource.username.equals("") ){
+                kotlinx.coroutines.delay(500)
+            }
+        }
+
         if(!loggedIn)
             emit(ResultAuth.Error(exception))
         else

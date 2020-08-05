@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.state.FeedState
@@ -59,13 +60,31 @@ class FeedFragment : Fragment() {
     private fun subscribeObservers(){
         viewModel.feedState.observe(viewLifecycleOwner, Observer {dataState ->
             Log.i(TAG, "$dataState")
+
             when(dataState){
+
                 is FeedState.SuccessListPostState -> {
                     displayProgressBar(false)
                     recycler_feed.apply {
                        layoutManager = LinearLayoutManager(requireContext())
                         adapter = PostAdapter(requireView(), dataState.data)
                         setHasFixedSize(true)
+                        addOnScrollListener(object: RecyclerView.OnScrollListener() {
+                            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                                super.onScrolled(recyclerView, dx, dy)
+
+                            }
+
+                            override fun onScrollStateChanged(
+                                recyclerView: RecyclerView,
+                                newState: Int
+                            ) {
+                                super.onScrollStateChanged(recyclerView, newState)
+                                if(!recyclerView.canScrollVertically(1)){
+                                    viewModel.setIntention(FeedFragmentEvent.RetrievePosts(true))
+                                }
+                            }
+                        })
                     }
                 }
                 is FeedState.Error -> {
@@ -127,7 +146,7 @@ class FeedFragment : Fragment() {
         val navController = findNavController()
         navController.navigate(R.id.postAddFragment)
     }
-
-
-
+}
+sealed class FeedFragmentEvent{
+    data class RetrievePosts(val morePosts: Boolean) : FeedFragmentEvent()
 }

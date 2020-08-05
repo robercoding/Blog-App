@@ -27,13 +27,13 @@ constructor(
 
 
     init {
-        getPosts()
+        retrievePosts(false)
     }
 
-    fun getPosts(){
+    fun retrievePosts(morePosts: Boolean){
         _feedState.value = FeedState.GettingPostState
         viewModelScope.launch {
-            firebaseRepository.retrievePosts()
+            firebaseRepository.retrievePosts(morePosts)
                 .collect {resultData ->
                     when(resultData){
                         is ResultData.Success -> {
@@ -49,6 +49,15 @@ constructor(
                         }
                     }
                 }
+        }
+    }
+
+
+    fun setIntention(event: FeedFragmentEvent){
+        when(event){
+            is FeedFragmentEvent.RetrievePosts -> {
+                retrievePosts(event.morePosts)
+            }
         }
     }
 }

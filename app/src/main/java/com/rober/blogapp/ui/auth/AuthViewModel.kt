@@ -2,11 +2,15 @@ package com.rober.blogapp.ui.auth
 
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.network.repository.FirebaseRepository
-import com.rober.blogapp.util.state.AuthStateEvent
+import com.rober.blogapp.ui.auth.login.LoginFragmentEvent
+import com.rober.blogapp.ui.auth.register.RegisterFragmentEvent
+import com.rober.blogapp.util.state.AuthState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -19,15 +23,14 @@ private val firebaseRepository: FirebaseRepository
 ): ViewModel() {
     private val TAG = "AuthViewModel"
 
-    private val _loginAuthState = MutableStateFlow<AuthStateEvent>(
-        AuthStateEvent.CheckingUserLoggedIn)
+    private val _loginAuthState : MutableLiveData<AuthState> = MutableLiveData()
 
-    private val _registerAuthState = MutableStateFlow<AuthStateEvent>(AuthStateEvent.Idle)
+    private val _registerAuthState = MutableStateFlow<AuthState>(AuthState.Idle)
 
-    val loginAuthState: StateFlow<AuthStateEvent>
+    val loginAuthState: LiveData<AuthState>
         get() = _loginAuthState
 
-    val registerAuthState: StateFlow<AuthStateEvent>
+    val registerAuthState: StateFlow<AuthState>
         get() = _registerAuthState
 
     init {
@@ -37,51 +40,65 @@ private val firebaseRepository: FirebaseRepository
 
                     when(resultAuthSignOut){
                         is ResultAuth.SuccessSignout -> {
-                            _loginAuthState.value = AuthStateEvent.UserLogout
+                            _loginAuthState.value = AuthState.UserLogout
                         }
                         is ResultAuth.FailureSignout -> {
-                            _loginAuthState.value = AuthStateEvent.Idle
+                            _loginAuthState.value = AuthState.Idle
                         }
                     }
                 }
 
         }
-
     }
 
-    fun login(email: String, password: String) {
-        Log.i(TAG, "Email: $email")
+    fun setLoginIntention(state: LoginFragmentEvent) {
+        when(state){
+            is LoginFragmentEvent.Login ->{
+                login(state.email, state.password)
+            }
+        }
+    }
+
+    private fun login(email: String, password: String) {
         viewModelScope.launch {
             firebaseRepository.login(email, password)
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Success -> {
-                            _loginAuthState.value = AuthStateEvent.UserLoggedIn
+                            _loginAuthState.value = AuthState.UserLoggedIn
                         }
                         is ResultAuth.Error -> {
                             Log.i(TAG, "${resultAuth.exception}")
-                            _loginAuthState.value = AuthStateEvent.Error(resultAuth.exception.message)
+                            _loginAuthState.value = AuthState.Error(resultAuth.exception.message)
                         }
                         is ResultAuth.Loading ->
-                            _loginAuthState.value = AuthStateEvent.Logging
+                            _loginAuthState.value = AuthState.Logging
                     }
                 }
         }
     }
+    
+    fun setRegisterIntetion(state: RegisterFragmentEvent){
+        when(state){
+            is RegisterFragmentEvent.SignUp -> {
+                signUpWithEmail(state.email, state.password, state.name)
+            }
+        }
+    }
 
-    fun signUpWithEmail(email: String, password: String, name: String){
+    private fun signUpWithEmail(email: String, password: String, name: String){
         viewModelScope.launch {
             firebaseRepository.signUpWithEmail(email, password, name)
                 .collect {resultAuth ->
                     when(resultAuth) {
                         is ResultAuth.Loading -> {
-                            _registerAuthState.value = AuthStateEvent.Registering
+                            _registerAuthState.value = AuthState.Registering
                         }
                         is ResultAuth.Success -> {
-                            _registerAuthState.value = AuthStateEvent.SuccessRegister
+                            _registerAuthState.value = AuthState.SuccessRegister
                         }
                         is ResultAuth.Error -> {
-                            _registerAuthState.value = AuthStateEvent.Error(resultAuth.exception.message)
+                            _registerAuthState.value = AuthState.Error(resultAuth.exception.message)
                         }
                 }
 
@@ -89,7 +106,7 @@ private val firebaseRepository: FirebaseRepository
         }
     }
 
-    fun getAndSetCurrentUser(){
+    private fun getAndSetCurrentUser(){
         viewModelScope.launch {
             firebaseRepository.getAndSetCurrentUser()
         }

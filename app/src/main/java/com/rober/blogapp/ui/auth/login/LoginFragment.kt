@@ -5,14 +5,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.util.state.AuthStateEvent
+import com.rober.blogapp.util.state.AuthState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.flow.launchIn
@@ -50,43 +52,60 @@ class LoginFragment : Fragment() {
 
     }
 
-    private fun observeViewModel(){
-        viewModel.loginAuthState.onEach {
-                state -> handleAuthState(state)
-        }.launchIn(lifecycleScope)
-    }
 
     private fun activateListeners() {
         btnLogin.setOnClickListener {
-            viewModel.login(etEmail.text.toString(), etPassword.text.toString())
+            login()
         }
         btnRegisterEmail.setOnClickListener {
             goToRegisterFragment()
         }
     }
 
-    private fun handleAuthState(state: AuthStateEvent){
+    private fun login(){
+        val email = etEmail.text.toString()
+        val password = etPassword.text.toString()
+
+        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            Toast.makeText(activity, "Email must be valid", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if(password.isEmpty()){
+           return
+        }
+
+        viewModel.setLoginIntention(LoginFragmentEvent.Login(email, password))
+    }
+
+
+    private fun observeViewModel(){
+        viewModel.loginAuthState.observe(viewLifecycleOwner, Observer {loginAuthState ->
+            handleAuthState(loginAuthState)
+        })
+    }
+
+    private fun handleAuthState(state: AuthState){
         when(state) {
-            is AuthStateEvent.CheckingUserLoggedIn -> {
+            is AuthState.CheckingUserLoggedIn -> {
                 displayProgressBar(true)
             }
-            is AuthStateEvent.Logging -> {
+            is AuthState.Logging -> {
                 displayProgressBar(true)
             }
-            is AuthStateEvent.UserLoggedIn -> {
+            is AuthState.UserLoggedIn -> {
                 displayProgressBar(false)
-                viewModel.getAndSetCurrentUser()
                 goToMainFragments()
             }
-            is AuthStateEvent.UserLogout -> {
+            is AuthState.UserLogout -> {
                 displayProgressBar(false)
                 Snackbar.make(requireView(), "Logout", Snackbar.LENGTH_SHORT).show()
             }
-            is AuthStateEvent.Error -> {
+            is AuthState.Error -> {
                 displayProgressBar(false)
                 errorMessage(state.message)
             }
-            is AuthStateEvent.Idle -> {
+            is AuthState.Idle -> {
                 displayProgressBar(false)
                 Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
             }
@@ -117,5 +136,8 @@ class LoginFragment : Fragment() {
     fun displayProgressBar(isDisplayed: Boolean){
         progress_bar.visibility = if(isDisplayed) View.VISIBLE else View.GONE
     }
+}
 
+sealed class LoginFragmentEvent{
+    data class Login(val email: String, val password:String) : LoginFragmentEvent()
 }
