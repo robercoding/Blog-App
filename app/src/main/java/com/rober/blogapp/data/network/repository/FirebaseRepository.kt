@@ -6,6 +6,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.FirebaseAuthManager
 import com.rober.blogapp.data.network.firebase.FirebaseFeedManager
 import com.rober.blogapp.data.network.firebase.FirebasePostAddManager
+import com.rober.blogapp.data.network.firebase.FirebaseProfileManager
 import com.rober.blogapp.entity.Post
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -15,7 +16,8 @@ class FirebaseRepository @Inject
 constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
     private val firebaseFeedManager: FirebaseFeedManager,
-    private val firebasePostAddManager: FirebasePostAddManager
+    private val firebasePostAddManager: FirebasePostAddManager,
+    private val firebaseProfileManager: FirebaseProfileManager
 ) {
     val TAG ="FirebaseRepository"
 
@@ -35,7 +37,12 @@ constructor(
     //suspend fun checkIfUserAlreadyLoggedIn(): Boolean = firebaseAuthManager.checkIfUserAlreadyLoggedIn()
 
     //Feed
-    suspend fun retrievePosts(morePosts: Boolean) : Flow<ResultData<List<Post>>> = firebaseFeedManager.retrievePosts(morePosts)
+    suspend fun retrieveFeedPosts(morePosts: Boolean) : Flow<ResultData<List<Post>>> = firebaseFeedManager.retrieveFeedPosts(morePosts)
 
+    //PostAdd
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
+
+
+    //Profile
+    suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUserPosts(morePosts)
 }

@@ -25,16 +25,16 @@ constructor
 {
     private val TAG = "FirebaseFeedManager"
 
-    var savedListPost: MutableList<Post> = mutableListOf()
-    var pagination = 0
+    var savedFeedListPost: MutableList<Post> = mutableListOf()
+    var feedPagination = 0
 
-    suspend fun retrievePosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
+
+    suspend fun retrieveFeedPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
         try{
-
-            if(!morePosts && pagination > 0){
-                if(savedListPost.size > 0)
-                    emit(ResultData.Success(savedListPost.toList()))
+            if(!morePosts && feedPagination > 0){
+                if(savedFeedListPost.size > 0)
+                    emit(ResultData.Success(savedFeedListPost.toList()))
             }
 
             //Get all user followings
@@ -44,9 +44,10 @@ constructor
 
             val newListPosts: MutableList<Post> = mutableListOf()
 
-            if(!morePosts && pagination == 0) {
-                pagination++
-                val dateGreater = DateTime.now().minusDays(pagination * 7).toDate()
+            //Init post and save
+            if(!morePosts && feedPagination == 0) {
+                feedPagination++
+                val dateGreater = DateTime.now().minusDays(feedPagination * 7).toDate()
 
 
                 for (following in listFollowing) {
@@ -63,16 +64,19 @@ constructor
 
                 val postsOrdered = newListPosts.sortedBy { post -> post.created_at.time }.toMutableList()
 
-                savedListPost = postsOrdered
+                savedFeedListPost = postsOrdered
 
-                emit(ResultData.Success(savedListPost))
+                emit(ResultData.Success(savedFeedListPost))
             }
 
-            if(morePosts){
-                val dateLess = DateTime.now().minusDays(pagination*7).toDate()
-                pagination++
-                val dateGreater = DateTime.now().minusDays(pagination*7).toDate()
+            //Retrieve post from firestore
 
+            if(morePosts){
+                val dateLess = DateTime.now().minusDays(feedPagination*7).toDate()
+                feedPagination++
+                val dateGreater = DateTime.now().minusDays(feedPagination*7).toDate()
+
+                //Get posts from following
                 for (following in listFollowing) {
                     val listFollowingPosts = getUserPostsWhereBetween(following, dateGreater, dateLess)
 
@@ -81,6 +85,7 @@ constructor
                     }
                 }
 
+                //Get posts user logged in
                 val userLoggedInPosts = getUserPostsWhereBetween(null, dateGreater, dateLess)
 
                 for(post in userLoggedInPosts)
@@ -88,9 +93,9 @@ constructor
 
                 val postsOrdered = newListPosts.sortedBy { post -> post.created_at.time }.toMutableList()
 
-                savedListPost.addAll(postsOrdered)
+                savedFeedListPost.addAll(postsOrdered)
 
-                emit(ResultData.Success(savedListPost))
+                emit(ResultData.Success(savedFeedListPost))
             }
 
         }catch (exception: Exception){
@@ -107,6 +112,7 @@ constructor
 
         return listFollowing
     }
+
 
     private suspend fun getUserPostsWhereDateGreater(following: Following? = null, dateGreater: Date): List<Post>{
         if(following != null){
@@ -152,4 +158,5 @@ constructor
 
         return userLoggedInPosts
     }
+
 }

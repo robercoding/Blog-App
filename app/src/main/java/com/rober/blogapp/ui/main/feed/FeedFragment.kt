@@ -81,7 +81,7 @@ class FeedFragment : Fragment() {
                             ) {
                                 super.onScrollStateChanged(recyclerView, newState)
                                 if(!recyclerView.canScrollVertically(1)){
-                                    viewModel.setIntention(FeedFragmentEvent.RetrievePosts(true))
+                                    viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
                                 }
                             }
                         })
@@ -148,5 +148,5 @@ class FeedFragment : Fragment() {
     }
 }
 sealed class FeedFragmentEvent{
-    data class RetrievePosts(val morePosts: Boolean) : FeedFragmentEvent()
+    data class RetrieveFeedPosts(val morePosts: Boolean) : FeedFragmentEvent()
 }

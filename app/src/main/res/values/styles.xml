@@ -14,5 +14,34 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+<!--    <style name="BottomNavigation">-->
+<!--        <item name="android:backgroundTint">@color/background</item>-->
+<!--    </style>-->
+    <style name="PostBackground">
+        <item name="android:background"> @color/background </item>
+
+    </style>
+
+    <style name="PostUserName">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="PostTitle">
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="PostText">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+
 
 </resources>

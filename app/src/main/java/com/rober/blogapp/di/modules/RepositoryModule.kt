@@ -1,9 +1,6 @@
 package com.rober.blogapp.di.modules
 
-import com.rober.blogapp.data.network.firebase.FirebaseAuthManager
-import com.rober.blogapp.data.network.firebase.FirebaseFeedManager
-import com.rober.blogapp.data.network.firebase.FirebasePostAddManager
-import com.rober.blogapp.data.network.firebase.FirebaseSource
+import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.data.network.util.FirebasePath
@@ -51,7 +48,12 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseRepository(firebaseAuthManager: FirebaseAuthManager, firebaseFeedManager: FirebaseFeedManager, firebasePostAddManager: FirebasePostAddManager): FirebaseRepository = FirebaseRepository(firebaseAuthManager, firebaseFeedManager, firebasePostAddManager)
+    fun provideFirebaseProfileManager(firebaseSource: FirebaseSource): FirebaseProfileManager = FirebaseProfileManager(firebaseSource)
+
+    @Singleton
+    @Provides
+    fun provideFirebaseRepository(firebaseAuthManager: FirebaseAuthManager, firebaseFeedManager: FirebaseFeedManager, firebasePostAddManager: FirebasePostAddManager, firebaseProfileManager: FirebaseProfileManager): FirebaseRepository
+            = FirebaseRepository(firebaseAuthManager, firebaseFeedManager, firebasePostAddManager, firebaseProfileManager)
 
 
 }

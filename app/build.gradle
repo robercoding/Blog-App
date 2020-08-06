@@ -112,9 +112,13 @@ dependencies {
     //Joda Time replaces Threetenabp
     implementation 'net.danlew:android.joda:2.10.6'
 
-
     //Round image
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
+    //MotionLayout
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
+
+    //recycler
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
 }

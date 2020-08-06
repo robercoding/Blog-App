@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
+import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_profile.*
@@ -43,6 +45,7 @@ class ProfileFragment : Fragment() {
             Log.i("ProfileFragment", "Let's load our user")
             viewModel.setIntention(ProfileFragmentEvent.loadUserDetails(null))
 
+
         }else{
             Log.i("ProfileFragment", "Let's load other user")
         }
@@ -57,17 +60,29 @@ class ProfileFragment : Fragment() {
     }
 
     private fun subscribeObservers(){
-        viewModel.profileState.observe(viewLifecycleOwner, Observer {dataState->
+        viewModel.profileUserState.observe(viewLifecycleOwner, Observer {dataState->
             when(dataState){
                 is DataState.Success -> {
                     val user = dataState.data
-                    uid_name.text = user.username
-                    uid_biography.text = user.biography
-                    uid_followers.text = "20 following"
-                    uid_following.text = "30 followers"
+//                    uid_name.text = user.username
+//                    uid_biography.text = user.biography
+//                    uid_followers.text = "20 following"
+//                    uid_following.text = "30 followers"
                 }
             }
 
+        })
+
+        viewModel.profileUserListState.observe(viewLifecycleOwner, Observer {dataState ->
+            when(dataState){
+                is DataState.Success -> {
+                    recycler_user_posts.apply {
+                        layoutManager = LinearLayoutManager(requireContext())
+                        adapter = PostAdapter(requireView(), dataState.data)
+
+                    }
+                }
+            }
         })
     }
 }

@@ -51,7 +51,7 @@ class PostAdapter(val itemView: View, val initListPost: List<Post>) : RecyclerVi
 
         fun bind(post: Post){
             Log.i("bind", "${post.user_creator_id}")
-            uid_name?.text = post.user_creator_id
+            uid_name?.text = "@${post.user_creator_id}"
             title?.text = post.title
             text?.text = post.text
         }

@@ -20,6 +20,13 @@
         app:layout_constraintVertical_bias="0.0"
         app:navGraph="@navigation/nav_graph" />
 
+    <View
+        style="@style/Divider"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        tools:ignore="MissingConstraints" />
+
+
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -28,6 +35,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:background="@color/white"
-        app:menu="@menu/bottom_nav" />
+        app:menu="@menu/bottom_nav"
+        app:backgroundTint="@color/background"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
