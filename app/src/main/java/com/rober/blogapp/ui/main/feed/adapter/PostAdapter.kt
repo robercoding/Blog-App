@@ -6,33 +6,56 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 
 
-class PostAdapter(val itemView: View, val initListPost: List<Post>) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter (val itemView: View) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private var TAG = "PostAdapter"
 
-    private var listPosts: List<Post> = initListPost
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         //return PostViewHolder()
         val view = LayoutInflater.from(itemView.context).inflate(R.layout.adapter_post_holder, parent, false)
         return PostViewHolder(view)
     }
 
+    private val differCallback = object: DiffUtil.ItemCallback<Post>(){
+        override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+            return oldItem.post_id == newItem.post_id
+        }
+
+        override fun getChangePayload(oldItem: Post, newItem: Post): Any? {
+            return super.getChangePayload(oldItem, newItem)
+        }
+
+        override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+            return oldItem == newItem
+        }
+    }
+
+    val differ = AsyncListDiffer(this, differCallback)
+
     override fun getItemCount(): Int {
-        return listPosts.size
+        return differ.currentList.size
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.bind(listPosts[position])
-        Log.i(TAG, "${listPosts[position].user_creator_id}")
+        val post = differ.currentList[position]
+        holder.bind(post)
     }
 
-    fun setPosts(newListPost: List<Post>){
-        listPosts = newListPost
+    fun setPosts(newListPost: MutableList<Post>){
+        differ.submitList(newListPost)
+        notifyDataSetChanged()
+    }
+
+    fun clear(){
+        differ.currentList.clear()
+        notifyDataSetChanged()
     }
 
     class PostViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {

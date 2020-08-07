@@ -8,20 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
-import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModels()
-
+    lateinit var postAdapter: PostAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +36,7 @@ class ProfileFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        postAdapter = PostAdapter(requireView())
         subscribeObservers()
 
         var userName = arguments?.getString("userName")
@@ -49,14 +48,6 @@ class ProfileFragment : Fragment() {
         }else{
             Log.i("ProfileFragment", "Let's load other user")
         }
-
-
-
-
-
-//        viewModel.login()
-//        viewModel.saveUser(User(1, "Rober", "Valencia"))
-//        viewModel.printSomething()
     }
 
     private fun subscribeObservers(){
@@ -64,10 +55,14 @@ class ProfileFragment : Fragment() {
             when(dataState){
                 is DataState.Success -> {
                     val user = dataState.data
-//                    uid_name.text = user.username
-//                    uid_biography.text = user.biography
-//                    uid_followers.text = "20 following"
-//                    uid_following.text = "30 followers"
+                    uid_name.text = user.username
+                    uid_biography.text = user.biography
+                    uid_followers.text = "20 following"
+                    uid_following.text = "30 followers"
+                }
+
+                is DataState.Loading -> {
+                    displayProgressBar(true)
                 }
             }
 
@@ -76,16 +71,25 @@ class ProfileFragment : Fragment() {
         viewModel.profileUserListState.observe(viewLifecycleOwner, Observer {dataState ->
             when(dataState){
                 is DataState.Success -> {
+                    postAdapter.setPosts(dataState.data.toMutableList())
                     recycler_user_posts.apply {
+                        displayProgressBar(false)
                         layoutManager = LinearLayoutManager(requireContext())
-                        adapter = PostAdapter(requireView(), dataState.data)
-
+                        adapter = postAdapter
                     }
+                }
+                is DataState.Loading -> {
+                    displayProgressBar(true)
                 }
             }
         })
     }
+
+    private fun displayProgressBar(isDisplayed: Boolean){
+        progress_bar_profile_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    }
 }
+
 
 sealed class ProfileFragmentEvent{
     data class loadUserDetails(val name: String? = null): ProfileFragmentEvent()

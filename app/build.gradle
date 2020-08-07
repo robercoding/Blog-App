@@ -115,10 +115,18 @@ dependencies {
     //Round image
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
+    //Round image v2
+    implementation 'com.makeramen:roundedimageview:2.3.0'
+
+
     //MotionLayout
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
 
     //recycler
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+
+    //Swiperefreshlayout for recycler feed
+//    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
 
 }

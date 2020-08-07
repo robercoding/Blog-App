@@ -1,14 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.search.SearchFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.main.search.SearchFragment"
+    android:background="@color/background">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.google.android.material.appbar.AppBarLayout
+        android:background="@color/background"
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Search" />
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-</FrameLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            app:menu="@menu/settings"
+            app:contentInsetStart="2dp"
+            >
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/outline_account_circle_black_24dp"
+                app:civ_border_color="@color/colorWhite"
+                app:civ_border_width="2dp"
+                />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:drawableStart="@drawable/ic_search_black_18dp"
+                android:layout_width="290dp"
+                android:layout_height="30dp"
+                android:layout_gravity="right"
+                android:background="@drawable/rounded_corners"
+                android:textSize="14dp"
+                android:drawablePadding="10dp"
+                android:lines="1"
+
+                android:hint="Search an user"
+                />
+
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

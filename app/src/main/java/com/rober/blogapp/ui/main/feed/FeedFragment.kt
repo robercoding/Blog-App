@@ -1,18 +1,19 @@
 package com.rober.blogapp.ui.main.feed
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.state.FeedState
@@ -22,8 +23,13 @@ import kotlinx.android.synthetic.main.fragment_feed.*
 @AndroidEntryPoint
 class FeedFragment : Fragment() {
 
-    private val viewModel: FeedViewModel by viewModels()
     private val TAG: String = "FeedFragment"
+    private var mHasReachedBottomonce = false
+    private var mHasPullRefresh = false
+    private var recyclerViewState: Parcelable? = null
+
+    private val viewModel: FeedViewModel by viewModels()
+    lateinit var postAdapter: PostAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,22 +45,10 @@ class FeedFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        postAdapter = PostAdapter(requireView())
 
-        //private val listPosts = viewModel.getPosts()
-
-//        val user = User(1, "Rober", "Valencia")
-//        insertUser(user)
-//        val user2 = User(2, "Ferran", "Valencia")
-//        insertUser(user2)
-//        val user3 = User(3, "Mew", "Valencia")
-//        insertUser(user3)
-//        for(i in 1..15){
-//            insertBlog(i)
-//        }
 
         subscribeObservers()
-        //viewModel.setStateEvent(FeedStateEvent.GetUserWithBlogs)
-        //viewModel.deleteUser(user)
     }
 
     private fun subscribeObservers(){
@@ -62,27 +56,39 @@ class FeedFragment : Fragment() {
             Log.i(TAG, "$dataState")
 
             when(dataState){
-
                 is FeedState.SuccessListPostState -> {
+                    postAdapter.setPosts(dataState.data.toMutableList())
+                    val linearLayoutManager = LinearLayoutManager(requireContext())
+
+                    Toast.makeText(requireContext(), "Stop refreshing", Toast.LENGTH_SHORT).show()
                     displayProgressBar(false)
+                    swipe_refresh_layout.isRefreshing = false
+
                     recycler_feed.apply {
-                       layoutManager = LinearLayoutManager(requireContext())
-                        adapter = PostAdapter(requireView(), dataState.data)
+                        if(recyclerViewState != null && !mHasPullRefresh){
+                            layoutManager!!.onRestoreInstanceState(recyclerViewState)
+                            mHasPullRefresh = false
+                        }else
+                            layoutManager = linearLayoutManager
+
+                        adapter = postAdapter
                         setHasFixedSize(true)
                         addOnScrollListener(object: RecyclerView.OnScrollListener() {
                             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                                 super.onScrolled(recyclerView, dx, dy)
 
-                            }
+                                if((linearLayoutManager.findLastVisibleItemPosition() == linearLayoutManager.itemCount -1) && !mHasReachedBottomonce){
+                                    recyclerViewState = linearLayoutManager.onSaveInstanceState()
+                                    viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
+                                    mHasReachedBottomonce = true
+                                }
 
+                            }
                             override fun onScrollStateChanged(
                                 recyclerView: RecyclerView,
                                 newState: Int
                             ) {
                                 super.onScrollStateChanged(recyclerView, newState)
-                                if(!recyclerView.canScrollVertically(1)){
-                                    viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
-                                }
                             }
                         })
                     }
@@ -134,7 +140,13 @@ class FeedFragment : Fragment() {
             goToPostAdd()
         }
 
-    //Example of sending a variable
+        swipe_refresh_layout.setOnRefreshListener {
+            mHasPullRefresh = true
+            viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
+            Toast.makeText(requireContext(), "Request more posts", Toast.LENGTH_SHORT).show()
+        }
+
+        //Example of sending a variable
 //            val navController = findNavController()
 //            val variable = "a variable has been sended"
 //            val bundle = bundleOf("variable" to variable)
