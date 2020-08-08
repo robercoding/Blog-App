@@ -31,7 +31,7 @@ class FirebaseAuthManager @Inject constructor(
     }
 
     suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
-        val user = firebaseSource.user
+        val user =  firebaseSource.getCurrentUser()
         Log.i("User", "AuthManager = Getting currentUser")
         Log.i("User", "AuthManager = Checking currentUser")
         if(user!=null){

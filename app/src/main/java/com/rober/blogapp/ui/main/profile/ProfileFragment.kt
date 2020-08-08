@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_profile.*
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
+    private val TAG ="ProfileFragment"
 
     private val viewModel: ProfileViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
@@ -55,7 +56,8 @@ class ProfileFragment : Fragment() {
             when(dataState){
                 is DataState.Success -> {
                     val user = dataState.data
-                    uid_name.text = user.username
+                    Log.i(TAG, "biography: ${user.biography}, name: ${user.username}, id: ${user.user_id} location: ${user.location}")
+                    uid_name.text = "@${user.username}"
                     uid_biography.text = user.biography
                     uid_followers.text = "20 following"
                     uid_following.text = "30 followers"

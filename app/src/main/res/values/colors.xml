@@ -17,4 +17,6 @@
     <color name="colorBlack">#000000</color>
 
     <color name="background">#14242c</color>
+
+    <color name="yellow">#FFFF00</color>
 </resources>

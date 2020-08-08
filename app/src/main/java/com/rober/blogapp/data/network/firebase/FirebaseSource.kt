@@ -23,7 +23,8 @@ class FirebaseSource {
 
     suspend fun setCurrentUser(){
         Log.i("User:", "First time user -> $user and $username")
-        var tempUsername = User()
+        var tempUsername = Username()
+        var tempUser = User()
         Log.i(TAG, "${userAuth.toString()}")
         if(userAuth!=null){
             try{
@@ -32,13 +33,19 @@ class FirebaseSource {
                     .get()
                     .addOnSuccessListener {
                         if(it != null)
-                            tempUsername = it.toObject(User::class.java)!!
+                            tempUsername = it.toObject(Username::class.java)!!
                     }.addOnFailureListener { username = "noname" }
                     .await()
 
+                if(!tempUsername.isEmpty()) {
+                    tempUser = db.collection("users").document(tempUsername.username).get().await().toObject(User::class.java)!!
+                }
+
             }catch (e: Exception){ Log.i(TAG, e.message.toString()) }
 
-            user = tempUsername
+            if(!tempUser.isEmpty())
+                user = tempUser
+
             if(!tempUsername.isEmpty())
                 username = tempUsername.username
 
@@ -46,8 +53,12 @@ class FirebaseSource {
         }
     }
 
-    fun getCurrentUser(){
-        userAuth = auth.currentUser
+    fun getCurrentUser(): User{
+        if(user != null)
+            return user!!
+        else
+            return User()
+
     }
 
     fun checkUser(): Boolean{
