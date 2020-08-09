@@ -3,10 +3,7 @@ package com.rober.blogapp.data.network.repository
 import com.google.firebase.firestore.Source
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
-import com.rober.blogapp.data.network.firebase.FirebaseAuthManager
-import com.rober.blogapp.data.network.firebase.FirebaseFeedManager
-import com.rober.blogapp.data.network.firebase.FirebasePostAddManager
-import com.rober.blogapp.data.network.firebase.FirebaseProfileManager
+import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -17,6 +14,7 @@ constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
     private val firebaseFeedManager: FirebaseFeedManager,
     private val firebasePostAddManager: FirebasePostAddManager,
+    private val firebaseSearchManager: FirebaseSearchManager,
     private val firebaseProfileManager: FirebaseProfileManager
 ) {
     val TAG ="FirebaseRepository"
@@ -42,6 +40,8 @@ constructor(
     //PostAdd
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
 
+    //Search
+    suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
 
     //Profile
     suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUserPosts(morePosts)

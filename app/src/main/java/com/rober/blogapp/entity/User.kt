@@ -5,8 +5,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
+import kotlinx.serialization.Serializable
 
 //@Entity(tableName = "users", indices = arrayOf(Index(value = ["username"], unique = true)))
+@Serializable
 @Entity(tableName = "users")
 data class User(
     @PrimaryKey(autoGenerate = true)

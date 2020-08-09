@@ -33,6 +33,7 @@
                 />
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/search_user_text"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:drawableStart="@drawable/ic_search_black_18dp"

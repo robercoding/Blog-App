@@ -52,8 +52,12 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseRepository(firebaseAuthManager: FirebaseAuthManager, firebaseFeedManager: FirebaseFeedManager, firebasePostAddManager: FirebasePostAddManager, firebaseProfileManager: FirebaseProfileManager): FirebaseRepository
-            = FirebaseRepository(firebaseAuthManager, firebaseFeedManager, firebasePostAddManager, firebaseProfileManager)
+    fun provideFirebaseSearchManager(firebaseSource: FirebaseSource): FirebaseSearchManager = FirebaseSearchManager(firebaseSource)
+
+    @Singleton
+    @Provides
+    fun provideFirebaseRepository(firebaseAuthManager: FirebaseAuthManager, firebaseFeedManager: FirebaseFeedManager, firebasePostAddManager: FirebasePostAddManager, firebaseSearchManager: FirebaseSearchManager, firebaseProfileManager: FirebaseProfileManager)
+            : FirebaseRepository= FirebaseRepository(firebaseAuthManager, firebaseFeedManager, firebasePostAddManager, firebaseSearchManager, firebaseProfileManager)
 
 
 }

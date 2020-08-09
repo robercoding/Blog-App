@@ -14,12 +14,14 @@ class FirebaseSource {
     private val TAG = "FirebaseSource"
 
 
-    var db = FirebaseFirestore.getInstance()
-    var auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+
 
     var userAuth: FirebaseUser? = null
     var user: User? = null
     var username  = ""
+
 
     suspend fun setCurrentUser(){
         Log.i("User:", "First time user -> $user and $username")
