@@ -22,6 +22,7 @@ class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
+    private val viewHolder = R.layout.adapter_feed_viewholder_posts
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +38,7 @@ class ProfileFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView())
+        postAdapter = PostAdapter(requireView(), viewHolder)
         subscribeObservers()
 
         var userName = arguments?.getString("userName")

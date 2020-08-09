@@ -13,7 +13,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.state.FeedState
@@ -26,6 +25,9 @@ class FeedFragment : Fragment() {
     private val TAG: String = "FeedFragment"
     private var mHasReachedBottomonce = false
     private var mHasPullRefresh = false
+
+    private var resource: Int = R.layout.adapter_feed_viewholder_posts
+
     private var recyclerViewState: Parcelable? = null
 
     private val viewModel: FeedViewModel by viewModels()
@@ -45,7 +47,7 @@ class FeedFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView())
+        postAdapter = PostAdapter(requireView(), R.layout.adapter_feed_viewholder_posts)
 
 
         subscribeObservers()

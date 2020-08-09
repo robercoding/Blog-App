@@ -13,13 +13,13 @@ import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 
 
-class PostAdapter (val itemView: View) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter (val itemView: View, val viewHolder: Int) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private var TAG = "PostAdapter"
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         //return PostViewHolder()
-        val view = LayoutInflater.from(itemView.context).inflate(R.layout.adapter_post_holder, parent, false)
+        val view = LayoutInflater.from(itemView.context).inflate(viewHolder, parent, false)
         return PostViewHolder(view)
     }
 
