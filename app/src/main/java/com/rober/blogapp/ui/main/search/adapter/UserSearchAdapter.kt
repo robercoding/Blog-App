@@ -71,8 +71,10 @@ class UserSearchAdapter (val itemView: View, val viewHolder: Int) : RecyclerView
 
         fun bind(user: User){
             uid_name?.text = user.username
-            uid_biography?.text = user.biography
-            Log.i("UserSearchAdapter", "biography: ${user.biography}")
+            if(!user.biography.isEmpty())
+                uid_biography?.text = user.biography
+            else
+                uid_biography?.text = "What's up? I forgot to configure my biography!"
         }
     }
 }

@@ -3,6 +3,7 @@ package com.rober.blogapp.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
@@ -26,10 +27,14 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener{_, destination, _ ->
             if(destination.id == R.id.loginFragment || destination.id == R.id.registerFragment || destination.id == R.id.postAddFragment){
-                bottom_navigation.visibility = View.GONE
+                displayBottomNavigation(false)
             }else{
-                bottom_navigation.visibility = View.VISIBLE
+                displayBottomNavigation(true)
             }
         }
+    }
+
+    fun displayBottomNavigation(display: Boolean){
+        if(display) bottom_navigation.visibility = View.VISIBLE else bottom_navigation.visibility
     }
 }

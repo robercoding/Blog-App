@@ -42,6 +42,16 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="SearchUserUnfocused">
+<!--        <item name="background">@drawable/search_user_selector</item>-->
+        <item name="android:layout_marginStart"> 10dp </item>
+    </style>
+
+    <style name="SearchUserFocused">
+<!--        <item name="background">@drawable/layout_bg_login_register</item>-->
+        <item name="android:layout_marginStart">30dp</item>
+    </style>
+
 
 
 </resources>

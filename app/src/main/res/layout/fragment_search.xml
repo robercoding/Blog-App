@@ -17,6 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/search_top_app_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
@@ -25,12 +26,22 @@
             >
 
             <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/search_toolbar_profile_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="10dp"
                 android:background="@drawable/outline_account_circle_black_24dp"
                 app:civ_border_color="@color/colorWhite"
                 app:civ_border_width="2dp"
                 />
+
+            <ImageView
+                android:id="@+id/search_arrow_back"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/ic_arrow_back_black_24dp"
+                android:visibility="gone"/>
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/search_user_text"
@@ -39,18 +50,19 @@
                 android:drawableStart="@drawable/ic_search_black_18dp"
                 android:layout_width="290dp"
                 android:layout_height="30dp"
-                android:layout_gravity="right"
-                android:background="@drawable/rounded_corners"
+                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/search_user_selector"
                 android:textSize="14dp"
                 android:drawablePadding="10dp"
                 android:lines="1"
-
                 android:hint="Search an user"
                 />
 
 
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_user_search"
