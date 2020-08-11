@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.profile
+package com.rober.blogapp.ui.main.profile.profiledetail
 
 import android.util.Log
 import androidx.hilt.Assisted
@@ -9,12 +9,11 @@ import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.state.DataState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
-class ProfileViewModel
+class ProfileDetailViewModel
  @ViewModelInject constructor(
      private val firebaseRepository: FirebaseRepository,
      @Assisted savedStateHandle: SavedStateHandle
@@ -39,6 +38,19 @@ class ProfileViewModel
                 if(event.name.isNullOrBlank()){
                     getCurrentUser()
                     getCurrentUserPosts()
+                }else{
+                    viewModelScope.launch {
+                        firebaseRepository.getUserProfile(event.name)
+                            .collect {resultData ->
+                                when(resultData){
+                                    is ResultData.Success ->{
+                                        _profileUserState.value = DataState.Success(resultData.data!!)
+
+                                    }
+                                }
+                            }
+                    }
+
                 }
             }
         }

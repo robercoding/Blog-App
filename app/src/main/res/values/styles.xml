@@ -51,6 +51,16 @@
 <!--        <item name="background">@drawable/layout_bg_login_register</item>-->
         <item name="android:layout_marginStart">30dp</item>
     </style>
+    
+    <style name="ProfileDetailEditButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/colorGray2TextSpotify</item>
+        <item name="android:textSize">12dp</item>
+        <item name="backgroundTint">@color/background</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="strokeColor">@color/colorGray2TextSpotify</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
 
 

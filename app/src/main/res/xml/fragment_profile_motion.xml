@@ -44,6 +44,16 @@
 <!--            />-->
 
         <Constraint
+            android:id="@+id/profile_detail_button_edit"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="30dp"
+            android:text="Edit profile"/>
+
+        <Constraint
             android:id="@+id/uid_image"
             android:layout_width="50dp"
             android:layout_height="50dp"

@@ -11,16 +11,18 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.util.RecyclerViewClickInterface
 
 
-class PostAdapter (val itemView: View, val viewHolder: Int) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClickInterface: RecyclerViewClickInterface) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private var TAG = "PostAdapter"
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         //return PostViewHolder()
         val view = LayoutInflater.from(itemView.context).inflate(viewHolder, parent, false)
-        return PostViewHolder(view)
+        return PostViewHolder(view, recyclerViewClickInterface)
     }
 
     private val differCallback = object: DiffUtil.ItemCallback<Post>(){
@@ -58,7 +60,8 @@ class PostAdapter (val itemView: View, val viewHolder: Int) : RecyclerView.Adapt
         notifyDataSetChanged()
     }
 
-    class PostViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    class PostViewHolder(itemView: View, val recyclerViewClickInterface: RecyclerViewClickInterface): RecyclerView.ViewHolder(itemView) {
+
         var uid_image : ImageView? = null
         var uid_name : TextView? = null
         var title: TextView? = null
@@ -77,6 +80,16 @@ class PostAdapter (val itemView: View, val viewHolder: Int) : RecyclerView.Adapt
             uid_name?.text = "@${post.user_creator_id}"
             title?.text = post.title
             text?.text = post.text
+
+            setupClickListeners()
+        }
+
+        private fun setupClickListeners(){
+            title?.setOnClickListener {recyclerViewClickInterface.clickListenerOnPost(adapterPosition)}
+            text?.setOnClickListener {recyclerViewClickInterface.clickListenerOnPost(adapterPosition)}
+
+            uid_name?.setOnClickListener { recyclerViewClickInterface.clickListenerOnUser(adapterPosition) }
+            uid_image?.setOnClickListener { recyclerViewClickInterface.clickListenerOnUser(adapterPosition)}
         }
     }
 }

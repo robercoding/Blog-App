@@ -5,6 +5,7 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -45,4 +46,6 @@ constructor(
 
     //Profile
     suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUserPosts(morePosts)
+
+    suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileManager.getUserProfile(username)
 }

@@ -13,7 +13,7 @@
         tools:layout="@layout/fragment_feed" >
         <action
             android:id="@+id/action_feedFragment_to_profileFragment"
-            app:destination="@id/profileFragment" />
+            app:destination="@id/profileDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -21,10 +21,10 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="com.rober.blogapp.ui.main.profile.ProfileFragment"
-        android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" >
+        android:id="@+id/profileDetailFragment"
+        android:name="com.rober.blogapp.ui.main.profile.profiledetail.ProfileFragment"
+        android:label="fragment_profile_detail"
+        tools:layout="@layout/fragment_profile_detail">
         <argument
             android:name="uid"
             app:argType="string"
@@ -49,7 +49,17 @@
         tools:layout="@layout/fragment_register" />
     <fragment
         android:id="@+id/postAddFragment"
-        android:name="com.rober.blogapp.ui.main.post.PostAddFragment"
+        android:name="com.rober.blogapp.ui.main.post.postadd.PostAddFragment"
         android:label="fragment_post_add"
         tools:layout="@layout/fragment_post_add" />
+    <fragment
+        android:id="@+id/postDetailFragment"
+        android:name="com.rober.blogapp.ui.main.post.postdetail.PostDetailFragment"
+        android:label="fragment_post_detail"
+        tools:layout="@layout/fragment_post_detail" >
+        <argument
+            android:name="postObject"
+            app:argType="com.rober.blogapp.entity.Post"
+            app:nullable="true" />
+    </fragment>
 </navigation>

@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.post
+package com.rober.blogapp.ui.main.post.postadd
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
@@ -7,8 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
-import com.rober.blogapp.entity.Post
-import com.rober.blogapp.util.state.DataState
+import com.rober.blogapp.ui.main.post.postadd.PostAddEvent
 import com.rober.blogapp.util.state.PostAddState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

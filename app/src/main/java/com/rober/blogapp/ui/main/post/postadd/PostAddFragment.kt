@@ -1,7 +1,6 @@
-package com.rober.blogapp.ui.main.post
+package com.rober.blogapp.ui.main.post.postadd
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,6 @@ import com.rober.blogapp.entity.Post
 import com.rober.blogapp.util.state.PostAddState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
-import kotlinx.android.synthetic.main.fragment_register.*
 import java.util.*
 
 
@@ -125,7 +123,11 @@ class PostAddFragment : Fragment() {
         }
 
         val post = Post(0, "", title, text, "", Date(), 0)
-        viewModel.setIntention(PostAddEvent.savePost(post))
+        viewModel.setIntention(
+            PostAddEvent.savePost(
+                post
+            )
+        )
 
     }
 }

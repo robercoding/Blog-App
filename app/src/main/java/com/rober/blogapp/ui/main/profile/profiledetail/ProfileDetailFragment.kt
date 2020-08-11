@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.profile
+package com.rober.blogapp.ui.main.profile.profiledetail
 
 import android.os.Bundle
 import android.util.Log
@@ -11,16 +11,16 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
+import com.rober.blogapp.util.RecyclerViewClickInterface
 import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_feed.*
-import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), RecyclerViewClickInterface{
     private val TAG ="ProfileFragment"
 
-    private val viewModel: ProfileViewModel by viewModels()
+    private val detailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
 
@@ -32,28 +32,36 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        Log.i(TAG, "ON CREATE VIEW")
+        return inflater.inflate(R.layout.fragment_profile_detail, container, false)
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView(), viewHolder)
+        postAdapter = PostAdapter(requireView(), viewHolder, this)
         subscribeObservers()
 
-        var userName = arguments?.getString("userName")
+        Log.i(TAG, "ACTIVITY CREATED")
+        var userName = arguments?.getString("user_id")
         if(userName.isNullOrBlank()){
             Log.i("ProfileFragment", "Let's load our user")
-            viewModel.setIntention(ProfileFragmentEvent.loadUserDetails(null))
-
-
+            detailViewModel.setIntention(
+                ProfileFragmentEvent.loadUserDetails(
+                    null
+                )
+            )
         }else{
-            Log.i("ProfileFragment", "Let's load other user")
+            detailViewModel.setIntention(
+                ProfileFragmentEvent.loadUserDetails(
+                    userName
+                )
+            )
         }
     }
 
     private fun subscribeObservers(){
-        viewModel.profileUserState.observe(viewLifecycleOwner, Observer {dataState->
+        detailViewModel.profileUserState.observe(viewLifecycleOwner, Observer { dataState->
             when(dataState){
                 is DataState.Success -> {
                     val user = dataState.data
@@ -71,7 +79,7 @@ class ProfileFragment : Fragment() {
 
         })
 
-        viewModel.profileUserListState.observe(viewLifecycleOwner, Observer {dataState ->
+        detailViewModel.profileUserListState.observe(viewLifecycleOwner, Observer { dataState ->
             when(dataState){
                 is DataState.Success -> {
                     postAdapter.setPosts(dataState.data.toMutableList())
@@ -90,6 +98,14 @@ class ProfileFragment : Fragment() {
 
     private fun displayProgressBar(isDisplayed: Boolean){
         progress_bar_profile_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    }
+
+    override fun clickListenerOnPost(positionAdapter: Int) {
+        //TODO
+    }
+
+    override fun clickListenerOnUser(positionAdapter: Int) {
+        //TODO
     }
 }
 

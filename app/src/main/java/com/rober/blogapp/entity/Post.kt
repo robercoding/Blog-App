@@ -1,11 +1,14 @@
 package com.rober.blogapp.entity
 
+import android.os.Parcelable
 import androidx.room.*
 import com.google.firebase.firestore.Exclude
 import com.rober.blogapp.util.Converters
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 
+@Parcelize
 @Entity
 @TypeConverters(Converters::class)
 data class Post (
@@ -17,7 +20,7 @@ data class Post (
     var user_creator_id: String,
     val created_at: Date,
     var likes: Int
-){
+) : Parcelable {
 
     constructor() : this(0, "","", "", "", Date(), 0)
 }
