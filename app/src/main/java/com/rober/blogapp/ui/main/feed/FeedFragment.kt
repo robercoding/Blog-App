@@ -17,13 +17,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
-import com.rober.blogapp.util.RecyclerViewClickInterface
-import com.rober.blogapp.util.state.FeedState
+import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(), RecyclerViewClickInterface{
+class FeedFragment : Fragment(), RecyclerViewActionInterface{
 
 
     private val TAG: String = "FeedFragment"
@@ -55,69 +54,61 @@ class FeedFragment : Fragment(), RecyclerViewClickInterface{
         super.onActivityCreated(savedInstanceState)
         postAdapter = PostAdapter(requireView(), R.layout.adapter_feed_viewholder_posts, this)
 
-
         subscribeObservers()
+        viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
     }
 
     private fun subscribeObservers(){
-        viewModel.feedState.observe(viewLifecycleOwner, Observer {dataState ->
-            Log.i(TAG, "$dataState")
-
-            when(dataState){
-                is FeedState.SuccessListPostState -> {
-                    postAdapter.setPosts(dataState.data.toMutableList())
-                    mutableListPosts = dataState.data.toMutableList()
-
-                    val linearLayoutManager = LinearLayoutManager(requireContext())
-
-                    Toast.makeText(requireContext(), "Stop refreshing", Toast.LENGTH_SHORT).show()
-                    displayProgressBar(false)
-                    swipe_refresh_layout.isRefreshing = false
-
-                    recycler_feed.apply {
-                        if(recyclerViewState != null && !mHasPullRefresh){
-                            layoutManager!!.onRestoreInstanceState(recyclerViewState)
-                            mHasPullRefresh = false
-                        }else
-                            layoutManager = linearLayoutManager
-
-                        adapter = postAdapter
-                        setHasFixedSize(true)
-                        addOnScrollListener(object: RecyclerView.OnScrollListener() {
-                            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                                super.onScrolled(recyclerView, dx, dy)
-
-                                if((linearLayoutManager.findLastVisibleItemPosition() == linearLayoutManager.itemCount -1) && !mHasReachedBottomonce){
-                                    recyclerViewState = linearLayoutManager.onSaveInstanceState()
-                                    viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
-                                    mHasReachedBottomonce = true
-                                }
-
-                            }
-                            override fun onScrollStateChanged(
-                                recyclerView: RecyclerView,
-                                newState: Int
-                            ) {
-                                super.onScrollStateChanged(recyclerView, newState)
-                            }
-                        })
-                    }
-                }
-                is FeedState.Error -> {
-                    Toast.makeText(requireContext(), dataState.message, Toast.LENGTH_SHORT).show()
-                }
-
-
-                is FeedState.GettingPostState -> {
-                    displayProgressBar(true)
-
-                }
-            }
+        viewModel.feedState.observe(viewLifecycleOwner, Observer {feedState ->
+            render(feedState)
         })
+    }
+
+    private fun render(feedState: FeedState){
+        when(feedState){
+            is FeedState.SetListPosts -> {
+                displayProgressBar(false)
+                stopSwipeRefresh()
+
+                mutableListPosts = feedState.listFeedPosts.toMutableList()
+                postAdapter.setPosts(mutableListPosts)
+
+                val linearLayoutManager = LinearLayoutManager(requireContext())
+
+                setAdapterToRecyclerFeed(linearLayoutManager)
+                viewModel.setIntention(FeedFragmentEvent.Idle)
+            }
+
+            is FeedState.Loading -> {
+                displayProgressBar(true)
+            }
+
+            is FeedState.Idle -> {
+                Log.i(TAG, "Estamos en idle")
+                Toast.makeText(requireContext(), "We are in IDLE", Toast.LENGTH_SHORT).show()
+            }
+
+            is FeedState.Error -> {
+                Toast.makeText(requireContext(), feedState.message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun displayProgressBar(isDisplayed: Boolean){
         progressbar.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    }
+
+    private fun stopSwipeRefresh(){
+        swipe_refresh_layout.isRefreshing = false
+    }
+
+    private fun setAdapterToRecyclerFeed(linearLayoutManager: LinearLayoutManager){
+        recycler_feed.apply {
+            layoutManager = linearLayoutManager
+
+            adapter = postAdapter
+            setHasFixedSize(true)
+        }
     }
 
     private fun setupListeners(){
@@ -127,8 +118,7 @@ class FeedFragment : Fragment(), RecyclerViewClickInterface{
 
         swipe_refresh_layout.setOnRefreshListener {
             mHasPullRefresh = true
-            viewModel.setIntention(FeedFragmentEvent.RetrieveFeedPosts(true))
-            Toast.makeText(requireContext(), "Request more posts", Toast.LENGTH_SHORT).show()
+            //viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
         }
     }
 
@@ -153,7 +143,13 @@ class FeedFragment : Fragment(), RecyclerViewClickInterface{
         navController.navigate(R.id.profileDetailFragment, bundle_user_id)
     }
 
+    override fun loadOldFeedPosts() {
+        viewModel.setIntention(FeedFragmentEvent.RetrieveOldFeedPosts)
+    }
 }
 sealed class FeedFragmentEvent{
-    data class RetrieveFeedPosts(val morePosts: Boolean) : FeedFragmentEvent()
+    object RetrieveNewFeedPosts: FeedFragmentEvent()
+    object RetrieveOldFeedPosts : FeedFragmentEvent()
+
+    object Idle: FeedFragmentEvent()
 }

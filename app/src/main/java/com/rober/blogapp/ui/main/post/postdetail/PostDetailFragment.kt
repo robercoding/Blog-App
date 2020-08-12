@@ -10,7 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
-import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 
@@ -43,16 +42,20 @@ class PostDetailFragment : Fragment() {
     }
 
     private fun setupObservers(){
-        viewModel.post.observe(viewLifecycleOwner, Observer {postDetailState ->
-            when(postDetailState){
-                is PostDetailState.SuccessPost<*> -> {
-                    setPostDetails(postDetailState.data as Post)
-                }
-                is PostDetailState.BackToPreviousFragment -> {
-                    moveToFeedFragment()
-                }
-            }
+        viewModel.postDetailState.observe(viewLifecycleOwner, Observer {postDetailState ->
+            render(postDetailState)
         })
+    }
+
+    private fun render(postDetailState: PostDetailState){
+        when(postDetailState){
+            is PostDetailState.SetPostDetails -> {
+                setPostDetails(postDetailState.data)
+            }
+            is PostDetailState.BackToPreviousFragment -> {
+                moveToFeedFragment()
+            }
+        }
     }
 
     private fun setupListeners(){

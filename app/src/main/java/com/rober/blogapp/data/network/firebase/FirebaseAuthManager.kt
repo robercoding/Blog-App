@@ -28,6 +28,8 @@ class FirebaseAuthManager @Inject constructor(
     suspend fun setCurrentUser(){
         Log.i("User", "AuthManager = Setting ")
         firebaseSource.setCurrentUser()
+        firebaseSource.setCurrentFollowing()
+        firebaseSource.setCurrentFollower()
     }
 
     suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
@@ -73,9 +75,11 @@ class FirebaseAuthManager @Inject constructor(
         }
 
         firebaseSource.setCurrentUser()
+        firebaseSource.setCurrentFollower()
+        firebaseSource.setCurrentFollowing()
 
         if(loggedIn){
-            while (firebaseSource.username.equals("") ){
+            while (firebaseSource.username.equals("") || firebaseSource.followingList == null || firebaseSource.followerList == null){
                 kotlinx.coroutines.delay(500)
             }
         }
@@ -144,7 +148,7 @@ class FirebaseAuthManager @Inject constructor(
     private suspend fun saveUser(uid: String, name: String): Boolean{
         var success = false
 
-        val userToSave = User(0, uid, name, "", "")
+        val userToSave = User(0, uid, name, "", "", 0, 0)
 
         val usersCollection = firebaseSource.db.collection("users").document(name)
 

@@ -139,7 +139,7 @@
             />
 
         <Constraint
-            android:id="@+id/recycler_user_posts"
+            android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:scrollbars="vertical"

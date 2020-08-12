@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
-import com.rober.blogapp.ui.main.post.postadd.PostAddEvent
-import com.rober.blogapp.util.state.PostAddState
+import com.rober.blogapp.entity.Post
+import com.rober.blogapp.util.MessageUtil
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -22,47 +22,37 @@ class PostAddViewModel @ViewModelInject constructor(
         get() = _statePost
 
     init {
-        //Get the current username
-//        viewModelScope.launch {
-//            firebaseRepository.getCurrentUser()
-//                .collect {resultData ->
-//                    when(resultData){
-//                        is ResultData.Success -> {
-//                            _statePost.value = PostAddState.Success(resultData.data)
-//                        }
-//
-//                        is ResultData.Error -> {
-//                            _statePost.value = PostAddState.Error(resultData.exception.message.toString(), null)
-//                        }
-//                    }
-//
-//                }
-//        }
     }
 
     fun setIntention(event: PostAddEvent){
         when(event) {
-            is PostAddEvent.savePost -> {
-                viewModelScope.launch {
-                    firebaseRepository.savePost(event.post)
-                        .collect {resultData ->
-                            when(resultData){
-                                is ResultData.Success ->{
-                                    _statePost.value = PostAddState.Success(null)
-                                }
-                                is ResultData.Error -> {
-                                    if(resultData.exception.message != null)
-                                    _statePost.value = PostAddState.Error(resultData.exception, "")
-                                }
-                                is ResultData.Loading -> {
-                                    _statePost.value = PostAddState.Idle
-                                }
-                            }
-                        }
-                }
+            is PostAddEvent.SavePost -> {
+                savePost(event.post)
+            }
+
+            PostAddEvent.Idle -> {
+                _statePost.value = PostAddState.Idle
             }
         }
+    }
 
+    private fun savePost(post: Post){
+        viewModelScope.launch {
+            firebaseRepository.savePost(post)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success ->{
+                            _statePost.value = PostAddState.PostHasBeenSaved(MessageUtil("Post has been succesfully saved!"))
+                        }
+                        is ResultData.Error -> {
+                            _statePost.value = PostAddState.Error(resultData.exception)
+                        }
+                        is ResultData.Loading -> {
+                            _statePost.value = PostAddState.Idle
+                        }
+                    }
+                }
+        }
     }
 
 

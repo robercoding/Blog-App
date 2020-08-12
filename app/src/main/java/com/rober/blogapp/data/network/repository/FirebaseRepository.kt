@@ -36,7 +36,7 @@ constructor(
     //suspend fun checkIfUserAlreadyLoggedIn(): Boolean = firebaseAuthManager.checkIfUserAlreadyLoggedIn()
 
     //Feed
-    suspend fun retrieveFeedPosts(morePosts: Boolean) : Flow<ResultData<List<Post>>> = firebaseFeedManager.retrieveFeedPosts(morePosts)
+    suspend fun retrieveFeedPosts() : Flow<ResultData<List<Post>>> = firebaseFeedManager.getFeedPosts()
 
     //PostAdd
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)

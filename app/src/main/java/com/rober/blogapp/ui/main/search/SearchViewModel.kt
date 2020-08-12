@@ -1,6 +1,5 @@
 package com.rober.blogapp.ui.main.search
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,7 +9,6 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.state.DataState
-import com.rober.blogapp.util.state.SearchState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -19,42 +17,46 @@ class SearchViewModel @ViewModelInject constructor(
 ): ViewModel() {
     private val TAG = "SearchViewModel"
 
-    private val _usersList : MutableLiveData<DataState<List<User>>> = MutableLiveData()
+    private val _searchState: MutableLiveData<SearchState> = MutableLiveData()
 
-    private val _viewState: MutableLiveData<SearchState> = MutableLiveData()
-
-    val viewState : LiveData<SearchState>
-        get() = _viewState
-
-    val userList: LiveData<DataState<List<User>>>
-        get() = _usersList
+    val searchState : LiveData<SearchState>
+        get() = _searchState
 
     fun setIntention(event: SearchFragmentEvent){
         when(event){
             is SearchFragmentEvent.RetrieveUserByUsername -> {
-
-                if(event.searchUsername.isEmpty())
-                    _usersList.value = DataState.Success(listOf())
-                else
-                    viewModelScope.launch {
-                        firebaseRepository.getUserByString(event.searchUsername)
-                            .collect {resultData ->
-                                when(resultData){
-                                    is ResultData.Success -> {
-                                        _usersList.value = DataState.Success(resultData.data!!)
-                                    }
-                                }
-                            }
-                    }
+                searchUsersByUsername(event.searchUsername)
             }
 
             is SearchFragmentEvent.ReadySearchUser -> {
-                _viewState.value = SearchState.ReadySearchUser
+                _searchState.value = SearchState.ReadySearchUser
             }
 
             is SearchFragmentEvent.StopSearchUser -> {
-            _viewState.value = SearchState.StopSearchUser
+                _searchState.value = SearchState.StopSearchUser
+            }
         }
-        }
+    }
+
+    private fun searchUsersByUsername(searchUsername: String){
+            if(searchUsername.isEmpty()){
+                _searchState.value = SearchState.ShowResultSearch(listOf())
+            } else{
+                viewModelScope.launch {
+                    firebaseRepository.getUserByString(searchUsername)
+                        .collect {resultData ->
+                            when(resultData){
+                                is ResultData.Success -> {
+                                    _searchState.value = SearchState.ShowResultSearch(resultData.data!!)
+                                }
+
+                                is ResultData.Loading -> {
+                                    _searchState.value = SearchState.Loading
+                                }
+                            }
+                        }
+                }
+            }
+
     }
 }

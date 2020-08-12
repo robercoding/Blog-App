@@ -1,11 +1,13 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import com.rober.blogapp.entity.Post
 import java.lang.Exception
 
 sealed class PostDetailState {
-    data class SuccessPost<out T>(val data: T) : PostDetailState()
-    data class Error<out T>(val exception: Exception): PostDetailState()
-    object Loading: PostDetailState()
+    data class SetPostDetails(val data: Post) : PostDetailState()
 
     object BackToPreviousFragment: PostDetailState()
+
+    data class Error(val exception: Exception): PostDetailState()
+    object Loading: PostDetailState()
 }

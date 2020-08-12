@@ -29,74 +29,46 @@ constructor
     var feedPagination = 0
 
 
-    suspend fun retrieveFeedPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
+    suspend fun getFeedPosts(): Flow<ResultData<List<Post>>> = flow {
+        Log.i(TAG, "Pasamos por aqui otra vez, no se porque")
         emit(ResultData.Loading)
         try{
-            if(!morePosts && feedPagination > 0){
-                if(savedFeedListPost.size > 0)
-                    emit(ResultData.Success(savedFeedListPost.toList()))
-            }
-
             //Get all user followings
             val listFollowing = getUserFollowings()
+            Log.i(TAG, "List Following: ${listFollowing}")
 
             //Get userlogged in posts reference
 
-            val newListPosts: MutableList<Post> = mutableListOf()
+            val newListUserPosts: MutableList<Post> = mutableListOf()
 
-            //Init post and save
-            if(!morePosts && feedPagination == 0) {
-                feedPagination++
-                val dateGreater = DateTime.now().minusDays(feedPagination * 7).toDate()
+            //val dateGreater = DateTime.now().minusDays(7).toDate()
 
+            for (following in listFollowing) {
+                val listFollowingPosts = firebaseSource.db.collection("posts/${following.following_id}/user_posts")
+                    .get()
+                    .await()
+                    .toObjects(Post::class.java)
 
-                for (following in listFollowing) {
-                    val listFollowingPosts = getUserPostsWhereDateGreater(following, dateGreater)
-
-                    for (post in listFollowingPosts) {
-                        newListPosts.add(post)
-                    }
+                Log.i(TAG, "List Following Posts: ${listFollowingPosts}")
+                for(followingPost in listFollowingPosts){
+                    Log.i(TAG, "Adding following post: ${followingPost}")
+                    newListUserPosts.add(followingPost)
                 }
-                val userLoggedInPosts = getUserPostsWhereDateGreater(null, dateGreater)
-
-                for (post in userLoggedInPosts)
-                    newListPosts.add(post)
-
-                val postsOrdered = newListPosts.sortedBy { post -> post.created_at.time }.toMutableList()
-
-                savedFeedListPost = postsOrdered
-
-                emit(ResultData.Success(savedFeedListPost))
             }
 
-            //Retrieve post from firestore
+            val listUserLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
+                .get()
+                .await()
+                .toObjects(Post::class.java)
 
-            if(morePosts){
-                val dateLess = DateTime.now().minusDays(feedPagination*7).toDate()
-                feedPagination++
-                val dateGreater = DateTime.now().minusDays(feedPagination*7).toDate()
+            for(userLogedInPost in listUserLoggedInPosts)
+                newListUserPosts.add(userLogedInPost)
 
-                //Get posts from following
-                for (following in listFollowing) {
-                    val listFollowingPosts = getUserPostsWhereBetween(following, dateGreater, dateLess)
+            val feedPostsOrdered = newListUserPosts.sortedBy { post -> post.created_at.time }.toMutableList()
 
-                    for (post in listFollowingPosts) {
-                        newListPosts.add(post)
-                    }
-                }
+            savedFeedListPost = feedPostsOrdered
 
-                //Get posts user logged in
-                val userLoggedInPosts = getUserPostsWhereBetween(null, dateGreater, dateLess)
-
-                for(post in userLoggedInPosts)
-                    newListPosts.add(post)
-
-                val postsOrdered = newListPosts.sortedBy { post -> post.created_at.time }.toMutableList()
-
-                savedFeedListPost.addAll(postsOrdered)
-
-                emit(ResultData.Success(savedFeedListPost))
-            }
+            emit(ResultData.Success(savedFeedListPost))
 
         }catch (exception: Exception){
             emit(ResultData.Error<List<Post>>(exception, null))

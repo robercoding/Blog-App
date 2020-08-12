@@ -8,9 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.marginStart
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -18,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.search.adapter.UserSearchAdapter
 import com.rober.blogapp.util.state.DataState
-import com.rober.blogapp.util.state.SearchState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_search.*
@@ -51,31 +47,30 @@ class SearchFragment : Fragment() {
     }
 
     private fun subscribeObservers(){
-        viewModel.userList.observe(viewLifecycleOwner, Observer {dataState ->
-            when(dataState){
-                is DataState.Success -> {
-                    if(dataState.data.isEmpty()){
-                        userSearchAdapter.setUsers(mutableListOf())
-                        recyclerAdapterApply()
-                    }else{
-                        userSearchAdapter.setUsers(dataState.data.toMutableList())
-                        recyclerAdapterApply()
-                    }
-                }
-            }
+        viewModel.searchState.observe(viewLifecycleOwner, Observer { searchState ->
+            render(searchState)
         })
+    }
 
-        viewModel.viewState.observe(viewLifecycleOwner, Observer {viewState ->
-            when(viewState){
-                is SearchState.ReadySearchUser -> {
-                    ReadySearchUser()
-                }
-
-                is SearchState.StopSearchUser -> {
-                    StopSearchUser()
-                }
+    private fun render(searchState : SearchState){
+        when(searchState){
+            is SearchState.ReadySearchUser -> {
+                ReadySearchUser()
             }
-        })
+
+            is SearchState.StopSearchUser -> {
+                StopSearchUser()
+            }
+
+            is SearchState.ShowResultSearch -> {
+                userSearchAdapter.setUsers(searchState.listUsers.toMutableList())
+                recyclerAdapterApply()
+            }
+
+            is SearchState.Loading -> {
+                //Load
+            }
+        }
     }
 
     private fun recyclerAdapterApply(){

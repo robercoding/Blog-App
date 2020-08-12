@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
-import com.rober.blogapp.util.RecyclerViewClickInterface
+import com.rober.blogapp.util.RecyclerViewActionInterface
 
 
-class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClickInterface: RecyclerViewClickInterface) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActionInterface: RecyclerViewActionInterface) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private var TAG = "PostAdapter"
 
@@ -22,7 +22,7 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClic
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         //return PostViewHolder()
         val view = LayoutInflater.from(itemView.context).inflate(viewHolder, parent, false)
-        return PostViewHolder(view, recyclerViewClickInterface)
+        return PostViewHolder(view, recyclerViewActionInterface)
     }
 
     private val differCallback = object: DiffUtil.ItemCallback<Post>(){
@@ -48,6 +48,10 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClic
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = differ.currentList[position]
         holder.bind(post)
+
+//        if(position == differ.currentList.size -1){
+//            recyclerViewActionInterface.loadOldFeedPosts()
+//        }
     }
 
     fun setPosts(newListPost: MutableList<Post>){
@@ -60,7 +64,7 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClic
         notifyDataSetChanged()
     }
 
-    class PostViewHolder(itemView: View, val recyclerViewClickInterface: RecyclerViewClickInterface): RecyclerView.ViewHolder(itemView) {
+    class PostViewHolder(itemView: View, val recyclerViewActionInterface: RecyclerViewActionInterface): RecyclerView.ViewHolder(itemView) {
 
         var uid_image : ImageView? = null
         var uid_name : TextView? = null
@@ -85,11 +89,11 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewClic
         }
 
         private fun setupClickListeners(){
-            title?.setOnClickListener {recyclerViewClickInterface.clickListenerOnPost(adapterPosition)}
-            text?.setOnClickListener {recyclerViewClickInterface.clickListenerOnPost(adapterPosition)}
+            title?.setOnClickListener {recyclerViewActionInterface.clickListenerOnPost(adapterPosition)}
+            text?.setOnClickListener {recyclerViewActionInterface.clickListenerOnPost(adapterPosition)}
 
-            uid_name?.setOnClickListener { recyclerViewClickInterface.clickListenerOnUser(adapterPosition) }
-            uid_image?.setOnClickListener { recyclerViewClickInterface.clickListenerOnUser(adapterPosition)}
+            uid_name?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition) }
+            uid_image?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition)}
         }
     }
 }

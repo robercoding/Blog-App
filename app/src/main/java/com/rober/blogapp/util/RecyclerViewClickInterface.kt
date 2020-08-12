@@ -2,7 +2,9 @@ package com.rober.blogapp.util
 
 import android.view.View
 
-interface RecyclerViewClickInterface{
+interface RecyclerViewActionInterface{
     fun clickListenerOnPost(positionAdapter: Int)
     fun clickListenerOnUser(positionAdapter: Int)
+
+    fun loadOldFeedPosts()
 }

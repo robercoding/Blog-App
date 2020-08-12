@@ -10,17 +10,18 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
+import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
-import com.rober.blogapp.util.RecyclerViewClickInterface
-import com.rober.blogapp.util.state.DataState
+import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(), RecyclerViewClickInterface{
+class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private val TAG ="ProfileFragment"
 
-    private val detailViewModel: ProfileDetailViewModel by viewModels()
+    private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
 
@@ -39,61 +40,98 @@ class ProfileFragment : Fragment(), RecyclerViewClickInterface{
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView(), viewHolder, this)
-        subscribeObservers()
 
-        Log.i(TAG, "ACTIVITY CREATED")
-        var userName = arguments?.getString("user_id")
-        if(userName.isNullOrBlank()){
-            Log.i("ProfileFragment", "Let's load our user")
-            detailViewModel.setIntention(
-                ProfileFragmentEvent.loadUserDetails(
-                    null
-                )
-            )
-        }else{
-            detailViewModel.setIntention(
-                ProfileFragmentEvent.loadUserDetails(
-                    userName
-                )
-            )
-        }
+        postAdapter = PostAdapter(requireView(), viewHolder, this)
+
+        subscribeObservers()
+        getUserAndSetIntention()
     }
 
     private fun subscribeObservers(){
-        detailViewModel.profileUserState.observe(viewLifecycleOwner, Observer { dataState->
-            when(dataState){
-                is DataState.Success -> {
-                    val user = dataState.data
-                    Log.i(TAG, "biography: ${user.biography}, name: ${user.username}, id: ${user.user_id} location: ${user.location}")
-                    uid_name.text = "@${user.username}"
-                    uid_biography.text = user.biography
-                    uid_followers.text = "20 following"
-                    uid_following.text = "30 followers"
-                }
+        profileDetailViewModel.profileDetailState.observe(viewLifecycleOwner, Observer { profileDetailState ->
+            render(profileDetailState)
+        })
+    }
 
-                is DataState.Loading -> {
-                    displayProgressBar(true)
-                }
+    private fun getUserAndSetIntention(){
+        val userName = arguments?.getString("user_id")
+
+        if(userName.isNullOrBlank()){
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserDetails(null))
+        }else{
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserDetails(userName))
+        }
+    }
+
+    private fun render(profileDetailState: ProfileDetailState){
+        Log.i("ProfileViewModel", "${profileDetailState}")
+        when(profileDetailState){
+            is ProfileDetailState.SetUserProfile -> {
+                Log.i("ProfileDetailViewModel", "Receive1!!")
+                val user = profileDetailState.user
+                setUserProfile(user)
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserPosts(null))
+            }
+            is ProfileDetailState.SetUserPosts -> {
+                val listUserPosts = profileDetailState.listUserPosts
+                setUserPosts(listUserPosts.toMutableList())
+
             }
 
-        })
+            is ProfileDetailState.SetOtherUserProfile ->{
+                setOtherUserProfile(profileDetailState.user)
 
-        detailViewModel.profileUserListState.observe(viewLifecycleOwner, Observer { dataState ->
-            when(dataState){
-                is DataState.Success -> {
-                    postAdapter.setPosts(dataState.data.toMutableList())
-                    recycler_user_posts.apply {
-                        displayProgressBar(false)
-                        layoutManager = LinearLayoutManager(requireContext())
-                        adapter = postAdapter
-                    }
-                }
-                is DataState.Loading -> {
-                    displayProgressBar(true)
-                }
             }
-        })
+            is ProfileDetailState.LoadingPosts -> {
+                displayProgressBar(true)
+            }
+        }
+
+    }
+
+
+
+    private fun setUserProfile(user: User){
+        Log.i("ProfileDetailViewModel", "Setting here ${user.username}")
+
+        uid_name.text = "@${user.username}"
+        uid_biography.text = user.biography
+        uid_followers.text = "${user.follower} Follower"
+        uid_following.text = "${user.following} Following"
+
+        if(user.follower > 1)
+            uid_followers.append("s")
+    }
+
+
+    //TODO HERE change edit profile by follow/following button
+    private fun setOtherUserProfile(user: User){
+        uid_name.text = "@${user.username}"
+        uid_biography.text = user.biography
+        uid_followers.text = "${user.follower} Follower"
+        uid_following.text = "${user.following} Following"
+
+        if(user.follower > 1)
+            uid_followers.append("s")
+    }
+
+    //TODO HERE CHANGE VIEWHOLDER LAYOUT TO BE ABLE TO DELETE POSTS
+    private fun setUserPosts(listUserPosts: MutableList<Post>){
+        postAdapter.setPosts(listUserPosts)
+
+        recycler_profile_detail_posts.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = postAdapter
+        }
+    }
+
+    private fun setOtherUserPosts(listOtherUserPosts: MutableList<Post>){
+        postAdapter.setPosts(listOtherUserPosts)
+
+        recycler_profile_detail_posts.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = postAdapter
+        }
     }
 
     private fun displayProgressBar(isDisplayed: Boolean){
@@ -107,9 +145,14 @@ class ProfileFragment : Fragment(), RecyclerViewClickInterface{
     override fun clickListenerOnUser(positionAdapter: Int) {
         //TODO
     }
+
+    override fun loadOldFeedPosts() {
+        TODO("Not yet implemented")
+    }
 }
 
 
-sealed class ProfileFragmentEvent{
-    data class loadUserDetails(val name: String? = null): ProfileFragmentEvent()
+sealed class ProfileDetailFragmentEvent{
+    data class loadUserDetails(val name: String? = null): ProfileDetailFragmentEvent()
+    data class loadUserPosts(val name: String? = null): ProfileDetailFragmentEvent()
 }

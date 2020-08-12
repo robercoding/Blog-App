@@ -10,7 +10,6 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.ui.auth.login.LoginFragmentEvent
 import com.rober.blogapp.ui.auth.register.RegisterFragmentEvent
-import com.rober.blogapp.util.state.AuthState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -25,7 +24,8 @@ private val firebaseRepository: FirebaseRepository
 
     private val _loginAuthState : MutableLiveData<AuthState> = MutableLiveData()
 
-    private val _registerAuthState = MutableStateFlow<AuthState>(AuthState.Idle)
+    private val _registerAuthState = MutableStateFlow<AuthState>(
+        AuthState.Idle)
 
     val loginAuthState: LiveData<AuthState>
         get() = _loginAuthState

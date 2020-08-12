@@ -3,27 +3,26 @@ package com.rober.blogapp.ui.main.post.postdetail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.rober.blogapp.entity.Post
-import com.rober.blogapp.util.state.DataState
+
 
 class PostDetailViewModel: ViewModel() {
 
-    private val _post : MutableLiveData<PostDetailState> = MutableLiveData()
+    private val _postDetailState : MutableLiveData<PostDetailState> = MutableLiveData()
 
-    val post: LiveData<PostDetailState>
-        get() = _post
+    val postDetailState: LiveData<PostDetailState>
+        get() = _postDetailState
 
     fun setIntention(event: PostDetailFragmentEvent){
         when(event){
             is PostDetailFragmentEvent.SetPost -> {
-                _post.value = PostDetailState.SuccessPost(event.post)
+                _postDetailState.value = PostDetailState.SetPostDetails(event.post)
             }
             is PostDetailFragmentEvent.AddLike -> {
 
             }
 
             is PostDetailFragmentEvent.GoBackToPreviousFragment -> {
-                _post.value = PostDetailState.BackToPreviousFragment
+                _postDetailState.value = PostDetailState.BackToPreviousFragment
             }
         }
     }

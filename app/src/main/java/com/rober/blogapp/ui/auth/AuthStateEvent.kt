@@ -1,4 +1,4 @@
-package com.rober.blogapp.util.state
+package com.rober.blogapp.ui.auth
 
 sealed class AuthState {
 

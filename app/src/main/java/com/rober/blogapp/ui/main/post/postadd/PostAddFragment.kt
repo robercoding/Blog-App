@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
-import com.rober.blogapp.util.state.PostAddState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
 import java.util.*
@@ -25,8 +24,6 @@ class PostAddFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
     }
 
     override fun onCreateView(
@@ -59,26 +56,32 @@ class PostAddFragment : Fragment() {
         observeViewModel()
     }
 
-    fun observeViewModel(){
-        viewModel.statePost.observe(viewLifecycleOwner, Observer { state ->
-                       handleState(state)
+    private fun observeViewModel(){
+        viewModel.statePost.observe(viewLifecycleOwner, Observer { postAddState ->
+            render(postAddState)
         })
     }
 
-    fun handleState(state : PostAddState){
-        when(state){
-            is PostAddState.Success<*> ->{
-                Toast.makeText(requireContext(), "Post has been succesfully uploaded!", Toast.LENGTH_SHORT).show()
+    private fun render(postAddState : PostAddState){
+        when(postAddState){
+            is PostAddState.PostHasBeenSaved -> {
+                Toast.makeText(requireContext(), postAddState.messageUtil.message, Toast.LENGTH_SHORT).show()
+                viewModel.setIntention(PostAddEvent.Idle)
             }
 
-            is PostAddState.Error<*> ->{
-                Toast.makeText(requireContext(), state.exception.toString(), Toast.LENGTH_SHORT).show()
+            is PostAddState.Idle -> {
+                //Nothing
+            }
+
+            is PostAddState.Error -> {
+                Toast.makeText(requireContext(), postAddState.exception.message.toString(), Toast.LENGTH_SHORT).show()
             }
         }
     }
+
     private fun setupListeners() {
         top_app_bar.setNavigationOnClickListener {
-
+            goToFeedFragment()
         }
 
         top_app_bar.setOnMenuItemClickListener {menuItem ->
@@ -95,6 +98,8 @@ class PostAddFragment : Fragment() {
         }
     }
 
+
+
     private fun goToFeedFragment(){
         displayActionBar(true)
         val navController = findNavController()
@@ -108,12 +113,6 @@ class PostAddFragment : Fragment() {
             (requireActivity() as AppCompatActivity).supportActionBar?.hide()
     }
 
-    private fun isEmpty(title: String, text: String): Boolean{
-        if(title.isEmpty() || text.isEmpty()){
-            return true
-        }
-        return false
-    }
 
     private fun savePost(){
         val title = post_add_title.text.toString()
@@ -123,17 +122,20 @@ class PostAddFragment : Fragment() {
         }
 
         val post = Post(0, "", title, text, "", Date(), 0)
-        viewModel.setIntention(
-            PostAddEvent.savePost(
-                post
-            )
-        )
 
+        viewModel.setIntention(PostAddEvent.SavePost(post))
+    }
+
+    private fun isEmpty(title: String, text: String): Boolean{
+        if(title.isEmpty() || text.isEmpty()){
+            return true
+        }
+        return false
     }
 }
 
 sealed class PostAddEvent(){
-    data class savePost(var post:Post): PostAddEvent()
+    data class SavePost(val post:Post): PostAddEvent()
 
-    object None: PostAddEvent()
+    object Idle: PostAddEvent()
 }

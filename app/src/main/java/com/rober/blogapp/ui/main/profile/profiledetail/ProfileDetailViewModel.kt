@@ -6,9 +6,6 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
-import com.rober.blogapp.entity.Post
-import com.rober.blogapp.entity.User
-import com.rober.blogapp.util.state.DataState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -20,38 +17,24 @@ class ProfileDetailViewModel
 
  ) : ViewModel(){
 
-    private var _profileUserState : MutableLiveData<DataState<User>> = MutableLiveData()
+    private var _profileDetailState : MutableLiveData<ProfileDetailState> = MutableLiveData()
 
-    val profileUserState: LiveData<DataState<User>>
-        get() = _profileUserState
+    val profileDetailState: LiveData<ProfileDetailState>
+        get() = _profileDetailState
 
-    private var _profileUserListState: MutableLiveData<DataState<List<Post>>> = MutableLiveData()
-
-    val profileUserListState : LiveData<DataState<List<Post>>>
-        get() = _profileUserListState
-
-
-
-    fun setIntention(event: ProfileFragmentEvent){
+    fun setIntention(event: ProfileDetailFragmentEvent){
         when(event){
-            is ProfileFragmentEvent.loadUserDetails -> {
+            is ProfileDetailFragmentEvent.loadUserDetails -> {
                 if(event.name.isNullOrBlank()){
                     getCurrentUser()
-                    getCurrentUserPosts()
+                    //getCurrentUserPosts()
                 }else{
-                    viewModelScope.launch {
-                        firebaseRepository.getUserProfile(event.name)
-                            .collect {resultData ->
-                                when(resultData){
-                                    is ResultData.Success ->{
-                                        _profileUserState.value = DataState.Success(resultData.data!!)
-
-                                    }
-                                }
-                            }
-                    }
-
+                    getUserProfile(event.name)
                 }
+            }
+
+            is ProfileDetailFragmentEvent.loadUserPosts ->{
+                getCurrentUserPosts()
             }
         }
     }
@@ -62,8 +45,8 @@ class ProfileDetailViewModel
                 .collect {resultData->
                     when(resultData){
                         is ResultData.Success -> {
-                            if(resultData.data != null)
-                                _profileUserState.value = DataState.Success(resultData.data)
+                            Log.i("ProfileDetailViewModel", "Setting user!!")
+                            _profileDetailState.value = ProfileDetailState.SetUserProfile(resultData.data!!)
                         }
                     }
                 }
@@ -71,14 +54,30 @@ class ProfileDetailViewModel
     }
 
     private fun getCurrentUserPosts(){
+        _profileDetailState.value = ProfileDetailState.LoadingPosts
+
         viewModelScope.launch {
             firebaseRepository.retrieveProfileUserPosts(false)
                 .collect {resultData->
                     when(resultData){
                         is ResultData.Success -> {
-                            if(resultData.data != null)
-                                _profileUserListState.value = DataState.Success(resultData.data)
-                            Log.i("ProfileViewModel", "${resultData.data}")
+                            _profileDetailState.value = ProfileDetailState.SetUserPosts(resultData.data!!)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun getUserProfile(username: String){
+        _profileDetailState.value = ProfileDetailState.LoadingPosts
+
+        viewModelScope.launch {
+            firebaseRepository.getUserProfile(username)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success ->{
+                            _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(resultData.data!!)
+
                         }
                     }
                 }

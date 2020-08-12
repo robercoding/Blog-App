@@ -13,11 +13,13 @@ data class User(
     @PrimaryKey(autoGenerate = true)
     @get:Exclude val db_user_id: Long = 0,
     val user_id: String = "",
-    val username: String = "",
-    val biography: String = "",
-    val location: String = ""
+    var username: String = "",
+    var biography: String = "",
+    var location: String = "",
+    var following: Int = 0,
+    var follower: Int = 0
 ) {
-    constructor() : this(0, "", "", "", "")
+    constructor() : this(0, "", "", "", "", 0, 0)
 
     fun isEmpty(): Boolean{
         if(this.username.isEmpty() || this.username.equals("")){
