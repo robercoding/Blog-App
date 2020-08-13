@@ -17,10 +17,7 @@ class FirebaseSearchManager constructor(
     suspend fun getUsersByString(searchUsername: String): Flow<ResultData<List<User>>> = flow {
         emit(ResultData.Loading)
 
-        val nameFirstLetter = searchUsername
-
-
-        val isKeyOnCache = mapUsersCache.containsKey(nameFirstLetter)
+        val isKeyOnCache = mapUsersCache.containsKey(searchUsername)
 
         if (!isKeyOnCache) {
             Log.i(TAG, "Getting from firebase")
@@ -35,15 +32,15 @@ class FirebaseSearchManager constructor(
                 .await()
                 .toObjects(User::class.java).toList()
 
-            mapUsersCache[nameFirstLetter] = listUsers
+            mapUsersCache[searchUsername] = listUsers
 
             emit(
                 ResultData.Success(
-                    mapUsersCache.getValue(nameFirstLetter).sortedBy { it.username })
+                    mapUsersCache.getValue(searchUsername).sortedBy { it.username })
             )
         } else {
             Log.i(TAG, "We got something in our database, sending back there")
-            emit(ResultData.Success(mapUsersCache[nameFirstLetter]?.sortedBy { it.username }))
+            emit(ResultData.Success(mapUsersCache[searchUsername]?.sortedBy { it.username }))
         }
     }
 }

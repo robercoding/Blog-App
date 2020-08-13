@@ -15,11 +15,12 @@ import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(), RecyclerViewActionInterface{
-    private val TAG ="ProfileFragment"
+    private val TAG ="ProfileDetailFragment"
 
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
@@ -44,7 +45,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         postAdapter = PostAdapter(requireView(), viewHolder, this)
 
         subscribeObservers()
-        getUserAndSetIntention()
+        getUserArgumentAndSetIntention()
     }
 
     private fun subscribeObservers(){
@@ -53,7 +54,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         })
     }
 
-    private fun getUserAndSetIntention(){
+    private fun getUserArgumentAndSetIntention(){
         val userName = arguments?.getString("user_id")
 
         if(userName.isNullOrBlank()){
@@ -64,35 +65,71 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun render(profileDetailState: ProfileDetailState){
-        Log.i("ProfileViewModel", "${profileDetailState}")
+        Log.i(TAG, "State: ${profileDetailState}")
         when(profileDetailState){
             is ProfileDetailState.SetUserProfile -> {
-                Log.i("ProfileDetailViewModel", "Receive1!!")
+                showViewMotionLayout(true)
+                setViewForCurrentUser()
+//                setViewForOtherUser()
+//                val visibilityFollow = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_follow).propertySet.visibility
+//                val visibilityEdit = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_edit).propertySet.visibility
+//                Log.i(TAG, "Visibility after setting Follow: $visibilityFollow")
+//                Log.i(TAG, "Visibility after setting Edit: $visibilityEdit")
+
                 val user = profileDetailState.user
                 setUserProfile(user)
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserPosts(null))
             }
+
             is ProfileDetailState.SetUserPosts -> {
+                displayProgressBar(false)
+
                 val listUserPosts = profileDetailState.listUserPosts
                 setUserPosts(listUserPosts.toMutableList())
-
             }
 
-            is ProfileDetailState.SetOtherUserProfile ->{
+            is ProfileDetailState.SetOtherUserProfile -> {
+                displayBottomNavigation(false)
+                showViewMotionLayout(true)
+                setViewForOtherUser()
+                val visibilityFollow = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_follow).propertySet.visibility
+                val visibilityEdit = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_edit).propertySet.visibility
+                Log.i(TAG, "Visibility after setting Follow: $visibilityFollow")
+                Log.i(TAG, "Visibility after setting Edit: $visibilityEdit")
                 setOtherUserProfile(profileDetailState.user)
-
             }
+
+            is ProfileDetailState.SetOtherUserPosts -> {
+                displayProgressBar(false)
+                setOtherUserPosts(profileDetailState.listOtherUserPosts.toMutableList())
+            }
+
             is ProfileDetailState.LoadingPosts -> {
+                //setViewForCurrentUser()
                 displayProgressBar(true)
             }
+
+            is ProfileDetailState.LoadingUser -> {
+                setViewForCurrentUser()
+                showViewMotionLayout(false)
+            }
+        }
+    }
+
+    private fun showViewMotionLayout(showMotionLayout: Boolean){
+        if(showMotionLayout){
+            profile_detail_motion_layout.visibility = View.VISIBLE
+            profile_detail_background_progress_bar.visibility = View.VISIBLE
+        } else{
+            profile_detail_background_progress_bar.visibility = View.GONE
+            profile_detail_motion_layout.visibility = View.GONE
+
         }
 
+
     }
-
-
 
     private fun setUserProfile(user: User){
-        Log.i("ProfileDetailViewModel", "Setting here ${user.username}")
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
@@ -103,9 +140,20 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             uid_followers.append("s")
     }
 
+    private fun setViewForCurrentUser(){
 
-    //TODO HERE change edit profile by follow/following button
+        profile_detail_motion_layout.getConstraintSet(R.id.start)?.let {
+            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.VISIBLE
+            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.GONE
+        }
+        profile_detail_motion_layout.getConstraintSet(R.id.end)?.let {
+            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.VISIBLE
+            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.GONE
+        }
+    }
+
     private fun setOtherUserProfile(user: User){
+
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
         uid_followers.text = "${user.follower} Follower"
@@ -115,7 +163,18 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             uid_followers.append("s")
     }
 
-    //TODO HERE CHANGE VIEWHOLDER LAYOUT TO BE ABLE TO DELETE POSTS
+    private fun setViewForOtherUser(){
+
+        profile_detail_motion_layout.getConstraintSet(R.id.start)?.let {
+            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
+            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
+        }
+        profile_detail_motion_layout.getConstraintSet(R.id.end)?.let {
+            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
+            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
+        }
+    }
+
     private fun setUserPosts(listUserPosts: MutableList<Post>){
         postAdapter.setPosts(listUserPosts)
 
@@ -138,6 +197,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         progress_bar_profile_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
     }
 
+    private fun displayBottomNavigation(display: Boolean){
+        val navController = activity?.bottom_navigation ?: return
+        if(display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
+    }
+
+
     override fun clickListenerOnPost(positionAdapter: Int) {
         //TODO
     }
@@ -150,7 +215,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         TODO("Not yet implemented")
     }
 }
-
 
 sealed class ProfileDetailFragmentEvent{
     data class loadUserDetails(val name: String? = null): ProfileDetailFragmentEvent()

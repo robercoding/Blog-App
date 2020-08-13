@@ -29,7 +29,12 @@ class ProfileDetailViewModel
                     getCurrentUser()
                     //getCurrentUserPosts()
                 }else{
-                    getUserProfile(event.name)
+                    val isUserCurrentUser = checkIfUserIsCurrentUser(event.name)
+
+                    if(isUserCurrentUser)
+                        getCurrentUser()
+                    else
+                        getUserProfile(event.name)
                 }
             }
 
@@ -40,6 +45,7 @@ class ProfileDetailViewModel
     }
 
     private fun getCurrentUser() {
+        _profileDetailState.value = ProfileDetailState.LoadingUser
         viewModelScope.launch {
             firebaseRepository.getCurrentUser()
                 .collect {resultData->
@@ -68,8 +74,29 @@ class ProfileDetailViewModel
         }
     }
 
+    private fun checkIfUserIsCurrentUser(username: String): Boolean{
+        var isUserCurrentUser = false
+
+        viewModelScope.launch {
+            firebaseRepository.getCurrentUser()
+                .collect {resultData ->
+                    when(resultData) {
+                        is ResultData.Success -> {
+                            if(username == resultData.data?.username)
+                                isUserCurrentUser = true
+                        }
+                        is ResultData.Error -> {
+                            isUserCurrentUser = false
+                        }
+                    }
+                }
+        }
+
+        return isUserCurrentUser
+    }
+
     private fun getUserProfile(username: String){
-        _profileDetailState.value = ProfileDetailState.LoadingPosts
+        _profileDetailState.value = ProfileDetailState.LoadingUser
 
         viewModelScope.launch {
             firebaseRepository.getUserProfile(username)
@@ -77,7 +104,6 @@ class ProfileDetailViewModel
                     when(resultData){
                         is ResultData.Success ->{
                             _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(resultData.data!!)
-
                         }
                     }
                 }

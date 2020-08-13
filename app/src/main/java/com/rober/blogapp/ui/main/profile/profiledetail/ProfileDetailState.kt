@@ -12,6 +12,7 @@ sealed class ProfileDetailState {
     data class SetUserPosts(val listUserPosts: List<Post>): ProfileDetailState()
     data class SetOtherUserPosts(val listOtherUserPosts: List<Post>): ProfileDetailState()
 
+    object LoadingUser : ProfileDetailState()
     object LoadingPosts : ProfileDetailState()
     data class Error(val exception: Exception): ProfileDetailState()
 

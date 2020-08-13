@@ -31,6 +31,34 @@
                 app:attributeName="textSize"/>
         </Constraint>
 
+        <Constraint
+            android:id="@+id/profile_detail_button_edit"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:text="Edit profile"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            style="@style/ProfileDetailEditButton"
+            android:visibility="gone"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_button_follow"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:text="Follow"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            style="@style/ProfileDetailEditButton"
+            android:visibility="gone"/>
+
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
@@ -45,6 +73,16 @@
 
         <Constraint
             android:id="@+id/profile_detail_button_edit"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="30dp"
+            android:text="Edit profile"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_button_follow"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

@@ -83,10 +83,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
                 displayProgressBar(true)
             }
 
-            is FeedState.Idle -> {
-                Log.i(TAG, "Estamos en idle")
-                Toast.makeText(requireContext(), "We are in IDLE", Toast.LENGTH_SHORT).show()
-            }
+            is FeedState.Idle -> {}
 
             is FeedState.Error -> {
                 Toast.makeText(requireContext(), feedState.message, Toast.LENGTH_SHORT).show()

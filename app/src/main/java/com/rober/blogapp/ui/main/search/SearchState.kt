@@ -5,6 +5,8 @@ import java.lang.Exception
 
 sealed class SearchState {
     data class ShowResultSearch(val listUsers: List<User>): SearchState()
+    data class EmptyResultsSearch(val searchUsername: String): SearchState()
+
     object ReadySearchUser: SearchState()
     object StopSearchUser: SearchState()
 

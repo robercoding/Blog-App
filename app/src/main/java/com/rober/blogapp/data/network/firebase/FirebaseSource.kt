@@ -92,7 +92,6 @@ class FirebaseSource {
             return user!!
         else
             return User()
-
     }
 
     fun checkUser(): Boolean{

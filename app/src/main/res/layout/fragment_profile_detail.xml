@@ -1,152 +1,184 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.profile.profiledetail.ProfileFragment"
-    app:layoutDescription="@xml/fragment_profile_motion"
     android:background="@color/background"
+    android:id="@+id/profile_detail_background"
     >
 
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/uid_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <ProgressBar
+        android:id="@+id/profile_detail_background_progress_bar"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginStart="30dp"
-        app:riv_border_color="@color/colorGray2TextSpotify"
-        app:riv_border_width="3dp"
-        app:riv_corner_radius="30dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/outline_account_circle_black_24dp"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/profile_detail_button_edit"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="30dp"
-        android:text="Edit profile"
-        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-        android:textColor="@color/white"
-        style="@style/ProfileDetailEditButton"/>
-
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/uid_name"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/uid_image"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="30dp"
-        android:text="Name"
-        android:textSize="14sp"
-        android:gravity="start"
-        android:textColor="@color/colorGray2TextSpotify"
-        android:textStyle="bold"
-        />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/uid_biography"
+    <androidx.constraintlayout.motion.widget.MotionLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        app:layout_constraintTop_toBottomOf="@id/uid_name"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="20dp"
-        android:text="biography must be very large, yet is short, but soon will be extended so thank you for reading this! anyways hope you're ok with this"
-        android:lines="3"
-        android:textColor="@color/white"
-        />
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/uid_following"
-        android:layout_width="100dp"
-        android:layout_height="20dp"
-        app:layout_constraintTop_toBottomOf="@id/uid_biography"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="15dp"
-        android:layout_marginStart="30dp"
-        android:text="20 following"
-        style="@style/PostText"
-        />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/uid_followers"
-        android:layout_width="100dp"
-        android:layout_height="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/uid_biography"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="30dp"
-        android:text="10 followers"
-        style="@style/PostText"
-        />
-
-    <View
-        android:id="@+id/divider_profile"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginTop="15dp"
-        app:layout_constraintTop_toBottomOf="@id/uid_following"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        style="@style/Divider"
-        />
-
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/container_user_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        app:layout_constraintTop_toBottomOf="@id/divider_profile"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="match_parent"
+        app:layoutDescription="@xml/fragment_profile_motion"
+        android:id="@+id/profile_detail_motion_layout"
         android:background="@color/background"
-        app:tabTextColor="@color/colorGray2TextSpotify"
-        app:tabSelectedTextColor="@color/white">
+        android:visibility="gone">
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/uid_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="30dp"
+            app:riv_border_color="@color/colorGray2TextSpotify"
+            app:riv_border_width="3dp"
+            app:riv_corner_radius="30dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/outline_account_circle_black_24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/profile_detail_button_edit"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:text="Posts"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:text="Edit profile"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            style="@style/ProfileDetailEditButton"
+            android:visibility="gone"/>
 
-    </com.google.android.material.tabs.TabLayout>
+        <Button
+            android:id="@+id/profile_detail_button_follow"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:text="Follow"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            style="@style/ProfileDetailEditButton"
+            android:visibility="gone"/>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/container_user_tabs"
-        app:layout_constraintBottom_toBottomOf="parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_profile_detail_posts"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:scrollbars="vertical"
-            android:scrollbarSize="2dp"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_name"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/uid_image"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="30dp"
+            android:text="Name"
+            android:textSize="14sp"
+            android:gravity="start"
+            android:textColor="@color/colorGray2TextSpotify"
+            android:textStyle="bold"
             />
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_biography"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/uid_name"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="20dp"
+            android:text="biography must be very large, yet is short, but soon will be extended so thank you for reading this! anyways hope you're ok with this"
+            android:lines="3"
+            android:textColor="@color/white"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_following"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            app:layout_constraintTop_toBottomOf="@id/uid_biography"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="30dp"
+            android:text="20 following"
+            style="@style/PostText"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_followers"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/uid_biography"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="30dp"
+            android:text="10 followers"
+            style="@style/PostText"
+            />
+
+        <View
+            android:id="@+id/divider_profile"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintTop_toBottomOf="@id/uid_following"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Divider"
+            />
 
 
-    <ProgressBar
-        android:id="@+id/progress_bar_profile_posts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/container_user_tabs"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="invisible"/>
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/container_user_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintTop_toBottomOf="@id/divider_profile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@color/background"
+            app:tabTextColor="@color/colorGray2TextSpotify"
+            app:tabSelectedTextColor="@color/white">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Posts"/>
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/container_user_tabs"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_profile_detail_posts"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:scrollbars="vertical"
+                android:scrollbarSize="2dp"
+                />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+        <ProgressBar
+            android:id="@+id/progress_bar_profile_posts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/container_user_tabs"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="invisible"/>
+    </androidx.constraintlayout.motion.widget.MotionLayout>
 
 
 
-</androidx.constraintlayout.motion.widget.MotionLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

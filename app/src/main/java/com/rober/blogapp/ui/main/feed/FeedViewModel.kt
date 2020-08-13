@@ -24,7 +24,9 @@ constructor(
     val feedState: LiveData<FeedState>
         get() =_feedState
 
-    init {}
+    init {
+
+    }
 
     fun setIntention(event: FeedFragmentEvent){
         when(event){

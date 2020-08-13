@@ -63,8 +63,19 @@ class SearchFragment : Fragment() {
             }
 
             is SearchState.ShowResultSearch -> {
+                search_text_cant_find_user.visibility = View.GONE
+                search_text_cant_find_user.text = ""
+
+                recycler_user_search.visibility = View.VISIBLE
                 userSearchAdapter.setUsers(searchState.listUsers.toMutableList())
                 recyclerAdapterApply()
+            }
+
+            is SearchState.EmptyResultsSearch -> {
+                recycler_user_search.visibility = View.INVISIBLE
+
+                search_text_cant_find_user.text = "@${searchState.searchUsername}"
+                search_text_cant_find_user.visibility = View.VISIBLE
             }
 
             is SearchState.Loading -> {
@@ -142,7 +153,7 @@ class SearchFragment : Fragment() {
         }
     }
 
-    fun displayBottomNavigation(display: Boolean){
+    private fun displayBottomNavigation(display: Boolean){
         val navController = activity?.bottom_navigation ?: return
         if(display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
     }

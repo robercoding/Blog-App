@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui.main.search
 
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -45,9 +46,16 @@ class SearchViewModel @ViewModelInject constructor(
                 viewModelScope.launch {
                     firebaseRepository.getUserByString(searchUsername)
                         .collect {resultData ->
+                            Log.i(TAG, "ResultData: $resultData with letter $searchUsername")
                             when(resultData){
+
                                 is ResultData.Success -> {
-                                    _searchState.value = SearchState.ShowResultSearch(resultData.data!!)
+                                    resultData.data?.let {listUsers ->
+                                        if(listUsers.isEmpty())
+                                            _searchState.value = SearchState.EmptyResultsSearch(searchUsername)
+                                        else
+                                            _searchState.value = SearchState.ShowResultSearch(listUsers)
+                                    }
                                 }
 
                                 is ResultData.Loading -> {
