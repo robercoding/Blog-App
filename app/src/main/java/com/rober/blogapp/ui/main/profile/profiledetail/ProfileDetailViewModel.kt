@@ -6,17 +6,17 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
+import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
 class ProfileDetailViewModel
  @ViewModelInject constructor(
-     private val firebaseRepository: FirebaseRepository,
-     @Assisted savedStateHandle: SavedStateHandle
-
+     private val firebaseRepository: FirebaseRepository
  ) : ViewModel(){
 
+    private val TAG = "ProfileDetailViewModel"
     private var _profileDetailState : MutableLiveData<ProfileDetailState> = MutableLiveData()
 
     val profileDetailState: LiveData<ProfileDetailState>
@@ -24,7 +24,7 @@ class ProfileDetailViewModel
 
     fun setIntention(event: ProfileDetailFragmentEvent){
         when(event){
-            is ProfileDetailFragmentEvent.loadUserDetails -> {
+            is ProfileDetailFragmentEvent.LoadUserDetails -> {
                 if(event.name.isNullOrBlank()){
                     getCurrentUser()
                     //getCurrentUserPosts()
@@ -38,8 +38,20 @@ class ProfileDetailViewModel
                 }
             }
 
-            is ProfileDetailFragmentEvent.loadUserPosts ->{
+            is ProfileDetailFragmentEvent.LoadUserPosts ->{
                 getCurrentUserPosts()
+            }
+
+            is ProfileDetailFragmentEvent.Follow -> {
+                followOtherUser(event.user)
+            }
+
+            is ProfileDetailFragmentEvent.Unfollow ->{
+                unfollowOtherUser(event.user)
+            }
+
+            is ProfileDetailFragmentEvent.Idle -> {
+                _profileDetailState.value = ProfileDetailState.Idle
             }
         }
     }
@@ -91,7 +103,6 @@ class ProfileDetailViewModel
                     }
                 }
         }
-
         return isUserCurrentUser
     }
 
@@ -103,7 +114,68 @@ class ProfileDetailViewModel
                 .collect {resultData ->
                     when(resultData){
                         is ResultData.Success ->{
-                            _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(resultData.data!!)
+                            val currentUserFollowsOtherUser = currentUserFollowsOtherUser(username)
+                            _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(resultData.data!!, currentUserFollowsOtherUser)
+                        }
+
+                        is ResultData.Error -> {
+                            _profileDetailState.value = ProfileDetailState.Error(resultData.exception)
+                        }
+                    }
+                }
+        }
+    }
+
+    private suspend fun currentUserFollowsOtherUser(otherUsername: String): Boolean{
+        var currentUserFollowsOtherUser = false
+
+            firebaseRepository.currentUserFollowsOtherUser(otherUsername)
+                .collect { resultData ->
+                    when (resultData){
+                        is ResultData.Success ->{
+                            currentUserFollowsOtherUser = resultData.data!!
+
+                        }
+
+                        is ResultData.Error -> currentUserFollowsOtherUser = false
+                    }
+                }
+
+        return currentUserFollowsOtherUser
+    }
+
+    private fun followOtherUser(user: User){
+        viewModelScope.launch {
+            firebaseRepository.followOtherUser(user)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            if(resultData.data!!)
+                                _profileDetailState.value = ProfileDetailState.Followed
+                            else
+                                _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry, we couldn't follow the user, try again later"))
+                        }
+                        is ResultData.Error -> {
+                            _profileDetailState.value = ProfileDetailState.Error(resultData.exception)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun unfollowOtherUser(user: User){
+        viewModelScope.launch {
+            firebaseRepository.unfollowOtherUser(user)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            if(resultData.data!!)
+                                _profileDetailState.value = ProfileDetailState.Unfollowed
+                            else
+                                _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry we couldn't unfollow the user, try again later"))
+                        }
+                        is ResultData.Error -> {
+                            _profileDetailState.value = ProfileDetailState.Error(resultData.exception)
                         }
                     }
                 }

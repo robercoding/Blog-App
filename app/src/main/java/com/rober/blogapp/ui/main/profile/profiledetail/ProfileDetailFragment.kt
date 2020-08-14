@@ -1,13 +1,19 @@
 package com.rober.blogapp.ui.main.profile.profiledetail
 
+import android.graphics.Typeface
+import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
@@ -25,6 +31,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
+
+    private var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +52,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
 
+        setupListeners()
         subscribeObservers()
         getUserArgumentAndSetIntention()
     }
@@ -58,9 +67,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         val userName = arguments?.getString("user_id")
 
         if(userName.isNullOrBlank()){
-            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserDetails(null))
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(null))
         }else{
-            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserDetails(userName))
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(userName))
         }
     }
 
@@ -78,7 +87,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
                 val user = profileDetailState.user
                 setUserProfile(user)
-                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.loadUserPosts(null))
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts(null))
             }
 
             is ProfileDetailState.SetUserPosts -> {
@@ -89,14 +98,14 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             }
 
             is ProfileDetailState.SetOtherUserProfile -> {
+                user = profileDetailState.user
+
                 displayBottomNavigation(false)
                 showViewMotionLayout(true)
+                setButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
                 setViewForOtherUser()
-                val visibilityFollow = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_follow).propertySet.visibility
-                val visibilityEdit = profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_button_edit).propertySet.visibility
-                Log.i(TAG, "Visibility after setting Follow: $visibilityFollow")
-                Log.i(TAG, "Visibility after setting Edit: $visibilityEdit")
-                setOtherUserProfile(profileDetailState.user)
+
+                setOtherUserProfile(user!!)
             }
 
             is ProfileDetailState.SetOtherUserPosts -> {
@@ -113,6 +122,21 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
                 setViewForCurrentUser()
                 showViewMotionLayout(false)
             }
+
+            is ProfileDetailState.Followed -> {
+                Toast.makeText(requireContext(), "Now you're following ${user?.username}", Toast.LENGTH_SHORT).show()
+                setButtonViewForOtherUser(true)
+            }
+
+            is ProfileDetailState.Unfollowed -> {
+                Toast.makeText(requireContext(), "You stopped following ${user?.username}", Toast.LENGTH_SHORT).show()
+                setButtonViewForOtherUser(false)
+            }
+
+            is ProfileDetailState.Error -> {
+                Toast.makeText(requireContext(), "${profileDetailState.exception.message}", Toast.LENGTH_SHORT).show()
+                backToPreviousFragment()
+            }
         }
     }
 
@@ -125,8 +149,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             profile_detail_motion_layout.visibility = View.GONE
 
         }
-
-
     }
 
     private fun setUserProfile(user: User){
@@ -175,6 +197,33 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         }
     }
 
+    private fun setButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean){
+        Log.i(TAG, "This should be what currentis $currentUserFollowsOtherUser")
+        Log.i(TAG, "This should be whatever ${profile_detail_button_follow.isSelected}")
+
+        if(currentUserFollowsOtherUser){
+            profile_detail_button_follow.apply {
+                isSelected = true
+
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
+                text = "Following"
+                setTypeface(null, Typeface.BOLD)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                text= "Following"
+            }
+        }else{
+            profile_detail_button_follow.apply {
+                isSelected = false
+                text = "Follow"
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
+                val shapeDrawable = ShapeDrawable()
+                shapeDrawable.paint.strokeWidth = 1.0F
+                shapeDrawable.paint.color = ContextCompat.getColor(requireContext(), R.color.blueGray)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
+            }
+        }
+    }
+
     private fun setUserPosts(listUserPosts: MutableList<Post>){
         postAdapter.setPosts(listUserPosts)
 
@@ -193,6 +242,25 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         }
     }
 
+    private fun setupListeners(){
+        profile_detail_button_follow.setOnClickListener {
+            Log.i(TAG, "Enabled: ${it.isEnabled}")
+
+            if(it.isSelected){
+                Log.i(TAG, "WE ARE GOING TO UNFOLLOW")
+                it.isSelected = false
+                user?.let {user ->
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow(user))
+                }
+            }else{
+                it.isSelected = true
+                user?.let { user ->
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow(user))
+                }
+            }
+        }
+    }
+
     private fun displayProgressBar(isDisplayed: Boolean){
         progress_bar_profile_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
     }
@@ -200,6 +268,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun displayBottomNavigation(display: Boolean){
         val navController = activity?.bottom_navigation ?: return
         if(display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
+    }
+
+    private fun backToPreviousFragment(){
+        val navController = activity?.bottom_navigation ?: return
+        navController.findNavController().popBackStack()
     }
 
 
@@ -217,6 +290,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 }
 
 sealed class ProfileDetailFragmentEvent{
-    data class loadUserDetails(val name: String? = null): ProfileDetailFragmentEvent()
-    data class loadUserPosts(val name: String? = null): ProfileDetailFragmentEvent()
+    data class LoadUserDetails(val name: String? = null): ProfileDetailFragmentEvent()
+    data class LoadUserPosts(val name: String? = null): ProfileDetailFragmentEvent()
+
+    data class Unfollow(val user: User): ProfileDetailFragmentEvent()
+    data class Follow(val user: User): ProfileDetailFragmentEvent()
+
+    object Idle : ProfileDetailFragmentEvent()
 }

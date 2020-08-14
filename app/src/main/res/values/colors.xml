@@ -20,4 +20,16 @@
     <color name="background">#14242c</color>
 
     <color name="yellow">#FFFF00</color>
+
+    <!-- Monochromatic blues color-->
+    <color name="blueDiamond">#BBDFFA</color>
+    <color name="blueJordy">#97BAEC</color>
+    <color name="blueGray">#6987D5</color>
+    <color name="blueHan">#445BC1</color>
+    <color name="blueDenim">#2C43B8</color>
+    <color name="blueEgyptian">#1727AE</color>
+
+
+
+
 </resources>

@@ -48,4 +48,10 @@ constructor(
     suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUserPosts(morePosts)
 
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileManager.getUserProfile(username)
+
+    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileManager.currentUserFollowsOtherUser(otherUsername)
+
+    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileManager.followOtherUser(user)
+
+    suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileManager.unfollowOtherUser(user)
 }

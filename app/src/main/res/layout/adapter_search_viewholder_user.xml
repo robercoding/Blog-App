@@ -5,44 +5,53 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/adapter_search_profile_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/adapter_search_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/outline_account_circle_black_24dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/adapter_search_username"
-        android:layout_width="200dp"
-        android:layout_height="20dp"
-        app:layout_constraintStart_toEndOf="@+id/adapter_search_profile_image"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="25dp"
-        android:layout_marginStart="15dp"
-        style="@style/PostUserName"
-        android:text="Name"/>
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/adapter_search_profile_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/outline_account_circle_black_24dp"/>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/adapter_search_biography"
-        android:layout_width="300dp"
-        android:layout_height="25dp"
-        android:lines="1"
-        app:layout_constraintStart_toEndOf="@+id/adapter_search_profile_image"
-        app:layout_constraintTop_toBottomOf="@+id/adapter_search_username"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="20dp"
-        android:text="Here would go the biography and damn that's beautiful"
-        android:textStyle="italic"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/adapter_search_username"
+            android:layout_width="200dp"
+            android:layout_height="20dp"
+            app:layout_constraintStart_toEndOf="@+id/adapter_search_profile_image"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="15dp"
+            style="@style/PostUserName"
+            android:text="Name"/>
 
-    <View style="@style/Divider"
-        tools:ignore="MissingConstraints"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/adapter_search_biography"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/adapter_search_biography"
+            android:layout_width="300dp"
+            android:layout_height="25dp"
+            android:lines="1"
+            app:layout_constraintStart_toEndOf="@+id/adapter_search_profile_image"
+            app:layout_constraintTop_toBottomOf="@+id/adapter_search_username"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:text="Here would go the biography and damn that's beautiful"
+            android:textStyle="italic"/>
 
+        <View style="@style/Divider"
+            tools:ignore="MissingConstraints"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/adapter_search_biography"/>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

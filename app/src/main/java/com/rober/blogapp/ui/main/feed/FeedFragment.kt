@@ -137,7 +137,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
 
         val navController = findNavController()
         val bundle_user_id = bundleOf("user_id" to user_id)
-        navController.navigate(R.id.profileDetailFragment, bundle_user_id)
+        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
     }
 
     override fun loadOldFeedPosts() {

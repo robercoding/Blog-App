@@ -77,12 +77,12 @@ class LoginFragment : Fragment() {
 
 
     private fun observeViewModel(){
-        viewModel.loginAuthState.observe(viewLifecycleOwner, Observer {loginAuthState ->
-            handleAuthState(loginAuthState)
+        viewModel.authState.observe(viewLifecycleOwner, Observer {loginAuthState ->
+            render(loginAuthState)
         })
     }
 
-    private fun handleAuthState(state: AuthState){
+    private fun render(state: AuthState){
         when(state) {
             is AuthState.CheckingUserLoggedIn -> {
                 displayProgressBar(true)

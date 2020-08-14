@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -84,19 +85,24 @@ class RegisterFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        viewModel.registerAuthState.onEach {
-                authState -> handleAuthState(authState)
-        }.launchIn(lifecycleScope)
+        viewModel.authState.observe(viewLifecycleOwner, Observer {authState ->
+            render(authState)
+        })
     }
 
-    private fun handleAuthState(authState: AuthState) {
+    private fun render(authState: AuthState) {
         when(authState){
             is AuthState.Registering -> {
                 displayProgressBar(true)
             }
             is AuthState.SuccessRegister -> {
                 displayProgressBar(false)
-                Toast.makeText(activity, "Succesfully registered", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(activity, "Succesfully registered", Toast.LENGTH_SHORT).show()
+                viewModel.setRegisterIntetion(RegisterFragmentEvent.LogIn(authState.email, authState.password))
+            }
+
+            is AuthState.UserLoggedIn -> {
+                Toast.makeText(activity, "LoggedIn", Toast.LENGTH_SHORT).show()
                 goToMainFragments()
             }
 
@@ -126,4 +132,5 @@ class RegisterFragment : Fragment() {
 
 sealed class RegisterFragmentEvent{
     data class SignUp(val email: String, val password: String, val name:String): RegisterFragmentEvent()
+    data class LogIn(val email: String, val password: String): RegisterFragmentEvent()
 }

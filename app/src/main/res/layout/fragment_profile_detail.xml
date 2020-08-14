@@ -51,7 +51,7 @@
             android:text="Edit profile"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            style="@style/ProfileDetailEditButton"
+            style="@style/ProfileDetailEditButtonEditProfile"
             android:visibility="gone"/>
 
         <Button
@@ -64,8 +64,8 @@
             android:layout_marginEnd="30dp"
             android:text="Follow"
             android:textAllCaps="false"
-            android:textColor="@color/white"
-            style="@style/ProfileDetailEditButton"
+            style="@style/ProfileDetailEditButtonFollow"
+            app:strokeColor="@color/blueGray"
             android:visibility="gone"/>
 
 

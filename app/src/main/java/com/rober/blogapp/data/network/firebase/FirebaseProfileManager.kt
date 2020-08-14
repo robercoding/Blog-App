@@ -1,6 +1,8 @@
 package com.rober.blogapp.data.network.firebase
 
+import android.util.Log
 import com.rober.blogapp.data.ResultData
+import com.rober.blogapp.entity.Following
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
@@ -12,14 +14,15 @@ import kotlin.Exception
 class FirebaseProfileManager @Inject constructor(
     private val firebaseSource: FirebaseSource
 ) {
+    private val TAG = "FirebaseProfileManager"
 
-    var userPaginationLimit = 0
-    var savedUserListPost : MutableList<Post> = mutableListOf()
+    private var userPaginationLimit = 0
+    private var savedUserListPost : MutableList<Post> = mutableListOf()
 
     suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
         try{
             if(!morePosts && userPaginationLimit == 0){
-                var userPosts = getProfileUserPostsLimit()
+                val userPosts = getProfileUserPostsLimit()
 
                 emit(ResultData.Success(userPosts))
             }
@@ -29,7 +32,7 @@ class FirebaseProfileManager @Inject constructor(
             }
 
             if(morePosts){
-                var userPosts = getProfileUserPostsLimit()
+                val userPosts = getProfileUserPostsLimit()
 
                 emit(ResultData.Success(userPosts))
             }
@@ -80,5 +83,82 @@ class FirebaseProfileManager @Inject constructor(
         }else{
             emit(ResultData.Success(user))
         }
+    }
+
+    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = flow {
+        emit(ResultData.Loading)
+
+        try{
+            val userFollowingRef = firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
+
+            val followingUser = userFollowingRef
+                .whereEqualTo("following_id", otherUsername)
+                .get()
+                .await()
+                .toObjects(Following::class.java)
+
+            when {
+                followingUser.isEmpty() -> {
+                    Log.i(TAG, "Is empty")
+                    emit(ResultData.Success(false))
+                }
+
+                followingUser.size >= 2 -> {
+                    Log.i(TAG, "Is 2 or more")
+                    emit(ResultData.Success(false))
+                }
+
+                else -> emit(ResultData.Success(true))
+            }
+        }catch (e: Exception){
+            emit(ResultData.Error(e))
+        }
+    }
+
+    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = flow {
+        var hasUserBeenFollowed = false
+        try{
+            val followingRef = firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
+
+            val followingUser = Following(user.username)
+
+            followingRef
+                .document(followingUser.following_id)
+                .set(followingUser)
+                .addOnSuccessListener {
+                    hasUserBeenFollowed = true
+                }
+                .addOnFailureListener {
+                    hasUserBeenFollowed = false
+                }
+                .await()
+        }catch (e: Exception){
+            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+        }
+
+        emit(ResultData.Success(hasUserBeenFollowed))
+    }
+
+    suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = flow {
+        var hasUserBeenUnfollowed = false
+
+        try{
+            val followingRef = firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
+
+            followingRef
+                .document(user.username)
+                .delete()
+                .addOnSuccessListener {
+                    hasUserBeenUnfollowed = true
+                }
+                .addOnFailureListener {
+                    hasUserBeenUnfollowed = false
+                }.await()
+
+        }catch (e: Exception){
+            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+        }
+
+        emit(ResultData.Success(hasUserBeenUnfollowed))
     }
 }

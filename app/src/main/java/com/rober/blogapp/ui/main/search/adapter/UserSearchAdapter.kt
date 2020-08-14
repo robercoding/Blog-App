@@ -6,21 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.util.RecyclerViewActionInterface
 
 
-class UserSearchAdapter (val itemView: View, val viewHolder: Int) : RecyclerView.Adapter<UserSearchAdapter.UserViewHolder>() {
+class UserSearchAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActionInterface: RecyclerViewActionInterface) : RecyclerView.Adapter<UserSearchAdapter.UserViewHolder>() {
 
     private var TAG = "PostAdapter"
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        //return PostViewHolder()
         val view = LayoutInflater.from(itemView.context).inflate(viewHolder, parent, false)
-        return UserViewHolder(view)
+        return UserViewHolder(view, recyclerViewActionInterface)
     }
 
     private val differCallback = object: DiffUtil.ItemCallback<User>(){
@@ -58,7 +59,8 @@ class UserSearchAdapter (val itemView: View, val viewHolder: Int) : RecyclerView
         notifyDataSetChanged()
     }
 
-    class UserViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    class UserViewHolder(itemView: View, val recyclerViewActionInterface: RecyclerViewActionInterface): RecyclerView.ViewHolder(itemView) {
+        var container : ConstraintLayout? = null
         var uid_image : ImageView? = null
         var uid_name : TextView? = null
         var uid_biography : TextView? = null
@@ -67,14 +69,24 @@ class UserSearchAdapter (val itemView: View, val viewHolder: Int) : RecyclerView
             uid_image = itemView.findViewById(R.id.adapter_search_profile_image)
             uid_name = itemView.findViewById(R.id.adapter_search_username)
             uid_biography = itemView.findViewById(R.id.adapter_search_biography)
+            container = itemView.findViewById(R.id.adapter_search_container)
         }
 
         fun bind(user: User){
+
             uid_name?.text = user.username
             if(!user.biography.isEmpty())
                 uid_biography?.text = user.biography
             else
                 uid_biography?.text = "What's up? I forgot to configure my biography!"
+
+            setupRecyclerListeners()
+        }
+
+        private fun setupRecyclerListeners(){
+            container?.setOnClickListener {
+                recyclerViewActionInterface.clickListenerOnUser(adapterPosition)
+            }
         }
     }
 }

@@ -13,13 +13,17 @@
         tools:layout="@layout/fragment_feed" >
         <action
             android:id="@+id/action_feedFragment_to_profileFragment"
-            app:destination="@id/profileDetailFragment" />
+            app:destination="@id/profileDetailFragment"/>
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.rober.blogapp.ui.main.search.SearchFragment"
         android:label="fragment_search"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_profileFragment"
+            app:destination="@id/profileDetailFragment"/>
+    </fragment>
     <fragment
         android:id="@+id/profileDetailFragment"
         android:name="com.rober.blogapp.ui.main.profile.profiledetail.ProfileFragment"

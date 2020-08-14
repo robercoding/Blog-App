@@ -8,12 +8,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rober.blogapp.R
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.search.adapter.UserSearchAdapter
+import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,13 +26,15 @@ import kotlinx.android.synthetic.main.fragment_search.*
 
 
 @AndroidEntryPoint
-class SearchFragment : Fragment() {
+class SearchFragment : Fragment(), RecyclerViewActionInterface {
     private val TAG = "SearchFragment"
 
     private val viewModel: SearchViewModel by viewModels()
     lateinit var userSearchAdapter: UserSearchAdapter
     private var textSearch = ""
     private var alreadyFocusOnSearchText = false
+
+    private var listUsers = mutableListOf<User>()
 
 
     override fun onCreateView(
@@ -42,7 +49,7 @@ class SearchFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         setupListeners()
 
-        userSearchAdapter = UserSearchAdapter(requireView(), R.layout.adapter_search_viewholder_user)
+        userSearchAdapter = UserSearchAdapter(requireView(), R.layout.adapter_search_viewholder_user, this)
         subscribeObservers()
     }
 
@@ -67,12 +74,15 @@ class SearchFragment : Fragment() {
                 search_text_cant_find_user.text = ""
 
                 recycler_user_search.visibility = View.VISIBLE
-                userSearchAdapter.setUsers(searchState.listUsers.toMutableList())
+
+                listUsers = searchState.listUsers.toMutableList()
+                userSearchAdapter.setUsers(listUsers)
                 recyclerAdapterApply()
             }
 
             is SearchState.EmptyResultsSearch -> {
                 recycler_user_search.visibility = View.INVISIBLE
+                listUsers = mutableListOf()
 
                 search_text_cant_find_user.text = "@${searchState.searchUsername}"
                 search_text_cant_find_user.visibility = View.VISIBLE
@@ -162,6 +172,18 @@ class SearchFragment : Fragment() {
         val imm: InputMethodManager =  context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
+
+    override fun clickListenerOnPost(positionAdapter: Int) {}
+
+    override fun clickListenerOnUser(positionAdapter: Int) {
+        val user_id = listUsers[positionAdapter].username
+
+        val navController = findNavController()
+        val bundle_user_id = bundleOf("user_id" to user_id)
+        navController.navigate(R.id.action_searchFragment_to_profileFragment, bundle_user_id)
+    }
+
+    override fun loadOldFeedPosts() {}
 }
 
 sealed class SearchFragmentEvent(){

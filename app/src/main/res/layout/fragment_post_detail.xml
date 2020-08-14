@@ -31,7 +31,7 @@
         app:layout_constraintTop_toBottomOf="@id/post_detail_app_bar"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="5dp"
         android:background="@drawable/outline_account_circle_black_24dp"
         />
 
@@ -42,7 +42,7 @@
         app:layout_constraintStart_toEndOf="@id/post_detail_image_profile"
         app:layout_constraintTop_toBottomOf="@id/post_detail_app_bar"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         style="@style/PostUserName"/>
 
     <com.google.android.material.textview.MaterialTextView
@@ -51,7 +51,7 @@
         android:id="@+id/post_detail_title"
         app:layout_constraintTop_toBottomOf="@id/post_detail_username"
         app:layout_constraintStart_toEndOf="@id/post_detail_image_profile"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="20dp"/>
 
     <com.google.android.material.textview.MaterialTextView
@@ -62,7 +62,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:maxHeight="100dp"
         android:padding="10dp"/>
 

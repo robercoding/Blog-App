@@ -40,9 +40,6 @@
             android:layout_marginTop="30dp"
             android:layout_marginEnd="30dp"
             android:text="Edit profile"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            style="@style/ProfileDetailEditButton"
             android:visibility="gone"/>
 
         <Constraint
@@ -53,10 +50,6 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="30dp"
             android:layout_marginEnd="30dp"
-            android:text="Follow"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            style="@style/ProfileDetailEditButton"
             android:visibility="gone"/>
 
     </ConstraintSet>

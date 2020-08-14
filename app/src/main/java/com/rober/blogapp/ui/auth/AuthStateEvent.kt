@@ -12,7 +12,7 @@ sealed class AuthState {
 
     //Register
     object Registering: AuthState()
-    object SuccessRegister: AuthState()
+    data class SuccessRegister(val email: String, val password: String): AuthState()
 
     //Generics
     object Idle : AuthState()

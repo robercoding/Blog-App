@@ -22,16 +22,10 @@ private val firebaseRepository: FirebaseRepository
 ): ViewModel() {
     private val TAG = "AuthViewModel"
 
-    private val _loginAuthState : MutableLiveData<AuthState> = MutableLiveData()
+    private val _authState : MutableLiveData<AuthState> = MutableLiveData()
 
-    private val _registerAuthState = MutableStateFlow<AuthState>(
-        AuthState.Idle)
-
-    val loginAuthState: LiveData<AuthState>
-        get() = _loginAuthState
-
-    val registerAuthState: StateFlow<AuthState>
-        get() = _registerAuthState
+    val authState: LiveData<AuthState>
+        get() = _authState
 
     init {
         viewModelScope.launch {
@@ -40,10 +34,10 @@ private val firebaseRepository: FirebaseRepository
 
                     when(resultAuthSignOut){
                         is ResultAuth.SuccessSignout -> {
-                            _loginAuthState.value = AuthState.UserLogout
+                            _authState.value = AuthState.UserLogout
                         }
                         is ResultAuth.FailureSignout -> {
-                            _loginAuthState.value = AuthState.Idle
+                            _authState.value = AuthState.Idle
                         }
                     }
                 }
@@ -65,14 +59,14 @@ private val firebaseRepository: FirebaseRepository
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Success -> {
-                            _loginAuthState.value = AuthState.UserLoggedIn
+                            _authState  .value = AuthState.UserLoggedIn
                         }
                         is ResultAuth.Error -> {
                             Log.i(TAG, "${resultAuth.exception}")
-                            _loginAuthState.value = AuthState.Error(resultAuth.exception.message)
+                            _authState.value = AuthState.Error(resultAuth.exception.message)
                         }
                         is ResultAuth.Loading ->
-                            _loginAuthState.value = AuthState.Logging
+                            _authState.value = AuthState.Logging
                     }
                 }
         }
@@ -83,6 +77,10 @@ private val firebaseRepository: FirebaseRepository
             is RegisterFragmentEvent.SignUp -> {
                 signUpWithEmail(state.email, state.password, state.name)
             }
+
+            is RegisterFragmentEvent.LogIn -> {
+                login(state.email, state.password)
+            }
         }
     }
 
@@ -92,16 +90,16 @@ private val firebaseRepository: FirebaseRepository
                 .collect {resultAuth ->
                     when(resultAuth) {
                         is ResultAuth.Loading -> {
-                            _registerAuthState.value = AuthState.Registering
+                            _authState.value = AuthState.Registering
                         }
                         is ResultAuth.Success -> {
-                            _registerAuthState.value = AuthState.SuccessRegister
+                            _authState.value = AuthState.SuccessRegister(email, password)
+
                         }
                         is ResultAuth.Error -> {
-                            _registerAuthState.value = AuthState.Error(resultAuth.exception.message)
+                            _authState.value = AuthState.Error(resultAuth.exception.message)
                         }
                 }
-
             }
         }
     }
