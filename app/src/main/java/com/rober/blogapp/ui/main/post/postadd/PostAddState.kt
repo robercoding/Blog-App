@@ -4,6 +4,8 @@ import com.rober.blogapp.util.MessageUtil
 
 sealed class PostAddState {
 
+    object ReadyToWrite: PostAddState()
+
     data class PostHasBeenSaved(val messageUtil: MessageUtil): PostAddState()
 
     data class Error(val exception: Exception): PostAddState()

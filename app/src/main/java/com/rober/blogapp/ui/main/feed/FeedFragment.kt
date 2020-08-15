@@ -26,12 +26,9 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
 
 
     private val TAG: String = "FeedFragment"
-    private var mHasReachedBottomonce = false
     private var mHasPullRefresh = false
 
     private var resource: Int = R.layout.adapter_feed_viewholder_posts
-
-    private var recyclerViewState: Parcelable? = null
 
     private val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
@@ -52,7 +49,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView(), R.layout.adapter_feed_viewholder_posts, this)
+        postAdapter = PostAdapter(requireView(), resource, this)
 
         subscribeObservers()
         viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
@@ -121,7 +118,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
 
     private fun goToPostAdd(){
         val navController = findNavController()
-        navController.navigate(R.id.postAddFragment)
+        navController.navigate(R.id.action_feedFragment_to_postAddFragment)
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {

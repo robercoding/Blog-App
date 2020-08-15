@@ -33,6 +33,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     lateinit var userSearchAdapter: UserSearchAdapter
     private var textSearch = ""
     private var alreadyFocusOnSearchText = false
+    private var didUserJustEnterInFragment = true
 
     private var listUsers = mutableListOf<User>()
 
@@ -103,7 +104,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
     private fun setupListeners(){
         search_user_text.setOnClickListener {
-            if(!alreadyFocusOnSearchText)
+            if(!alreadyFocusOnSearchText && !didUserJustEnterInFragment)
                 viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
         }
 
@@ -119,10 +120,12 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
         search_user_text.addTextChangedListener {
             val textToSearch = search_user_text.text.toString()
+            didUserJustEnterInFragment = false
             viewModel.setIntention(SearchFragmentEvent.RetrieveUserByUsername(textToSearch))
         }
 
         search_arrow_back.setOnClickListener {
+
             viewModel.setIntention(SearchFragmentEvent.StopSearchUser)
         }
     }
@@ -184,6 +187,12 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     override fun loadOldFeedPosts() {}
+
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "Resume")
+        didUserJustEnterInFragment = true
+    }
 }
 
 sealed class SearchFragmentEvent(){

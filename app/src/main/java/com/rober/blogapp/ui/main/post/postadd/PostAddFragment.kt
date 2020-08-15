@@ -1,10 +1,12 @@
 package com.rober.blogapp.ui.main.post.postadd
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
@@ -54,6 +56,9 @@ class PostAddFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
+        viewModel.setIntention(PostAddEvent.ReadyToWrite)
+
+
     }
 
     private fun observeViewModel(){
@@ -71,6 +76,10 @@ class PostAddFragment : Fragment() {
 
             is PostAddState.Idle -> {
                 //Nothing
+            }
+
+            is PostAddState.ReadyToWrite -> {
+                setViewReadyToWrite()
             }
 
             is PostAddState.Error -> {
@@ -98,12 +107,16 @@ class PostAddFragment : Fragment() {
         }
     }
 
-
+    private fun setViewReadyToWrite(){
+        post_add_title.requestFocus()
+        //displayKeyBoard(true)
+    }
 
     private fun goToFeedFragment(){
-        displayActionBar(true)
-        val navController = findNavController()
-        navController.navigate(R.id.feedFragment)
+        displayKeyBoard(false)
+        displayActionBar(false)
+        findNavController().popBackStack()
+
     }
 
     private fun displayActionBar(display: Boolean){
@@ -132,9 +145,20 @@ class PostAddFragment : Fragment() {
         }
         return false
     }
+
+    private fun displayKeyBoard(display: Boolean){
+        val imm: InputMethodManager =  context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        if(display)
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+        else
+            imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
 }
 
-sealed class PostAddEvent(){
+sealed class PostAddEvent{
+    object ReadyToWrite: PostAddEvent()
+
     data class SavePost(val post:Post): PostAddEvent()
 
     object Idle: PostAddEvent()

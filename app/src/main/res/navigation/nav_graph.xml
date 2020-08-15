@@ -13,7 +13,28 @@
         tools:layout="@layout/fragment_feed" >
         <action
             android:id="@+id/action_feedFragment_to_profileFragment"
-            app:destination="@id/profileDetailFragment"/>
+            app:destination="@id/profileDetailFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_feedFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_feedFragment_to_postAddFragment"
+            app:destination="@id/postAddFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:exitAnim="@anim/to_top"
+            app:popEnterAnim="@anim/from_top"
+            app:popExitAnim="@anim/to_bottom" />
+        <action
+            android:id="@+id/action_feedFragment_to_postDetailFragment"
+            app:destination="@id/postDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -23,6 +44,14 @@
         <action
             android:id="@+id/action_searchFragment_to_profileFragment"
             app:destination="@id/profileDetailFragment"/>
+        <action
+            android:id="@+id/action_searchFragment_to_feedFragment"
+            app:destination="@id/feedFragment"
+            app:enterAnim="@anim/to_right"
+            app:exitAnim="@anim/from_left" />
+        <action
+            android:id="@+id/action_searchFragment_to_profileDetailFragment"
+            app:destination="@id/profileDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/profileDetailFragment"
@@ -33,6 +62,18 @@
             android:name="uid"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_feedFragment2"
+            app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_postDetailFragment"
+            app:destination="@id/postDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -50,12 +91,23 @@
         android:id="@+id/registerFragment"
         android:name="com.rober.blogapp.ui.auth.register.RegisterFragment"
         android:label="fragment_register"
-        tools:layout="@layout/fragment_register" />
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_registerFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
     <fragment
         android:id="@+id/postAddFragment"
         android:name="com.rober.blogapp.ui.main.post.postadd.PostAddFragment"
         android:label="fragment_post_add"
-        tools:layout="@layout/fragment_post_add" />
+        tools:layout="@layout/fragment_post_add" >
+        <action
+            android:id="@+id/action_postAddFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+    </fragment>
     <fragment
         android:id="@+id/postDetailFragment"
         android:name="com.rober.blogapp.ui.main.post.postdetail.PostDetailFragment"
@@ -65,5 +117,11 @@
             android:name="postObject"
             app:argType="com.rober.blogapp.entity.Post"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_postDetailFragment_to_profileDetailFragment"
+            app:destination="@id/profileDetailFragment" />
+        <action
+            android:id="@+id/action_postDetailFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
     </fragment>
 </navigation>

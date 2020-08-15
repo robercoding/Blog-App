@@ -30,48 +30,53 @@ constructor
 
 
     suspend fun getFeedPosts(): Flow<ResultData<List<Post>>> = flow {
-        Log.i(TAG, "Pasamos por aqui otra vez, no se porque")
         emit(ResultData.Loading)
         try{
-            //Get all user followings
-            val listFollowing = getUserFollowings()
-            Log.i(TAG, "List Following: ${listFollowing}")
 
-            //Get userlogged in posts reference
+            if(savedFeedListPost.isNotEmpty()){
+                emit(ResultData.Success(savedFeedListPost))
+            }else{
 
-            val newListUserPosts: MutableList<Post> = mutableListOf()
+                //Get all user followings
+                val listFollowing = getUserFollowings()
+                Log.i(TAG, "List Following: ${listFollowing}")
 
-            //val dateGreater = DateTime.now().minusDays(7).toDate()
+                //Get userlogged in posts reference
 
-            for (following in listFollowing) {
-                val listFollowingPosts = firebaseSource.db.collection("posts/${following.following_id}/user_posts")
+                val newListUserPosts: MutableList<Post> = mutableListOf()
+
+                //val dateGreater = DateTime.now().minusDays(7).toDate()
+
+                for (following in listFollowing) {
+                    val listFollowingPosts = firebaseSource.db.collection("posts/${following.following_id}/user_posts")
+                        .limit(1)
+                        .get()
+                        .await()
+                        .toObjects(Post::class.java)
+
+                    Log.i(TAG, "List Following Posts: ${listFollowingPosts}")
+                    for(followingPost in listFollowingPosts){
+                        Log.i(TAG, "Adding following post: ${followingPost}")
+                        newListUserPosts.add(followingPost)
+                    }
+                }
+
+                val listUserLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
                     .limit(1)
                     .get()
                     .await()
                     .toObjects(Post::class.java)
 
-                Log.i(TAG, "List Following Posts: ${listFollowingPosts}")
-                for(followingPost in listFollowingPosts){
-                    Log.i(TAG, "Adding following post: ${followingPost}")
-                    newListUserPosts.add(followingPost)
-                }
+                for(userLogedInPost in listUserLoggedInPosts)
+                    newListUserPosts.add(userLogedInPost)
+
+                val feedPostsOrdered = newListUserPosts.sortedBy { post -> post.created_at.time }.toMutableList()
+
+                savedFeedListPost = feedPostsOrdered
+
+                emit(ResultData.Success(savedFeedListPost))
+
             }
-
-            val listUserLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-                .limit(1)
-                .get()
-                .await()
-                .toObjects(Post::class.java)
-
-            for(userLogedInPost in listUserLoggedInPosts)
-                newListUserPosts.add(userLogedInPost)
-
-            val feedPostsOrdered = newListUserPosts.sortedBy { post -> post.created_at.time }.toMutableList()
-
-            savedFeedListPost = feedPostsOrdered
-
-            emit(ResultData.Success(savedFeedListPost))
-
         }catch (exception: Exception){
             emit(ResultData.Error<List<Post>>(exception, null))
         }

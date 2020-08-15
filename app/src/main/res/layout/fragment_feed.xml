@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.feed.FeedFragment"
-    style="@style/PostBackground"
+    android:background="@color/background"
     >
 
         <com.google.android.material.appbar.AppBarLayout
@@ -78,9 +78,9 @@
             android:layout_marginBottom="38dp"
             app:layout_constraintBottom_toBottomOf="@+id/swipe_refresh_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:backgroundTint="@color/blueTwitter"
+            app:backgroundTint="@color/background"
             app:srcCompat="@drawable/ic_note_add_black_24dp_filled"
-            app:tint="@color/white"/>
+            app:tint="@color/blueTwitter"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

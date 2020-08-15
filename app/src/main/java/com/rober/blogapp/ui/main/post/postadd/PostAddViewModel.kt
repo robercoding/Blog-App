@@ -30,6 +30,10 @@ class PostAddViewModel @ViewModelInject constructor(
                 savePost(event.post)
             }
 
+            is PostAddEvent.ReadyToWrite -> {
+                _statePost.value = PostAddState.ReadyToWrite
+            }
+
             PostAddEvent.Idle -> {
                 _statePost.value = PostAddState.Idle
             }
