@@ -22,18 +22,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(), RecyclerViewActionInterface{
+class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
 
     private val TAG: String = "FeedFragment"
-    private var mHasPullRefresh = false
 
+    private var mHasPullRefresh = false
     private var resource: Int = R.layout.adapter_feed_viewholder_posts
 
     private val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
 
-    private var mutableListPosts = mutableListOf<Post>()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,7 +52,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
         postAdapter = PostAdapter(requireView(), resource, this)
 
         subscribeObservers()
-        viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
+        viewModel.setIntention(FeedFragmentEvent.RetrieveInitPosts)
     }
 
     private fun subscribeObservers(){
@@ -67,13 +67,20 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
                 displayProgressBar(false)
                 stopSwipeRefresh()
 
-                mutableListPosts = feedState.listFeedPosts.toMutableList()
-                postAdapter.setPosts(mutableListPosts)
+                postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
 
                 val linearLayoutManager = LinearLayoutManager(requireContext())
 
                 setAdapterToRecyclerFeed(linearLayoutManager)
                 viewModel.setIntention(FeedFragmentEvent.Idle)
+            }
+
+            is FeedState.LoadNewPosts -> {
+                loadNewPosts(feedState.listFeedPosts, feedState.scrollToPosition)
+            }
+
+            is FeedState.GoToPostDetails -> {
+                goToPostDetails(feedState.post)
             }
 
             is FeedState.Loading -> {
@@ -97,12 +104,24 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun setAdapterToRecyclerFeed(linearLayoutManager: LinearLayoutManager){
+        val onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this)
+
         recycler_feed.apply {
             layoutManager = linearLayoutManager
-
             adapter = postAdapter
+            addOnScrollListener(onScrollListenerHelper)
             setHasFixedSize(true)
         }
+    }
+
+    private fun loadNewPosts(listPosts: List<Post>, scrollToPosition: Int){
+        postAdapter.setPosts(listPosts.toMutableList())
+
+        recycler_feed.apply {
+            adapter = postAdapter
+            scrollToPosition(scrollToPosition)
+        }
+
     }
 
     private fun setupListeners(){
@@ -122,28 +141,36 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {
-        val post = mutableListPosts[positionAdapter]
+        //val post = mutableListPosts[positionAdapter]
+        viewModel.setIntention(FeedFragmentEvent.GoToPostDetails(positionAdapter))
+    }
 
+    private fun goToPostDetails(post: Post){
         val bundle = bundleOf("post" to post)
         val navController = findNavController()
         navController.navigate(R.id.postDetailFragment, bundle)
+        viewModel.setIntention(FeedFragmentEvent.Idle)
     }
 
     override fun clickListenerOnUser(positionAdapter: Int) {
-        val user_id = mutableListPosts[positionAdapter].user_creator_id
+        //val user_id = mutableListPosts[positionAdapter].user_creator_id
 
-        val navController = findNavController()
-        val bundle_user_id = bundleOf("user_id" to user_id)
-        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
+//        val navController = findNavController()
+//        val bundle_user_id = bundleOf("user_id" to user_id)
+//        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
     }
 
-    override fun loadOldFeedPosts() {
-        viewModel.setIntention(FeedFragmentEvent.RetrieveOldFeedPosts)
+    override fun requestMorePosts(actualRecyclerViewPosition: Int) {
+
+        viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts(actualRecyclerViewPosition))
     }
 }
 sealed class FeedFragmentEvent{
-    object RetrieveNewFeedPosts: FeedFragmentEvent()
+    object RetrieveInitPosts: FeedFragmentEvent()
+    data class RetrieveNewFeedPosts(val actualRecyclerViewPosition: Int): FeedFragmentEvent()
     object RetrieveOldFeedPosts : FeedFragmentEvent()
+
+    data class GoToPostDetails(val positionAdapter: Int): FeedFragmentEvent()
 
     object Idle: FeedFragmentEvent()
 }

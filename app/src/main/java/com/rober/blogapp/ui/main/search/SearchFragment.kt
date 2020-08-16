@@ -186,7 +186,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         navController.navigate(R.id.action_searchFragment_to_profileFragment, bundle_user_id)
     }
 
-    override fun loadOldFeedPosts() {}
+    override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
 
     override fun onResume() {
         super.onResume()

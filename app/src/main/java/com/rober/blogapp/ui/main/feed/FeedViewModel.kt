@@ -24,17 +24,26 @@ constructor(
     val feedState: LiveData<FeedState>
         get() =_feedState
 
+    private var scrollToPosition = 0
+    private var mutableListPosts = mutableListOf<Post>()
+
     init {
 
     }
 
     fun setIntention(event: FeedFragmentEvent){
         when(event){
+            is FeedFragmentEvent.RetrieveInitPosts ->{
+                retrievePosts()
+            }
             is FeedFragmentEvent.RetrieveOldFeedPosts -> {
                 retrievePosts()
             }
             is FeedFragmentEvent.RetrieveNewFeedPosts -> {
-                retrievePosts()
+                retrieveNewPosts(event.actualRecyclerViewPosition)
+            }
+            is FeedFragmentEvent.GoToPostDetails -> {
+                goToPostDetails(event.positionAdapter)
             }
             is FeedFragmentEvent.Idle ->{
                 _feedState.value = FeedState.Idle
@@ -42,7 +51,7 @@ constructor(
         }
     }
 
-    fun retrievePosts(){
+    private fun retrievePosts(){
         _feedState.value = FeedState.Loading
 
         viewModelScope.launch {
@@ -50,8 +59,8 @@ constructor(
                 .collect {resultData ->
                     when(resultData){
                         is ResultData.Success -> {
-                            _feedState.value = FeedState.SetListPosts(resultData.data!!)
-                            Log.i(TAG, "Result Feed: ${resultData.data!!}")
+                            mutableListPosts = resultData.data!!.toMutableList()
+                            _feedState.value = FeedState.SetListPosts(mutableListPosts)
                         }
                         is ResultData.Error -> {
                             _feedState.value = FeedState.Error(resultData.exception.message)
@@ -59,6 +68,30 @@ constructor(
                     }
                 }
         }
+    }
+
+    private fun retrieveNewPosts(actualRecyclerViewPosition: Int){
+        viewModelScope.launch {
+            firebaseRepository.retrieveFeedPosts()
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            scrollToPosition = actualRecyclerViewPosition
+                            mutableListPosts = resultData.data!!.toMutableList()
+
+                            _feedState.value = FeedState.LoadNewPosts(mutableListPosts,actualRecyclerViewPosition)
+                        }
+                        is ResultData.Error -> {
+                            _feedState.value = FeedState.Error(resultData.exception.message)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun goToPostDetails(positionAdapter: Int){
+        val post = mutableListPosts[positionAdapter]
+        _feedState.value = FeedState.GoToPostDetails(post)
     }
 
 }

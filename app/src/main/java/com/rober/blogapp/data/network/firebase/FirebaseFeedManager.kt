@@ -32,11 +32,9 @@ constructor
     suspend fun getFeedPosts(): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
         try{
-
             if(savedFeedListPost.isNotEmpty()){
                 emit(ResultData.Success(savedFeedListPost))
             }else{
-
                 //Get all user followings
                 val listFollowing = getUserFollowings()
                 Log.i(TAG, "List Following: ${listFollowing}")
@@ -49,7 +47,6 @@ constructor
 
                 for (following in listFollowing) {
                     val listFollowingPosts = firebaseSource.db.collection("posts/${following.following_id}/user_posts")
-                        .limit(1)
                         .get()
                         .await()
                         .toObjects(Post::class.java)
@@ -62,7 +59,6 @@ constructor
                 }
 
                 val listUserLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-                    .limit(1)
                     .get()
                     .await()
                     .toObjects(Post::class.java)

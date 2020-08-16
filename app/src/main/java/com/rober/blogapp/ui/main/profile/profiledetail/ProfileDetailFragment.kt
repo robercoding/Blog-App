@@ -284,8 +284,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         //TODO
     }
 
-    override fun loadOldFeedPosts() {
-        TODO("Not yet implemented")
+
+    override fun requestMorePosts(actualRecyclerViewPosition: Int) {
+        //
     }
 }
 
