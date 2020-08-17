@@ -1,17 +1,13 @@
 package com.rober.blogapp.data.network.firebase
 
 import android.util.Log
-import com.google.firebase.Timestamp
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.entity.Following
 import com.rober.blogapp.entity.Post
-import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import org.threeten.bp.LocalDateTime
 import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
@@ -19,66 +15,183 @@ import javax.inject.Inject
 class FirebaseFeedManager
 @Inject
 constructor
-(
+    (
     private val firebaseSource: FirebaseSource
-)
-{
+) {
     private val TAG = "FirebaseFeedManager"
 
-    var savedFeedListPost: MutableList<Post> = mutableListOf()
-    var feedPagination = 0
+//    private var dateGreaterThan = DateTime.now().minus(4).toDate()
+//    private var dateLessThan = DateTime.now().toDate()
+    //var instant = Instant()
+    //private var format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    //private var date = format.parse()
 
+    private var dateInit: Date? = null
 
-    suspend fun getFeedPosts(): Flow<ResultData<List<Post>>> = flow {
+    private var savedFeedListPosts: MutableList<Post> = mutableListOf()
+    private var restDays = 0
+    private var currentIntervalHoursIndex = 0
+    private var listIntervalHours = listOf(0, 4, 8, 12, 16, 20, 24)
+    private var dateGreaterThan: Date? = null
+    private var dateLessThan: Date? = null
+
+    private var savedListFollowing: MutableList<Following>? = null
+
+    suspend fun getInitFeedPosts(): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
-        try{
-            if(savedFeedListPost.isNotEmpty()){
-                emit(ResultData.Success(savedFeedListPost))
-            }else{
+
+        if (!savedListFollowing.isNullOrEmpty()) {
+            Log.i(TAG, "We sending database ")
+            emit(ResultData.Success(savedFeedListPosts))
+        } else {
+            dateInit = DateTime.now().toDate()
+
+            var dateLessThanInit = DateTime.now().minusDays(restDays).toDate()
+            var dateGreaterThanInit = DateTime.now().minusDays(restDays + 1).toDate()
+
+            val listFollowing: MutableList<Following>
+
+            try {
                 //Get all user followings
-                val listFollowing = getUserFollowings()
-                Log.i(TAG, "List Following: ${listFollowing}")
+                if (savedListFollowing.isNullOrEmpty()) {
+                    listFollowing = getUserFollowings().toMutableList()
+                    savedListFollowing = listFollowing
+                } else {
+                    listFollowing = savedListFollowing!!
+                }
 
-                //Get userlogged in posts reference
+                val newListUsersPosts: MutableList<Post> = mutableListOf()
 
-                val newListUserPosts: MutableList<Post> = mutableListOf()
+                while (newListUsersPosts.size < 10) {
+                    for (following in savedListFollowing!!) {
+                        val listFollowingPosts = getFollowingPostsByDateInit(
+                            following.following_id,
+                            dateLessThanInit,
+                            dateGreaterThanInit
+                        )
+                        for (followingPost in listFollowingPosts)
+                            newListUsersPosts.add(followingPost)
+                    }
 
-                //val dateGreater = DateTime.now().minusDays(7).toDate()
+                    //Get User Logged In posts
+                    val listUserLoggedInPosts = getFollowingPostsByDateInit(
+                        firebaseSource.username,
+                        dateLessThanInit,
+                        dateGreaterThanInit
+                    )
+                    for (userLoggedInPost in listUserLoggedInPosts)
+                        newListUsersPosts.add(userLoggedInPost)
 
-                for (following in listFollowing) {
-                    val listFollowingPosts = firebaseSource.db.collection("posts/${following.following_id}/user_posts")
-                        .get()
-                        .await()
-                        .toObjects(Post::class.java)
-
-                    Log.i(TAG, "List Following Posts: ${listFollowingPosts}")
-                    for(followingPost in listFollowingPosts){
-                        Log.i(TAG, "Adding following post: ${followingPost}")
-                        newListUserPosts.add(followingPost)
+                    Log.i("InitPosts", "So there's now a size of ${newListUsersPosts.size}")
+                    restDays += 1
+                    if (newListUsersPosts.size < 10) {
+                        dateLessThanInit = DateTime.now().minusDays(restDays).toDate()
+                        dateGreaterThanInit = DateTime.now().minusDays(restDays + 1).toDate()
                     }
                 }
 
-                val listUserLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-                    .get()
-                    .await()
-                    .toObjects(Post::class.java)
+                val feedPostsOrdered =
+                    newListUsersPosts.sortedByDescending { post -> post.created_at.time }
+                        .toMutableList()
 
-                for(userLogedInPost in listUserLoggedInPosts)
-                    newListUserPosts.add(userLogedInPost)
+                savedFeedListPosts = feedPostsOrdered
 
-                val feedPostsOrdered = newListUserPosts.sortedBy { post -> post.created_at.time }.toMutableList()
+                emit(ResultData.Success(savedFeedListPosts))
 
-                savedFeedListPost = feedPostsOrdered
-
-                emit(ResultData.Success(savedFeedListPost))
-
+            } catch (exception: Exception) {
+                emit(ResultData.Error<List<Post>>(exception, null))
             }
-        }catch (exception: Exception){
-            emit(ResultData.Error<List<Post>>(exception, null))
         }
     }
 
-    private suspend fun getUserFollowings(): List<Following>{
+    private suspend fun getFollowingPostsByDateInit(
+        followingId: String,
+        dateLessThanInit: Date,
+        dateGreaterThanInit: Date
+    ): List<Post> {
+        return firebaseSource.db.collection("posts/${followingId}/user_posts")
+            .whereGreaterThan("created_at", dateGreaterThanInit)
+            .whereLessThan("created_at", dateLessThanInit)
+            .get()
+            .await()
+            .toObjects(Post::class.java)
+    }
+
+    suspend fun getOldFeedPosts(): Flow<ResultData<List<Post>>> = flow {
+        emit(ResultData.Loading)
+        Log.i("TryOldPosts", "Try")
+
+        var triesRetrieveOldFeedPost = 0
+
+        if (dateGreaterThan == null || dateLessThan == null) {
+            dateLessThan = DateTime.now().minusDays(restDays)
+                .plusHours(listIntervalHours[currentIntervalHoursIndex]).toDate()
+            dateGreaterThan = DateTime.now().minusDays(restDays)
+                .plusHours(listIntervalHours[currentIntervalHoursIndex + 1]).toDate()
+        }
+
+        //Get Followings
+        if (savedListFollowing.isNullOrEmpty()) {
+            val listFollowing = getUserFollowings()
+            savedListFollowing = listFollowing.toMutableList()
+        }
+
+        val newListUsersPosts: MutableList<Post> = mutableListOf()
+
+        while (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 7) {
+            triesRetrieveOldFeedPost += 1
+            Log.i("CheckOldPosts", "Try: ${triesRetrieveOldFeedPost}")
+
+            Log.i("OldPosts", "Date Less than: ${dateLessThan}")
+            Log.i("OldPosts", "Date Greater than: ${dateGreaterThan}")
+            //Get following posts
+            for (following in savedListFollowing!!) {
+                val listFollowingPosts = getFollowingPostsByDate(following.following_id)
+                newListUsersPosts.addAll(listFollowingPosts)
+            }
+
+            //Get User Logged In posts
+            val listUserLoggedInPosts = getFollowingPostsByDate(firebaseSource.username)
+            newListUsersPosts.addAll(listUserLoggedInPosts)
+
+            if (currentIntervalHoursIndex != 5) {
+                currentIntervalHoursIndex += 1
+            } else {
+                currentIntervalHoursIndex = 0
+                restDays += 1
+            }
+
+            if (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 7) {
+
+                dateLessThan = DateTime.now().minusDays(restDays)
+                    .minusHours(listIntervalHours[currentIntervalHoursIndex]).toDate()
+
+                dateGreaterThan = DateTime.now().minusDays(restDays)
+                    .plusHours(listIntervalHours[currentIntervalHoursIndex + 1]).toDate()
+            } else {
+                Log.i("CheckOldPosts", "${newListUsersPosts.size}")
+                val feedPostsOrdered =
+                    newListUsersPosts.sortedByDescending { post -> post.created_at.time }
+                        .toMutableList()
+
+                for (postOrdered in feedPostsOrdered)
+                    savedFeedListPosts.add(postOrdered)
+
+                emit(ResultData.Success(savedFeedListPosts))
+            }
+        }
+    }
+
+    private suspend fun getFollowingPostsByDate(followingId: String): List<Post> {
+        return firebaseSource.db.collection("posts/${followingId}/user_posts")
+            .whereGreaterThan("created_at", dateGreaterThan!!)
+            .whereLessThan("created_at", dateLessThan!!)
+            .get()
+            .await()
+            .toObjects(Post::class.java)
+    }
+
+    private suspend fun getUserFollowings(): List<Following> {
         val listFollowing =
             firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
                 .get()
@@ -87,51 +200,4 @@ constructor
 
         return listFollowing
     }
-
-
-    private suspend fun getUserPostsWhereDateGreater(following: Following? = null, dateGreater: Date): List<Post>{
-        if(following != null){
-            val listFollowingPosts =
-                firebaseSource.db.collection("posts/${following.following_id}/user_posts")
-                    .whereGreaterThan("created_at", dateGreater)
-                    .get()
-                    .await()
-                    .toObjects(Post::class.java)
-
-            return listFollowingPosts
-        }
-
-        val userLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-            .whereGreaterThan("created_at", dateGreater)
-            .get()
-            .await()
-            .toObjects(Post::class.java)
-
-        return userLoggedInPosts
-    }
-
-    private suspend fun getUserPostsWhereBetween(following: Following? = null, dateGreater: Date, dateLess: Date): List<Post>{
-
-        if(following != null){
-            val listFollowingPosts =
-                firebaseSource.db.collection("posts/${following.following_id}/user_posts")
-                    .whereGreaterThan("created_at", dateGreater)
-                    .whereLessThan("created_at", dateLess)
-                    .get()
-                    .await()
-                    .toObjects(Post::class.java)
-
-            return listFollowingPosts
-        }
-
-        val userLoggedInPosts = firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-            .whereGreaterThan("created_at", dateGreater)
-            .whereLessThan("created_at", dateLess)
-            .get()
-            .await()
-            .toObjects(Post::class.java)
-
-        return userLoggedInPosts
-    }
-
 }

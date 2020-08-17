@@ -134,7 +134,6 @@ class ProfileDetailViewModel
                     when (resultData){
                         is ResultData.Success ->{
                             currentUserFollowsOtherUser = resultData.data!!
-
                         }
 
                         is ResultData.Error -> currentUserFollowsOtherUser = false
