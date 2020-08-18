@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -71,20 +72,30 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
         var title: TextView? = null
         var text: TextView? = null
 
+        var container_post: ConstraintLayout? = null
+        var container_no_more_posts: ConstraintLayout? = null
+
         init{
             uid_image = itemView.findViewById(R.id.uid_image)
             uid_name = itemView.findViewById(R.id.uid_name)
             title = itemView.findViewById(R.id.title)
             text = itemView.findViewById(R.id.text)
-
+            container_post = itemView.findViewById(R.id.feed_viewholder_container_post)
+            container_no_more_posts = itemView.findViewById(R.id.feed_viewholder_container_no_more_posts)
         }
 
         fun bind(post: Post){
-            Log.i("bind", "${post.user_creator_id}")
-            uid_name?.text = "@${post.user_creator_id}"
-            title?.text = post.title
-            text?.text = post.text
-
+            Log.i("bind", post.user_creator_id)
+            if(post.post_id == "no_more_posts"){
+                container_no_more_posts?.visibility = View.VISIBLE
+                container_post?.visibility = View.GONE
+            }else{
+                uid_name?.text = "@${post.user_creator_id}"
+                title?.text = post.title
+                text?.text = post.text
+                container_no_more_posts?.visibility = View.GONE
+                container_post?.visibility = View.VISIBLE
+            }
             setupClickListeners()
         }
 

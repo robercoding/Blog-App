@@ -183,6 +183,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
         val navController = findNavController()
         val bundle_user_id = bundleOf("user_id" to user_id)
+        hideKeyBoard()
         navController.navigate(R.id.action_searchFragment_to_profileFragment, bundle_user_id)
     }
 

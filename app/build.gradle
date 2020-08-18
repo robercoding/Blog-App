@@ -138,6 +138,9 @@ dependencies {
     //recycler
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
+    //Saved State
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.0-alpha06'
+
     //Swiperefreshlayout for recycler feed
 //    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }

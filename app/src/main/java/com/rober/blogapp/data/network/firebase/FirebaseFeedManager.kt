@@ -31,7 +31,8 @@ constructor
     private var savedFeedListPosts: MutableList<Post> = mutableListOf()
     private var restDays = 0
     private var currentIntervalHoursIndex = 0
-    private var listIntervalHours = listOf(0, 4, 8, 12, 16, 20, 24)
+    private var listIntervalFourHours = listOf(0, 4, 8, 12, 16, 20, 24)
+    private var listIntervalEightHours = listOf(0, 8, 16, 24)
     private var dateGreaterThan: Date? = null
     private var dateLessThan: Date? = null
 
@@ -119,16 +120,14 @@ constructor
 
     suspend fun getOldFeedPosts(): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
-        Log.i("TryOldPosts", "Try")
 
         var triesRetrieveOldFeedPost = 0
 
-        if (dateGreaterThan == null || dateLessThan == null) {
-            dateLessThan = DateTime.now().minusDays(restDays)
-                .plusHours(listIntervalHours[currentIntervalHoursIndex]).toDate()
-            dateGreaterThan = DateTime.now().minusDays(restDays)
-                .plusHours(listIntervalHours[currentIntervalHoursIndex + 1]).toDate()
-        }
+        dateLessThan = DateTime.now().minusDays(restDays)
+            .minusHours(listIntervalEightHours[currentIntervalHoursIndex]).toDate()
+        dateGreaterThan = DateTime.now().minusDays(restDays)
+            .minusHours(listIntervalEightHours[currentIntervalHoursIndex + 1]).toDate()
+
 
         //Get Followings
         if (savedListFollowing.isNullOrEmpty()) {
@@ -137,10 +136,9 @@ constructor
         }
 
         val newListUsersPosts: MutableList<Post> = mutableListOf()
+        var hasCheckedCurrentIntervalHours = false
 
-        while (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 7) {
-            triesRetrieveOldFeedPost += 1
-            Log.i("CheckOldPosts", "Try: ${triesRetrieveOldFeedPost}")
+        while (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 15) {
 
             Log.i("OldPosts", "Date Less than: ${dateLessThan}")
             Log.i("OldPosts", "Date Greater than: ${dateGreaterThan}")
@@ -149,35 +147,72 @@ constructor
                 val listFollowingPosts = getFollowingPostsByDate(following.following_id)
                 newListUsersPosts.addAll(listFollowingPosts)
             }
-
+//            Log.i("CheckOldPosts", "We got old ${newListUsersPosts.size}")
             //Get User Logged In posts
             val listUserLoggedInPosts = getFollowingPostsByDate(firebaseSource.username)
+
             newListUsersPosts.addAll(listUserLoggedInPosts)
 
-            if (currentIntervalHoursIndex != 5) {
+            if (currentIntervalHoursIndex != 2) {
                 currentIntervalHoursIndex += 1
             } else {
                 currentIntervalHoursIndex = 0
                 restDays += 1
             }
 
-            if (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 7) {
 
-                dateLessThan = DateTime.now().minusDays(restDays)
-                    .minusHours(listIntervalHours[currentIntervalHoursIndex]).toDate()
+            Log.i("TestDatesInTries", "Before size = ${newListUsersPosts.size}}")
 
-                dateGreaterThan = DateTime.now().minusDays(restDays)
-                    .plusHours(listIntervalHours[currentIntervalHoursIndex + 1]).toDate()
+            if (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost < 15) {
+                Log.i("CheckOldPosts", "If: ${triesRetrieveOldFeedPost}")
+                triesRetrieveOldFeedPost += 1
+
+                if (triesRetrieveOldFeedPost >= 3 && newListUsersPosts.size < 5) {
+                    restDays += 1
+
+
+                    dateLessThan = DateTime.now().minusDays(restDays - 1).toDate()
+                    dateGreaterThan = DateTime.now().minusDays(restDays).toDate()
+                    Log.i(
+                        "TestDatesInTries",
+                        "DAY BY DAY NOW: DateLess= ${dateLessThan.toString()} && DateGreater= ${dateGreaterThan.toString()}"
+                    )
+                } else {
+
+                    dateLessThan = DateTime.now().minusDays(restDays)
+                        .minusHours(listIntervalEightHours[currentIntervalHoursIndex]).toDate()
+
+                    dateGreaterThan = DateTime.now().minusDays(restDays)
+                        .minusHours(listIntervalEightHours[currentIntervalHoursIndex + 1]).toDate()
+                    Log.i(
+                        "TestDatesInTries",
+                        "HOUR BY HOUR: DateLess= ${dateLessThan.toString()} && DateGreater= ${dateGreaterThan.toString()}"
+                    )
+                }
             } else {
-                Log.i("CheckOldPosts", "${newListUsersPosts.size}")
+                //Leave ready the search by hour when user retrieve old posts again
+                if (currentIntervalHoursIndex != 2) {
+                    currentIntervalHoursIndex += 1
+                } else {
+                    currentIntervalHoursIndex = 0
+                    restDays += 1
+                }
+
                 val feedPostsOrdered =
                     newListUsersPosts.sortedByDescending { post -> post.created_at.time }
                         .toMutableList()
 
+                //
                 for (postOrdered in feedPostsOrdered)
                     savedFeedListPosts.add(postOrdered)
 
+                //Add end of timeline
+                if (feedPostsOrdered.size < 10) {
+                    savedFeedListPosts.add(Post(0, "no_more_posts", "", "", "", Date(), 0))
+                }
+
                 emit(ResultData.Success(savedFeedListPosts))
+                break //Stop the while loop
             }
         }
     }

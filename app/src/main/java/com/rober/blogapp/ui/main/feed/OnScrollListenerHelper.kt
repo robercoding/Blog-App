@@ -64,21 +64,17 @@ class OnScrollListenerHelper(val context: Context, val recyclerViewClickInterfac
         Log.i("OnScrollListener", "Has user reached bottom?? ${hasUserReachedBottom}")
         if(hasUserReachedBottom && isUserDragging){
             if(!hasUserReachedBottomAndDraggingBefore){
-                //Toast.makeText(context, "Request", Toast.LENGTH_SHORT).show()
-                Log.i("OnScrollListener", "Request")
+                Toast.makeText(context, "Request", Toast.LENGTH_SHORT).show()
+                //Log.i("OnScrollListener", "Request")
                 hasUserReachedBottomAndDraggingBefore = true
 
                 val lastVisibleItemPosition = (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
                 recyclerViewClickInterface.requestMorePosts(lastVisibleItemPosition)
             }else{
                 Log.i("OnScrollListener", "Can't request more data")
+//                Toast.makeText(context, "Can't request more data", Toast.LENGTH_SHORT).show()
+
             }
-        }
-
-
-
-        if((RecyclerView.SCROLL_STATE_DRAGGING == newState) && (linearLayoutManager.itemCount == 2)){
-
         }
     }
 }

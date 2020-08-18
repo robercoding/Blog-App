@@ -15,7 +15,7 @@ class FeedViewModel
 @ViewModelInject
 constructor(
     private val firebaseRepository: FirebaseRepository,
-    @Assisted savedStateHandle: SavedStateHandle
+    @Assisted val stateHandle: SavedStateHandle
 ) : ViewModel() {
     private val TAG = "FeedViewModel"
 
@@ -24,19 +24,70 @@ constructor(
     val feedState: LiveData<FeedState>
         get() = _feedState
 
-    private var scrollToPosition = 0
-    private var mutableListPosts = mutableListOf<Post>()
+    var scrollToPosition = 0
+    private var mutableListPosts = getMutableListPosts()
+    private var endOfTimeline: LiveData<Boolean> = getEndOfTimeline()
+
+    companion object {
+        private val END_OF_TIMELINE = "endOfTimeline"
+        private val MUTABLE_LIST_POSTS = "mutableListPosts"
+    }
+
+    private fun getMutableListPosts(): LiveData<MutableList<Post>> {
+        return stateHandle.getLiveData(MUTABLE_LIST_POSTS, mutableListOf())
+    }
+
+    private fun saveMutableListPosts(mutableListPosts: MutableList<Post>) {
+        stateHandle.set(MUTABLE_LIST_POSTS, mutableListPosts)
+    }
+
+    private fun getEndOfTimeline(): LiveData<Boolean> {
+        return stateHandle.getLiveData(END_OF_TIMELINE, false)
+    }
+
+    fun saveEndOfTimeline(endOfTimeline: Boolean) {
+        stateHandle.set(END_OF_TIMELINE, endOfTimeline)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("CheckingLifecycle", "${endOfTimeline.value}")
+        Log.i(
+            "CheckingLifecycle",
+            "CLEARED Contains any? = ${stateHandle.contains(END_OF_TIMELINE)} OR ${stateHandle.contains(
+                MUTABLE_LIST_POSTS
+            )}"
+        )
+    }
 
     init {
+        Log.i("CheckingLifecycle", "Init")
+//        mutableListPosts = stateHandle.get<MutableList<Post>>("mutableListPosts")
+//        endOfTimeline = stateHandle.get("endOfTimeline")!!
 
+//        if(endOfTimeline.value == null)
+//            saveEndOfTimeline(false)
+        Log.i(
+            "CheckingLifecycle",
+            "INIT Contains any? = ${stateHandle.contains(END_OF_TIMELINE)} OR ${stateHandle.contains(
+                MUTABLE_LIST_POSTS
+            )}"
+        )
+        Log.i("CheckingLifecycle", "MutableList is null? = ${getMutableListPosts().value}")
+        Log.i("CheckingLifecycle", "End of timeline is null? = ${getEndOfTimeline().value}")
+        //Log.i("CheckingLifecycle", "End of timeline = ${endOfTimeline.value}")
     }
 
     fun setIntention(event: FeedFragmentEvent) {
         when (event) {
             is FeedFragmentEvent.RetrieveInitPosts -> {
+                Log.i("EndOfTimeline", "Set endoftimeline")
+                saveEndOfTimeline(false)
+                //saveEndOfTimeline(endOfTimeline = false)
                 retrieveInitPosts()
             }
             is FeedFragmentEvent.RetrieveOldFeedPosts -> {
+                Log.i("EndOfTimeline", "We just checking how is endoftimeline = ${endOfTimeline}")
                 retrieveOldFeedPosts(event.actualRecyclerViewPosition)
             }
             is FeedFragmentEvent.RetrieveNewFeedPosts -> {
@@ -44,9 +95,11 @@ constructor(
             is FeedFragmentEvent.GoToPostDetails -> {
                 goToPostDetails(event.positionAdapter)
             }
-
             is FeedFragmentEvent.RetrieveSavedLocalPosts -> {
-                retrieveSavedLocalPosts()
+//                retrieveSavedLocalPosts()
+            }
+            is FeedFragmentEvent.StopRequestOldPosts -> {
+                _feedState.value = FeedState.StopRequestOldPosts
             }
             is FeedFragmentEvent.Idle -> {
                 _feedState.value = FeedState.Idle
@@ -62,8 +115,8 @@ constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            mutableListPosts = resultData.data!!.toMutableList()
-                            _feedState.value = FeedState.SetListPosts(mutableListPosts)
+                            saveMutableListPosts(resultData.data!!.toMutableList())
+                            _feedState.value = FeedState.SetListPosts(mutableListPosts.value!!)
                         }
                         is ResultData.Error -> {
                             _feedState.value = FeedState.Error(resultData.exception.message)
@@ -74,35 +127,64 @@ constructor(
     }
 
     private fun retrieveOldFeedPosts(actualRecyclerViewPosition: Int) {
-        viewModelScope.launch {
-            firebaseRepository.retrieveOldFeedPosts()
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultData.Success -> {
-                            scrollToPosition = actualRecyclerViewPosition
-                            if (mutableListPosts != resultData.data!!.toMutableList()) {
-                                mutableListPosts = resultData.data.toMutableList()
-
-                                _feedState.value = FeedState.LoadOldPosts(
-                                    mutableListPosts,
-                                    actualRecyclerViewPosition
-                                )
-                            } else {
-                                Log.i(TAG, "They're the same sadly ${mutableListPosts.size} and ${resultData.data.size}")
-
-                                _feedState.value = FeedState.StopRequestOldPosts
+        Log.i(
+            "CheckingLifecycle",
+            "End of timeline is null when retrieve? = ${endOfTimeline.value}"
+        )
+        //Log.i("EndOfTimeline", "Checking if we can retrieve more posts ${endOfTimeline}")
+        Log.i(
+            "EndOfTimeline",
+            "Does mutablelist contains no_more_posts = ${mutableListPosts.value?.find { post -> post.post_id == "no_more_posts" }}"
+        )
+        if (!endOfTimeline.value!!) {
+            viewModelScope.launch {
+                firebaseRepository.retrieveOldFeedPosts()
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                sendOldFeedPosts(actualRecyclerViewPosition, resultData.data!!)
                             }
-
-                        }
-                        is ResultData.Error -> {
-                            _feedState.value = FeedState.Error(resultData.exception.message)
+                            is ResultData.Error -> {
+                                _feedState.value = FeedState.Error(resultData.exception.message)
+                            }
                         }
                     }
-                }
+            }
+        } else {
+            _feedState.value = FeedState.StopRequestOldPosts
         }
     }
 
-    private fun retrieveSavedLocalPosts() {
+    private fun sendOldFeedPosts(actualRecyclerViewPosition: Int, resultData: List<Post>) {
+        //SaveScroll Position
+
+        scrollToPosition = actualRecyclerViewPosition
+        saveEndOfTimeline(containsEndOfTimeline(resultData))
+        Log.i(TAG, "Old feed post check value now ${endOfTimeline.value}")
+        if (mutableListPosts != resultData.toMutableList()) {
+            val tempEndOfTimeline = containsEndOfTimeline(resultData)
+            //endOfTimeline = tempEndOfTimeline
+            Log.i("EndOfTimeline", "Contains endoftl? ${endOfTimeline}")
+
+            saveMutableListPosts(resultData.toMutableList())
+
+            _feedState.value = FeedState.LoadOldPosts(
+                mutableListPosts.value!!,
+                actualRecyclerViewPosition,
+                endOfTimeline.value!!
+            )
+        } else {
+            _feedState.value = FeedState.StopRequestOldPosts
+        }
+    }
+
+    private fun containsEndOfTimeline(resultListPosts: List<Post>): Boolean {
+        val findPost = resultListPosts.find { post -> post.post_id == "no_more_posts" }
+
+        return findPost != null
+    }
+
+//    private fun retrieveSavedLocalPosts() {
 //        viewModelScope.launch {
 //            firebaseRepository.retrieveSavedLocalPosts()
 //                .collect { resultData ->
@@ -117,10 +199,10 @@ constructor(
 //                    }
 //                }
 //        }
-    }
+//    }
 
     private fun goToPostDetails(positionAdapter: Int) {
-        val post = mutableListPosts[positionAdapter]
+        val post = mutableListPosts.value!![positionAdapter]
         _feedState.value = FeedState.GoToPostDetails(post)
     }
 

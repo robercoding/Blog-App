@@ -20,6 +20,7 @@ import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
+import org.joda.time.DateTime
 
 @AndroidEntryPoint
 class FeedFragment : Fragment(), RecyclerViewActionInterface {
@@ -32,6 +33,8 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
     private val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
+
+    private var onScrollListenerHelper :OnScrollListenerHelper? = null
 
 
     override fun onCreateView(
@@ -48,10 +51,14 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        postAdapter = PostAdapter(requireView(), resource, this)
-
         subscribeObservers()
         viewModel.setIntention(FeedFragmentEvent.RetrieveInitPosts)
+        postAdapter = PostAdapter(requireView(), resource, this)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
     }
 
     private fun subscribeObservers() {
@@ -61,12 +68,11 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun render(feedState: FeedState) {
-        Log.i("CheckOldPosts", "State = $feedState")
+        Log.i("States", "State = ${feedState}")
         when (feedState) {
             is FeedState.SetListPosts -> {
                 displayProgressBar(false)
                 stopSwipeRefresh()
-//                feed_no_more_posts.visibility = View.GONE
 
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
 
@@ -81,7 +87,9 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is FeedState.LoadOldPosts -> {
-                loadOldPosts(feedState.listFeedPosts, feedState.scrollToPosition)
+                loadOldPosts(feedState.listFeedPosts, feedState.scrollToPosition, feedState.endOfTimeline)
+                if(feedState.endOfTimeline)
+                    viewModel.setIntention(FeedFragmentEvent.StopRequestOldPosts)
             }
 
             is FeedState.StopRequestOldPosts -> {
@@ -90,8 +98,8 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                     "Sorry, there's no more posts from the people you follow",
                     Toast.LENGTH_SHORT
                 ).show()
+                onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = true
                 viewModel.setIntention(FeedFragmentEvent.Idle)
-//                feed_no_more_posts.visibility = View.VISIBLE
             }
 
             is FeedState.GoToPostDetails -> {
@@ -121,23 +129,23 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun setAdapterToRecyclerFeed(linearLayoutManager: LinearLayoutManager) {
-        val onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this)
+        onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this)
+//        onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = false
 
         recycler_feed.apply {
             layoutManager = linearLayoutManager
             adapter = postAdapter
-            addOnScrollListener(onScrollListenerHelper)
+            addOnScrollListener(onScrollListenerHelper!!)
             setHasFixedSize(true)
         }
     }
 
-    private fun loadOldPosts(listPosts: List<Post>, scrollToPosition: Int) {
+    private fun loadOldPosts(listPosts: List<Post>, scrollToPosition: Int, endOfTimeline: Boolean) {
         postAdapter.setPosts(listPosts.toMutableList())
-        val onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this)
+        onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = endOfTimeline
 
         recycler_feed.apply {
             adapter = postAdapter
-            addOnScrollListener(onScrollListenerHelper)
             scrollToPosition(scrollToPosition)
         }
     }
@@ -188,6 +196,8 @@ sealed class FeedFragmentEvent {
     data class RetrieveNewFeedPosts(val actualRecyclerViewPosition: Int) : FeedFragmentEvent()
     data class RetrieveOldFeedPosts(val actualRecyclerViewPosition: Int) : FeedFragmentEvent()
     object RetrieveSavedLocalPosts : FeedFragmentEvent()
+
+    object StopRequestOldPosts: FeedFragmentEvent()
 
     data class GoToPostDetails(val positionAdapter: Int) : FeedFragmentEvent()
 
