@@ -36,7 +36,9 @@ constructor(
     //suspend fun checkIfUserAlreadyLoggedIn(): Boolean = firebaseAuthManager.checkIfUserAlreadyLoggedIn()
 
     //Feed
-    suspend fun retrieveInitPosts() : Flow<ResultData<List<Post>>> = firebaseFeedManager.getInitFeedPosts()
+    suspend fun retrieveInitFeedPosts() : Flow<ResultData<List<Post>>> = firebaseFeedManager.getInitFeedPosts()
+
+    suspend fun retrieveNewFeedPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getNewFeedPosts()
 
     suspend fun retrieveOldFeedPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getOldFeedPosts()
 

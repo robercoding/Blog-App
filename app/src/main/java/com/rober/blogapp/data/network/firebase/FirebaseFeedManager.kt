@@ -22,7 +22,7 @@ constructor
 
     private var endOfTimeline = false
 
-    private var dateInit: Date? = null
+    private var dateToRetrieveNewerPosts: Date? = null
 
     private var savedFeedListPosts: MutableList<Post> = mutableListOf()
     private var restDays = 0
@@ -41,7 +41,7 @@ constructor
             Log.i(TAG, "We sending database ")
             emit(ResultData.Success(savedFeedListPosts))
         } else {
-            dateInit = DateTime.now().toDate()
+            dateToRetrieveNewerPosts = DateTime.now().toDate()
 
             var dateLessThanInit = DateTime.now().minusDays(restDays).toDate()
             var dateGreaterThanInit = DateTime.now().minusDays(restDays + 1).toDate()
@@ -112,6 +112,56 @@ constructor
             .get()
             .await()
             .toObjects(Post::class.java)
+    }
+
+    suspend fun getNewFeedPosts(): Flow<ResultData<List<Post>>> = flow {
+        emit(ResultData.Loading)
+
+        try{
+            if(savedListFollowing.isNullOrEmpty())
+                savedListFollowing = getUserFollowings().toMutableList()
+
+            val newListPosts = mutableListOf<Post>()
+
+            for(following in savedListFollowing!!){
+                val listFollowingPosts = getNewerPostsFromId(following.following_id)
+                for(followingPost in listFollowingPosts)
+                    newListPosts.add(followingPost)
+            }
+
+            val listUserPosts = getNewerPostsFromId(firebaseSource.username)
+            for(userPost in listUserPosts){
+                newListPosts.add(userPost)
+            }
+
+            dateToRetrieveNewerPosts = DateTime.now().toDate()
+
+
+            if(newListPosts.size > 0){
+                newListPosts.sortedByDescending {  post -> post.created_at}
+                for(post in newListPosts)
+                    savedFeedListPosts.add(0, post)
+
+                //Add the newest posts the first and the next posts follow the queue
+                emit(ResultData.Success(savedFeedListPosts))
+            }else{
+                emit(ResultData.Success(savedFeedListPosts))
+            }
+
+        }catch (e: Exception){
+            emit(ResultData.Error(e))
+        }
+    }
+
+    private suspend fun getNewerPostsFromId(followingId: String): List<Post>{
+        return if(dateToRetrieveNewerPosts != null)
+            firebaseSource.db.collection("posts/${followingId}/user_posts")
+                .whereGreaterThan("created_at", dateToRetrieveNewerPosts!!)
+                .get()
+                .await()
+                .toObjects(Post::class.java)
+        else
+            emptyList()
     }
 
     suspend fun getOldFeedPosts(): Flow<ResultData<List<Post>>> = flow {

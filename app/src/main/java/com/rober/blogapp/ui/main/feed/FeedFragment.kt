@@ -8,14 +8,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.ui.MainActivity
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +37,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     private val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
 
-    private var onScrollListenerHelper :OnScrollListenerHelper? = null
+    private var onScrollListenerHelper: OnScrollListenerHelper? = null
 
 
     override fun onCreateView(
@@ -44,9 +47,12 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         return inflater.inflate(R.layout.fragment_feed, container, false)
     }
 
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
+        setupView()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -83,20 +89,41 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is FeedState.LoadNewPosts -> {
+                stopSwipeRefresh()
 
+                postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
+
+                recycler_feed.apply {
+                    adapter = postAdapter
+                    scrollToPosition(feedState.scrollToPosition)
+                }
+                mHasPullRefresh = false
+                viewModel.setIntention(FeedFragmentEvent.Idle)
+            }
+
+            is FeedState.StopRequestNewPosts -> {
+                mHasPullRefresh = false
+
+                Toast.makeText(requireContext(), "${feedState.messageUtil.message}", Toast.LENGTH_SHORT).show()
+                stopSwipeRefresh()
+                viewModel.setIntention(FeedFragmentEvent.Idle)
             }
 
             is FeedState.LoadOldPosts -> {
                 displayProgressBarMorePosts(false)
-                loadOldPosts(feedState.listFeedPosts, feedState.scrollToPosition, feedState.endOfTimeline)
-                if(feedState.endOfTimeline)
+                loadOldPosts(
+                    feedState.listFeedPosts,
+                    feedState.scrollToPosition,
+                    feedState.endOfTimeline
+                )
+                if (feedState.endOfTimeline)
                     viewModel.setIntention(FeedFragmentEvent.StopRequestOldPosts)
             }
 
             is FeedState.StopRequestOldPosts -> {
                 Toast.makeText(
                     requireContext(),
-                    "Sorry, there's no more posts from the people you follow",
+                    "Sorry, there aren't more posts from the people you follow",
                     Toast.LENGTH_SHORT
                 ).show()
                 onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = true
@@ -125,8 +152,9 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun displayProgressBarInitialPosts(isDisplayed: Boolean) {
-        progressbar.visibility = if (isDisplayed) View.VISIBLE else View.GONE
+        feed_progress_bar_init.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
+
     private fun displayProgressBarMorePosts(isDisplayed: Boolean) {
         feed_progress_bar_more_posts.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
@@ -163,9 +191,17 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         }
 
         swipe_refresh_layout.setOnRefreshListener {
-            mHasPullRefresh = true
-            //viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
+            if (!mHasPullRefresh) {
+                mHasPullRefresh = true
+                viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
+            }
         }
+    }
+
+    private fun setupView(){
+        swipe_refresh_layout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(requireContext(), R.color.background))
+        swipe_refresh_layout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
+
     }
 
     private fun goToPostAdd() {
@@ -200,11 +236,11 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
 sealed class FeedFragmentEvent {
     object RetrieveInitPosts : FeedFragmentEvent()
-    data class RetrieveNewFeedPosts(val actualRecyclerViewPosition: Int) : FeedFragmentEvent()
+    object RetrieveNewFeedPosts : FeedFragmentEvent()
     data class RetrieveOldFeedPosts(val actualRecyclerViewPosition: Int) : FeedFragmentEvent()
     object RetrieveSavedLocalPosts : FeedFragmentEvent()
 
-    object StopRequestOldPosts: FeedFragmentEvent()
+    object StopRequestOldPosts : FeedFragmentEvent()
 
     data class GoToPostDetails(val positionAdapter: Int) : FeedFragmentEvent()
 

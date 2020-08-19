@@ -8,6 +8,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 //import com.rober.blogapp.data.room.repository.RoomRepository
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.util.MessageUtil
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
@@ -37,6 +38,7 @@ constructor(
                 retrieveOldFeedPosts(event.actualRecyclerViewPosition)
             }
             is FeedFragmentEvent.RetrieveNewFeedPosts -> {
+                retrieveNewFeedPosts()
             }
             is FeedFragmentEvent.GoToPostDetails -> {
                 goToPostDetails(event.positionAdapter)
@@ -59,7 +61,7 @@ constructor(
         val endOfTimeline = firebaseRepository.getEndOfTimeline()
 
         viewModelScope.launch {
-            firebaseRepository.retrieveInitPosts()
+            firebaseRepository.retrieveInitFeedPosts()
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
@@ -75,6 +77,40 @@ constructor(
                     }
                 }
         }
+    }
+
+    private fun retrieveNewFeedPosts(){
+        viewModelScope.launch {
+            firebaseRepository.retrieveNewFeedPosts()
+                .collect { resultData ->
+                    when(resultData){
+                        is ResultData.Success ->{
+                            if(resultData.data!! == mutableListPosts){
+                                _feedState.value = FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))
+                            } else{
+                                sendNewFeedPosts(resultData.data!!)
+                            }
+                        }
+                        is ResultData.Error -> {
+                            _feedState.value = FeedState.Error(resultData.exception.message!!)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun sendNewFeedPosts(newListPosts: List<Post>){
+        val firstPostBeforeLoadingNewPosts = mutableListPosts[0]
+
+        mutableListPosts = newListPosts.toMutableList() //Is already ordered
+
+        val positionOfTheFirstPost = mutableListPosts.indexOf(firstPostBeforeLoadingNewPosts)
+        //Where's user now?
+        val endOfTimeLine = firebaseRepository.getEndOfTimeline()
+        if(endOfTimeLine)
+            addEndOfTimelineToMutableListPosts()
+
+        _feedState.value = FeedState.LoadNewPosts(mutableListPosts, positionOfTheFirstPost-1)
     }
 
     private fun retrieveOldFeedPosts(actualRecyclerViewPosition: Int) {
