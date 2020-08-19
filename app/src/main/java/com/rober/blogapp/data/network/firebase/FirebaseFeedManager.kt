@@ -20,19 +20,15 @@ constructor
 ) {
     private val TAG = "FirebaseFeedManager"
 
-//    private var dateGreaterThan = DateTime.now().minus(4).toDate()
-//    private var dateLessThan = DateTime.now().toDate()
-    //var instant = Instant()
-    //private var format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    //private var date = format.parse()
+    private var endOfTimeline = false
 
     private var dateInit: Date? = null
 
     private var savedFeedListPosts: MutableList<Post> = mutableListOf()
     private var restDays = 0
     private var currentIntervalHoursIndex = 0
-    private var listIntervalFourHours = listOf(0, 4, 8, 12, 16, 20, 24)
-    private var listIntervalEightHours = listOf(0, 8, 16, 24)
+//    private var listIntervalFourHours = listOf(0, 4, 8, 12, 16, 20, 24) //for people who has more followings
+    private var listIntervalEightHours = listOf(0, 8, 16, 24) //For people with less following
     private var dateGreaterThan: Date? = null
     private var dateLessThan: Date? = null
 
@@ -128,6 +124,9 @@ constructor
         dateGreaterThan = DateTime.now().minusDays(restDays)
             .minusHours(listIntervalEightHours[currentIntervalHoursIndex + 1]).toDate()
 
+//        Log.i("CheckDate", "Date Less than: ${dateLessThan}")
+//        Log.i("CheckDate", "Date Greater than: ${dateGreaterThan}")
+
 
         //Get Followings
         if (savedListFollowing.isNullOrEmpty()) {
@@ -140,14 +139,13 @@ constructor
 
         while (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost <= 15) {
 
-            Log.i("OldPosts", "Date Less than: ${dateLessThan}")
-            Log.i("OldPosts", "Date Greater than: ${dateGreaterThan}")
+
             //Get following posts
             for (following in savedListFollowing!!) {
                 val listFollowingPosts = getFollowingPostsByDate(following.following_id)
                 newListUsersPosts.addAll(listFollowingPosts)
             }
-//            Log.i("CheckOldPosts", "We got old ${newListUsersPosts.size}")
+
             //Get User Logged In posts
             val listUserLoggedInPosts = getFollowingPostsByDate(firebaseSource.username)
 
@@ -160,11 +158,7 @@ constructor
                 restDays += 1
             }
 
-
-            Log.i("TestDatesInTries", "Before size = ${newListUsersPosts.size}}")
-
             if (newListUsersPosts.size < 10 && triesRetrieveOldFeedPost < 15) {
-                Log.i("CheckOldPosts", "If: ${triesRetrieveOldFeedPost}")
                 triesRetrieveOldFeedPost += 1
 
                 if (triesRetrieveOldFeedPost >= 3 && newListUsersPosts.size < 5) {
@@ -178,7 +172,6 @@ constructor
                         "DAY BY DAY NOW: DateLess= ${dateLessThan.toString()} && DateGreater= ${dateGreaterThan.toString()}"
                     )
                 } else {
-
                     dateLessThan = DateTime.now().minusDays(restDays)
                         .minusHours(listIntervalEightHours[currentIntervalHoursIndex]).toDate()
 
@@ -202,13 +195,12 @@ constructor
                     newListUsersPosts.sortedByDescending { post -> post.created_at.time }
                         .toMutableList()
 
-                //
                 for (postOrdered in feedPostsOrdered)
                     savedFeedListPosts.add(postOrdered)
 
                 //Add end of timeline
                 if (feedPostsOrdered.size < 10) {
-                    savedFeedListPosts.add(Post(0, "no_more_posts", "", "", "", Date(), 0))
+                    endOfTimeline = true
                 }
 
                 emit(ResultData.Success(savedFeedListPosts))
@@ -235,4 +227,6 @@ constructor
 
         return listFollowing
     }
+
+    fun getEndOfTimeline(): Boolean = endOfTimeline
 }

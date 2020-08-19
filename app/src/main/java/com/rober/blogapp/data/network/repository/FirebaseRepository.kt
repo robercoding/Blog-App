@@ -40,6 +40,8 @@ constructor(
 
     suspend fun retrieveOldFeedPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getOldFeedPosts()
 
+    fun getEndOfTimeline(): Boolean = firebaseFeedManager.getEndOfTimeline()
+
     //suspend fun retrieveSavedLocalPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getSavedLocalPosts()
 
     //PostAdd

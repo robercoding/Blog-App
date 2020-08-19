@@ -71,7 +71,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         Log.i("States", "State = ${feedState}")
         when (feedState) {
             is FeedState.SetListPosts -> {
-                displayProgressBar(false)
+                displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
 
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
@@ -87,6 +87,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is FeedState.LoadOldPosts -> {
+                displayProgressBarMorePosts(false)
                 loadOldPosts(feedState.listFeedPosts, feedState.scrollToPosition, feedState.endOfTimeline)
                 if(feedState.endOfTimeline)
                     viewModel.setIntention(FeedFragmentEvent.StopRequestOldPosts)
@@ -107,7 +108,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is FeedState.Loading -> {
-                displayProgressBar(true)
+                displayProgressBarInitialPosts(true)
+            }
+            is FeedState.LoadingMorePosts -> {
+                displayProgressBarMorePosts(true)
             }
 
             is FeedState.Idle -> {
@@ -120,8 +124,11 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun displayProgressBar(isDisplayed: Boolean) {
+    private fun displayProgressBarInitialPosts(isDisplayed: Boolean) {
         progressbar.visibility = if (isDisplayed) View.VISIBLE else View.GONE
+    }
+    private fun displayProgressBarMorePosts(isDisplayed: Boolean) {
+        feed_progress_bar_more_posts.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
 
     private fun stopSwipeRefresh() {

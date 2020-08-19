@@ -128,6 +128,18 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
             viewModel.setIntention(SearchFragmentEvent.StopSearchUser)
         }
+
+        search_top_app_bar.setOnMenuItemClickListener {menuItem ->
+            when(menuItem.itemId){
+                R.id.icon_settings -> {
+                    findNavController().popBackStack()
+                    true
+                }
+
+                else -> true
+            }
+
+        }
     }
 
     private fun ReadySearchUser(){
@@ -194,6 +206,8 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         Log.i(TAG, "Resume")
         didUserJustEnterInFragment = true
     }
+
+
 }
 
 sealed class SearchFragmentEvent(){

@@ -11,6 +11,7 @@ sealed class FeedState {
     data class GoToPostDetails(val post: Post): FeedState()
 
     object Loading: FeedState()
+    object LoadingMorePosts: FeedState()
     data class Error(val message: String?): FeedState()
 
     object Idle: FeedState()

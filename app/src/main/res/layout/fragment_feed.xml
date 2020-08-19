@@ -37,6 +37,7 @@
                     android:foregroundGravity="center"
                     android:layout_marginStart="140dp"
                     android:backgroundTint="@color/blueTwitter"
+                    android:contentDescription="feed_user_profile"
                     />
 
             </com.google.android.material.appbar.MaterialToolbar>
@@ -81,6 +82,18 @@
             app:backgroundTint="@color/background"
             app:srcCompat="@drawable/ic_note_add_black_24dp_filled"
             app:tint="@color/blueTwitter"/>
+
+    <ProgressBar
+        android:id="@+id/feed_progress_bar_more_posts"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone"
+        />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
