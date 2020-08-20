@@ -34,15 +34,12 @@ class FirebaseAuthManager @Inject constructor(
 
     suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
         val user =  firebaseSource.getCurrentUser()
-        Log.i("User", "AuthManager = Getting currentUser")
-        Log.i("User", "AuthManager = Checking currentUser")
-        if(user!=null){
-            emit(if(user.isEmpty()) ResultData.Error(Exception("Sorry, user is empty"), null) else ResultData.Success(user))
-            Log.i("User", "AuthManager = NOT NULL")
-        }
-        else{
-            Log.i("User", "AuthManager = NULL")
+
+        if(user.isEmpty()) {
             firebaseSource.setCurrentUser()
+            emit(ResultData.Error(Exception("Sorry, user is empty"), null))
+        }else {
+            emit(ResultData.Success(user))
         }
     }
 
@@ -74,13 +71,12 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-        firebaseSource.setCurrentUser()
-        firebaseSource.setCurrentFollower()
-        firebaseSource.setCurrentFollowing()
 
-        if(loggedIn){
-            while (firebaseSource.username.equals("") || firebaseSource.followingList == null || firebaseSource.followerList == null){
-                kotlinx.coroutines.delay(500)
+        setCurrentUser()
+
+        if(loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null){
+            while (firebaseSource.username.equals("")){
+                kotlinx.coroutines.delay(200)
             }
         }
 

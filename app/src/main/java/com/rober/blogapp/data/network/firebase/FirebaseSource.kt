@@ -21,8 +21,14 @@ class FirebaseSource {
     var userAuth: FirebaseUser? = null
     var user: User? = null
     var username  = ""
-    var followingList: List<Following>? = null
-    var followerList: List<Follower>? = null
+    var followingList: MutableList<Following>? = null
+    var followerList: MutableList<Follower>? = null
+
+    val listNewFollowingsUsername = mutableListOf<String>()
+    val listNewFollowersUsername = mutableListOf<String>()
+
+    val listNewUnfollowingsUsername = mutableListOf<String>()
+    val listNewUnfollowersUsername = mutableListOf<String>()
 
 
     suspend fun setCurrentUser(){
@@ -88,10 +94,10 @@ class FirebaseSource {
     }
 
     fun getCurrentUser(): User{
-        if(user != null)
-            return user!!
+        return if(user != null)
+            user!!
         else
-            return User()
+            User()
     }
 
     fun checkUser(): Boolean{

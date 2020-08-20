@@ -64,7 +64,6 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-
     }
 
     private fun subscribeObservers() {
