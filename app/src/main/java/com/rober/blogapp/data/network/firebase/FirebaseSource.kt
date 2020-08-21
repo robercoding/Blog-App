@@ -24,11 +24,11 @@ class FirebaseSource {
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
 
-    val listNewFollowingsUsername = mutableListOf<String>()
-    val listNewFollowersUsername = mutableListOf<String>()
+    val listNewFollowingsUsername = HashSet<String>()
+    val listNewUnfollowingsUsername = HashSet<String>()
 
-    val listNewUnfollowingsUsername = mutableListOf<String>()
-    val listNewUnfollowersUsername = mutableListOf<String>()
+    val listNewFollowersUsername = HashSet<String>()
+    val listNewUnfollowersUsername = HashSet<String>()
 
 
     suspend fun setCurrentUser(){

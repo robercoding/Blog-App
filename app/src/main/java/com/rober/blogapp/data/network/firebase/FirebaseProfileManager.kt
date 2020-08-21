@@ -151,13 +151,21 @@ class FirebaseProfileManager @Inject constructor(
         emit(ResultData.Success(hasUserBeenFollowed))
     }
 
-    private fun checkIfNewUnfollowingHasBeenFollowedBefore(followingId: String): Boolean{
-        return firebaseSource.listNewFollowingsUsername.contains(followingId)
+    private fun checkIfNewUnfollowingHasBeenFollowedBefore(followingUsername: String): Boolean{
+        return firebaseSource.listNewFollowingsUsername.contains(followingUsername)
     }
 
-    private fun removeNewUnfollowingFromFollowing(followingId: String){
-        firebaseSource.listNewFollowingsUsername.remove(followingId)
+    private fun removeNewUnfollowingFromFollowing(followingUsername: String){
+        firebaseSource.listNewFollowingsUsername.remove(followingUsername)
     }
+
+//    private fun checkIfNewUnfollowingHasBeenUnfollowedBefore(followingUsername: String): Boolean{
+//        return firebaseSource.listNewUnfollowingsUsername.contains(followingUsername)
+//    }
+//
+//    private fun removeNewUnfollowingFromUnfollowing(followingUsername: String){
+//        firebaseSource.listNewUnfollowingsUsername.remove(followingUsername)
+//    }
 
     suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = flow {
         var hasUserBeenUnfollowed = false
@@ -170,9 +178,14 @@ class FirebaseProfileManager @Inject constructor(
                 .delete()
                 .addOnSuccessListener {
                     hasUserBeenUnfollowed = true
-                    firebaseSource.listNewUnfollowingsUsername.add(user.username)
-                    if(checkIfNewFollowingHasBeenUnfollowedBefore(user.username))
+//                    if(checkIfNewUnfollowingHasBeenUnfollowedBefore(user.username))
+//                        removeNewUnfollowingFromUnfollowing(user.username)
+
+                    if(checkIfNewUnfollowingHasBeenFollowedBefore(user.username))
                         removeNewUnfollowingFromFollowing(user.username)
+
+                    firebaseSource.listNewUnfollowingsUsername.add(user.username)
+
                 }
                 .addOnFailureListener {
                     hasUserBeenUnfollowed = false
