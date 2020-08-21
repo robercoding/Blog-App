@@ -105,6 +105,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
                 setViewForOtherUser()
 
                 setOtherUserProfile(user!!)
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts(user.username))
             }
 
             is ProfileDetailState.SetOtherUserPosts -> {

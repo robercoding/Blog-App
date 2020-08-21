@@ -3,25 +3,37 @@ package com.rober.blogapp.data.network.firebase
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.rober.blogapp.data.ResultData
+import com.rober.blogapp.data.network.util.FirebasePath
+import com.rober.blogapp.entity.CountsPosts
 import com.rober.blogapp.entity.Following
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import org.joda.time.DateTime
+import java.util.*
 import javax.inject.Inject
 import kotlin.Exception
+import kotlin.collections.HashMap
 
 class FirebaseProfileManager @Inject constructor(
-    private val firebaseSource: FirebaseSource
+    private val firebaseSource: FirebaseSource,
+    private val firebasePath: FirebasePath
 ) {
     private val TAG = "FirebaseProfileManager"
 
     private var userPaginationLimit = 0
     private var savedUserListPost: MutableList<Post> = mutableListOf()
+    private var savedUserHashMapPost = hashMapOf<String, MutableList<Post>>()
 
     private var hashMapCurrentUserFollowsOtherUser = hashMapOf<String, Boolean>()
     private var hashMapOthersUsersFollowings = hashMapOf<String, MutableList<Following>>()
+
+    private var dateToRetrieveNewerPosts : Date? = null
+    private var dateLessThan : Date? = null
+    private var dateGreaterThan : Date? = null
+    private var minusDays = 0
 
     suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
         try {
@@ -43,7 +55,6 @@ class FirebaseProfileManager @Inject constructor(
         } catch (e: Exception) {
             emit(ResultData.Error(e, null))
         }
-
     }
 
     private suspend fun getProfileUserPostsLimit(): List<Post> {
@@ -61,6 +72,92 @@ class FirebaseProfileManager @Inject constructor(
         savedUserListPost = userPosts
 
         return savedUserListPost
+    }
+
+    suspend fun retrieveProfileOtherUserPosts(userID : String): Flow<ResultData<List<Post>>> = flow {
+
+        //get the total number of posts that user has
+        val countPosts = getCountPostsFromOtherUser(userID)
+
+        var listPostsOtherUser = mutableListOf<Post>()
+
+        if(listPostsOtherUser.size <= 20){
+            listPostsOtherUser = getProfilePosts(userID).toMutableList()
+        }else {
+            while (listPostsOtherUser.size < 5 && listPostsOtherUser.size < countPosts) {
+                dateLessThan = DateTime.now().minusDays(minusDays).toDate()
+                dateGreaterThan = DateTime.now().minusDays(minusDays - 1).toDate()
+
+
+                val listPostsOtherUserByDay =
+                    getProfilePostsByDateLessAndGreater(userID, dateLessThan!!, dateGreaterThan!!)
+
+                for (post in listPostsOtherUserByDay)
+                    listPostsOtherUser.add(post)
+
+                minusDays.minus(1)
+            }
+        }
+
+        var tempMutableListPostsFromHashMap = mutableListOf<Post>()
+
+        if(savedUserHashMapPost.containsKey(userID)){
+            tempMutableListPostsFromHashMap = savedUserHashMapPost[userID]!!
+
+            for(post in listPostsOtherUser) {
+                tempMutableListPostsFromHashMap.add(post)
+            }
+        }else{
+            tempMutableListPostsFromHashMap = listPostsOtherUser
+        }
+
+        tempMutableListPostsFromHashMap.sortByDescending { post -> post.created_at }
+
+        savedUserHashMapPost[userID] = tempMutableListPostsFromHashMap
+
+        emit(ResultData.Success(tempMutableListPostsFromHashMap))
+    }
+
+    private suspend fun getProfilePostsByDateLessAndGreater(userID: String, dateLessThan: Date, dateGreaterThan: Date): List<Post> {
+        var listOtherUserPosts =
+            firebaseSource.db
+                .collection("posts")
+                .document(userID)
+                .collection(firebasePath.user_posts)
+                .whereLessThan("created_at", dateLessThan)
+                .whereGreaterThan("created_at", dateGreaterThan)
+                .get()
+                .await()
+                .toObjects(Post::class.java)
+
+        return listOtherUserPosts
+    }
+
+    private suspend fun getProfilePosts(userID: String) : List<Post>{
+        var listOtherUserPosts =
+            firebaseSource.db
+                .collection("posts")
+                .document(userID)
+                .collection(firebasePath.user_posts)
+                .get()
+                .await()
+                .toObjects(Post::class.java)
+
+        return listOtherUserPosts
+    }
+
+    private suspend fun getCountPostsFromOtherUser(userID: String): Int {
+        val countPostsDocRef = firebaseSource.db.collection("posts").document(userID).collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+
+        val countPosts = countPostsDocRef
+            .get()
+            .await()
+            .toObject(CountsPosts::class.java)
+
+        if(countPosts != null)
+            return countPosts.count
+        else
+            return 0
     }
 
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = flow {
@@ -273,5 +370,4 @@ class FirebaseProfileManager @Inject constructor(
             Log.i("CheckUpdate", "Exception")
         }
     }
-
 }

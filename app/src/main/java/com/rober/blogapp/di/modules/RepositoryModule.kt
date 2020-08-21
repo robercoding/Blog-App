@@ -48,7 +48,7 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseProfileManager(firebaseSource: FirebaseSource): FirebaseProfileManager = FirebaseProfileManager(firebaseSource)
+    fun provideFirebaseProfileManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseProfileManager = FirebaseProfileManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides

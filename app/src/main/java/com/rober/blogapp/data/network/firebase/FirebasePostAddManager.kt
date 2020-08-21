@@ -1,5 +1,6 @@
 package com.rober.blogapp.data.network.firebase
 
+import com.google.firebase.firestore.FieldValue
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.Post
@@ -18,15 +19,15 @@ constructor(
 
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = flow {
         emit(ResultData.Loading)
-        val path = firebaseSource.db.collection(firebasePath.posts).document(firebaseSource.username).collection(firebasePath.user_posts).document()
+        val newPostPath = firebaseSource.db.collection(firebasePath.posts).document(firebaseSource.username).collection(firebasePath.user_posts).document()
         var success = false
         var exception: Exception? = Exception("Sorry, we couldn't upload the post, try again later")
 
         post.user_creator_id = firebaseSource.username
-        post.post_id = path.id
+        post.post_id = newPostPath.id
 
         try{
-            path.set(post)
+            newPostPath.set(post)
                 .addOnSuccessListener {
                     success = true
                 }
@@ -38,10 +39,36 @@ constructor(
             exception = e
         }
 
-        if(!success){
-            emit(ResultData.Error<Unit>(exception!!))
+        if(success){
+            val successAddPostCount = addCountPost()
+
+            if(successAddPostCount){
+                emit(ResultData.Success<Unit>())
+            }
+            else{
+                newPostPath.delete().await()
+                emit(ResultData.Error<Unit>(Exception("Sadly we couldn't add the count post!")))
+            }
         }else{
-            emit(ResultData.Success<Unit>())
+            emit(ResultData.Error<Unit>(exception!!))
+
         }
+    }
+
+    private suspend fun addCountPost(): Boolean{
+        val collRef = firebaseSource.db.collection(firebasePath.posts).document(firebaseSource.username).collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+
+        var success = false
+        collRef
+            .update("countPosts", FieldValue.increment(1))
+            .addOnSuccessListener {
+                success = true
+            }
+            .addOnFailureListener {
+                success = false
+            }
+            .await()
+
+        return success
     }
 }

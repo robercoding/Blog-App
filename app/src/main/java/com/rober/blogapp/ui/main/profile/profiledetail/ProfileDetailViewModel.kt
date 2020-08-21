@@ -42,7 +42,11 @@ class ProfileDetailViewModel
             }
 
             is ProfileDetailFragmentEvent.LoadUserPosts -> {
-                getCurrentUserPosts()
+                Log.i("RequestPosts", "RequestsPosts Before choice")
+                if(event.name.isNullOrBlank())
+                    getCurrentUserPosts()
+                else
+                    getOtherUserPosts()
             }
 
             is ProfileDetailFragmentEvent.Follow -> {
@@ -143,6 +147,26 @@ class ProfileDetailViewModel
                         is ResultData.Error -> {
                             _profileDetailState.value =
                                 ProfileDetailState.Error(resultData.exception)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun getOtherUserPosts(){
+        Log.i("RequestPosts", "RequestsPosts from otherUser")
+        viewModelScope.launch {
+            firebaseRepository.retrieveProfileOtherUserPosts(user?.username!!)
+                .collect {resultData ->
+                    Log.i("RequestPosts", "Result data is $resultData")
+                    when(resultData){
+                        is ResultData.Success -> {
+                            Log.i("RequestPosts", "Result data is Success")
+
+                            _profileDetailState.value = ProfileDetailState.SetOtherUserPosts(resultData.data!!)
+                        }
+                        is ResultData.Error -> {
+                            _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
                         }
                     }
                 }
