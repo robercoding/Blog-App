@@ -40,8 +40,11 @@ constructor(
             is FeedFragmentEvent.RetrieveNewFeedPosts -> {
                 retrieveNewFeedPosts()
             }
-            is FeedFragmentEvent.GoToPostDetails -> {
+            is FeedFragmentEvent.GoToPostDetailsFragment -> {
                 goToPostDetails(event.positionAdapter)
+            }
+            is FeedFragmentEvent.GoToProfileDetailsFragment -> {
+                goToProfileDetailsFragment(event.positionAdapter)
             }
             is FeedFragmentEvent.RetrieveSavedLocalPosts -> {
 //                retrieveSavedLocalPosts()
@@ -167,6 +170,11 @@ constructor(
 
     private fun goToPostDetails(positionAdapter: Int) {
         val post = mutableListPosts[positionAdapter]
-        _feedState.value = FeedState.GoToPostDetails(post)
+        _feedState.value = FeedState.GoToPostDetailsFragment(post)
+    }
+
+    private fun goToProfileDetailsFragment(positionAdapter: Int){
+        val user_id = mutableListPosts[positionAdapter].user_creator_id
+        _feedState.value = FeedState.GoToProfileDetailsFragment(user_id)
     }
 }

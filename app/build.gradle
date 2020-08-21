@@ -128,10 +128,6 @@ dependencies {
     //Round image
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
-    //Round image v2
-    implementation 'com.makeramen:roundedimageview:2.3.0'
-
-
     //MotionLayout
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
 
@@ -141,6 +137,7 @@ dependencies {
     //Saved State
     implementation 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.0-alpha06'
 
-    //Swiperefreshlayout for recycler feed
-//    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    //Glide
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 }

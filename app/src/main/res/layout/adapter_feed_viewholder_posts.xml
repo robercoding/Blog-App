@@ -78,7 +78,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:visibility="gone">
-        <com.makeramen.roundedimageview.RoundedImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="5dp"
             android:layout_height="5dp"
             android:layout_marginTop="15dp"

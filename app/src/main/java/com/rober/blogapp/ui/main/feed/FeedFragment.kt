@@ -48,7 +48,6 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     }
 
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
@@ -103,7 +102,11 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             is FeedState.StopRequestNewPosts -> {
                 mHasPullRefresh = false
 
-                Toast.makeText(requireContext(), "${feedState.messageUtil.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "${feedState.messageUtil.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 stopSwipeRefresh()
                 viewModel.setIntention(FeedFragmentEvent.Idle)
             }
@@ -129,8 +132,12 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                 viewModel.setIntention(FeedFragmentEvent.Idle)
             }
 
-            is FeedState.GoToPostDetails -> {
-                goToPostDetails(feedState.post)
+            is FeedState.GoToPostDetailsFragment -> {
+                goToPostDetailsFragment(feedState.post)
+            }
+
+            is FeedState.GoToProfileDetailsFragment -> {
+                goToProfileDetailsFragment(feedState.user_id)
             }
 
             is FeedState.Loading -> {
@@ -197,9 +204,19 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun setupView(){
-        swipe_refresh_layout.setProgressBackgroundColorSchemeColor(ContextCompat.getColor(requireContext(), R.color.background))
-        swipe_refresh_layout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
+    private fun setupView() {
+        swipe_refresh_layout.setProgressBackgroundColorSchemeColor(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.background
+            )
+        )
+        swipe_refresh_layout.setColorSchemeColors(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.blueTwitter
+            )
+        )
 
     }
 
@@ -210,10 +227,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
     override fun clickListenerOnPost(positionAdapter: Int) {
         //val post = mutableListPosts[positionAdapter]
-        viewModel.setIntention(FeedFragmentEvent.GoToPostDetails(positionAdapter))
+        viewModel.setIntention(FeedFragmentEvent.GoToPostDetailsFragment(positionAdapter))
     }
 
-    private fun goToPostDetails(post: Post) {
+    private fun goToPostDetailsFragment(post: Post) {
         val bundle = bundleOf("post" to post)
         val navController = findNavController()
         navController.navigate(R.id.postDetailFragment, bundle)
@@ -221,11 +238,13 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     override fun clickListenerOnUser(positionAdapter: Int) {
-        //val user_id = mutableListPosts[positionAdapter].user_creator_id
+        viewModel.setIntention(FeedFragmentEvent.GoToProfileDetailsFragment(positionAdapter))
+    }
 
-//        val navController = findNavController()
-//        val bundle_user_id = bundleOf("user_id" to user_id)
-//        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
+    private fun goToProfileDetailsFragment(user_id: String) {
+        val navController = findNavController()
+        val bundle_user_id = bundleOf("user_id" to user_id)
+        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
@@ -241,7 +260,8 @@ sealed class FeedFragmentEvent {
 
     object StopRequestOldPosts : FeedFragmentEvent()
 
-    data class GoToPostDetails(val positionAdapter: Int) : FeedFragmentEvent()
+    data class GoToPostDetailsFragment(val positionAdapter: Int) : FeedFragmentEvent()
+    data class GoToProfileDetailsFragment(val positionAdapter: Int) : FeedFragmentEvent()
 
     object Idle : FeedFragmentEvent()
 }

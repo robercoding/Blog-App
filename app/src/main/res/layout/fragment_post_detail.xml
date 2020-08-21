@@ -24,7 +24,7 @@
             app:navigationIcon="@drawable/ic_arrow_back_black_24dp"/>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/post_detail_image_profile"

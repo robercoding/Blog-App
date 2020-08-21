@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.makeramen.roundedimageview.RoundedImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/adapter_search_profile_image"
             android:layout_width="50dp"
             android:layout_height="50dp"

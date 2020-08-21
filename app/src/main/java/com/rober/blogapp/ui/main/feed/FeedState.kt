@@ -10,7 +10,8 @@ sealed class FeedState {
     object StopRequestOldPosts: FeedState()
     data class StopRequestNewPosts(val messageUtil: MessageUtil): FeedState()
 
-    data class GoToPostDetails(val post: Post): FeedState()
+    data class GoToPostDetailsFragment(val post: Post): FeedState()
+    data class GoToProfileDetailsFragment(val user_id: String): FeedState()
 
     object Loading: FeedState()
     object LoadingMorePosts: FeedState()

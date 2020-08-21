@@ -23,7 +23,7 @@
                 android:layout_height="match_parent"
                 app:contentInsetStart="0dp">
 
-                <com.makeramen.roundedimageview.RoundedImageView
+                <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/feed_toolbar_image_profile"
                     android:layout_width="40dp"
                     android:layout_height="40dp"

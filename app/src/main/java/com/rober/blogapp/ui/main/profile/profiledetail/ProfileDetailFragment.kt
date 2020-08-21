@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
@@ -31,8 +32,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
-
-    private var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +97,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             }
 
             is ProfileDetailState.SetOtherUserProfile -> {
-                user = profileDetailState.user
+                val user = profileDetailState.user
 
                 displayBottomNavigation(false)
                 showViewMotionLayout(true)
@@ -124,13 +123,19 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             }
 
             is ProfileDetailState.Followed -> {
-                Toast.makeText(requireContext(), "Now you're following ${user?.username}", Toast.LENGTH_SHORT).show()
+                val follower = profileDetailState.user.follower
+                Toast.makeText(requireContext(), "Now you're following ${profileDetailState.user.username}", Toast.LENGTH_SHORT).show()
                 setButtonViewForOtherUser(true)
+                Log.i("UserFollower", "Get ${follower}")
+                setFollower(follower)
             }
 
             is ProfileDetailState.Unfollowed -> {
-                Toast.makeText(requireContext(), "You stopped following ${user?.username}", Toast.LENGTH_SHORT).show()
+                val follower = profileDetailState.user.follower
+                Log.i("UserFollower", "Get ${follower}")
+                Toast.makeText(requireContext(), "You stopped following ${profileDetailState.user.username}", Toast.LENGTH_SHORT).show()
                 setButtonViewForOtherUser(false)
+                setFollower(follower)
             }
 
             is ProfileDetailState.Error -> {
@@ -155,11 +160,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
-        uid_followers.text = "${user.follower} Follower"
         uid_following.text = "${user.following} Following"
 
-        if(user.follower > 1)
-            uid_followers.append("s")
+        Glide.with(requireView())
+            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .into(uid_image)
+
+        setFollower(user.follower)
     }
 
     private fun setViewForCurrentUser(){
@@ -178,10 +185,18 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
-        uid_followers.text = "${user.follower} Follower"
         uid_following.text = "${user.following} Following"
+        Glide.with(requireView())
+            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .into(uid_image)
 
-        if(user.follower > 1)
+        setFollower(user.follower)
+    }
+
+    private fun setFollower(follower: Int){
+        uid_followers.text = "${follower} Follower"
+
+        if(follower > 1)
             uid_followers.append("s")
     }
 
@@ -204,13 +219,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         if(currentUserFollowsOtherUser){
             profile_detail_button_follow.apply {
                 isSelected = true
-
                 setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
                 text = "Following"
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
                 text= "Following"
             }
+
         }else{
             profile_detail_button_follow.apply {
                 isSelected = false
@@ -249,14 +264,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             if(it.isSelected){
                 Log.i(TAG, "WE ARE GOING TO UNFOLLOW")
                 it.isSelected = false
-                user?.let {user ->
-                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow(user))
-                }
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
+
             }else{
                 it.isSelected = true
-                user?.let { user ->
-                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow(user))
-                }
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
             }
         }
     }
@@ -294,8 +306,8 @@ sealed class ProfileDetailFragmentEvent{
     data class LoadUserDetails(val name: String? = null): ProfileDetailFragmentEvent()
     data class LoadUserPosts(val name: String? = null): ProfileDetailFragmentEvent()
 
-    data class Unfollow(val user: User): ProfileDetailFragmentEvent()
-    data class Follow(val user: User): ProfileDetailFragmentEvent()
+    object Unfollow: ProfileDetailFragmentEvent()
+    object Follow: ProfileDetailFragmentEvent()
 
     object Idle : ProfileDetailFragmentEvent()
 }
