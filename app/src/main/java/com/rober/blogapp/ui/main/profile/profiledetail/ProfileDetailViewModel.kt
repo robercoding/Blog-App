@@ -204,10 +204,10 @@ class ProfileDetailViewModel
                                 Log.i("UserFollower", "After Plus ${user?.follower}")
                                 _profileDetailState.value = ProfileDetailState.Followed(user!!)
                             } else
-                                _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry, we couldn't follow the user, try again later"))
+                                _profileDetailState.value = ProfileDetailState.FollowError
                         }
                         is ResultData.Error -> {
-                            _profileDetailState.value = ProfileDetailState.Error(resultData.exception)
+                            _profileDetailState.value = ProfileDetailState.FollowError
                         }
                     }
                 }
@@ -229,13 +229,13 @@ class ProfileDetailViewModel
 
                                 _profileDetailState.value = ProfileDetailState.Unfollowed(user!!)
                             }else{
-                                _profileDetailState.value =
-                                    ProfileDetailState.Error(Exception("Sorry we couldn't unfollow the user, try again later"))
+                                _profileDetailState.value = ProfileDetailState.UnfollowError
+
                             }
                         }
                         is ResultData.Error -> {
                             _profileDetailState.value =
-                                ProfileDetailState.Error(resultData.exception)
+                                ProfileDetailState.UnfollowError
                         }
                     }
                 }

@@ -15,6 +15,9 @@ sealed class ProfileDetailState {
     data class Unfollowed(val user: User) : ProfileDetailState()
     data class Followed(val user: User) : ProfileDetailState()
 
+    object UnfollowError: ProfileDetailState()
+    object FollowError: ProfileDetailState()
+
     object Idle : ProfileDetailState()
 
     object LoadingUser : ProfileDetailState()

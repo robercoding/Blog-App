@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -101,7 +102,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
                 displayBottomNavigation(false)
                 showViewMotionLayout(true)
-                setButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
+                setFollowButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
                 setViewForOtherUser()
 
                 setOtherUserProfile(user!!)
@@ -126,17 +127,27 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             is ProfileDetailState.Followed -> {
                 val follower = profileDetailState.user.follower
                 Toast.makeText(requireContext(), "Now you're following ${profileDetailState.user.username}", Toast.LENGTH_SHORT).show()
-                setButtonViewForOtherUser(true)
+                setFollowButtonViewForOtherUser(true)
                 Log.i("UserFollower", "Get ${follower}")
-                setFollower(follower)
+                setFollowerText(follower)
+            }
+
+            is ProfileDetailState.FollowError -> {
+                Toast.makeText(requireContext(), "Sorry we couldn't follow the user, try again later", Toast.LENGTH_SHORT).show()
+                setFollowButtonViewForOtherUser(false)
             }
 
             is ProfileDetailState.Unfollowed -> {
                 val follower = profileDetailState.user.follower
                 Log.i("UserFollower", "Get ${follower}")
                 Toast.makeText(requireContext(), "You stopped following ${profileDetailState.user.username}", Toast.LENGTH_SHORT).show()
-                setButtonViewForOtherUser(false)
-                setFollower(follower)
+                setFollowButtonViewForOtherUser(false)
+                setFollowerText(follower)
+            }
+
+            is ProfileDetailState.UnfollowError -> {
+                Toast.makeText(requireContext(), "Sorry we couldn't unfollow the user, try again later", Toast.LENGTH_SHORT).show()
+                setFollowButtonViewForOtherUser(true)
             }
 
             is ProfileDetailState.Error -> {
@@ -167,7 +178,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
             .into(uid_image)
 
-        setFollower(user.follower)
+        setFollowerText(user.follower)
     }
 
     private fun setViewForCurrentUser(){
@@ -191,10 +202,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
             .into(uid_image)
 
-        setFollower(user.follower)
+        setFollowerText(user.follower)
     }
 
-    private fun setFollower(follower: Int){
+    private fun setFollowerText(follower: Int){
         uid_followers.text = "${follower} Follower"
 
         if(follower > 1)
@@ -210,33 +221,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         profile_detail_motion_layout.getConstraintSet(R.id.end)?.let {
             it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
             it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
-        }
-    }
-
-    private fun setButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean){
-        Log.i(TAG, "This should be what currentis $currentUserFollowsOtherUser")
-        Log.i(TAG, "This should be whatever ${profile_detail_button_follow.isSelected}")
-
-        if(currentUserFollowsOtherUser){
-            profile_detail_button_follow.apply {
-                isSelected = true
-                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
-                text = "Following"
-                setTypeface(null, Typeface.BOLD)
-                setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-                text= "Following"
-            }
-
-        }else{
-            profile_detail_button_follow.apply {
-                isSelected = false
-                text = "Follow"
-                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
-                val shapeDrawable = ShapeDrawable()
-                shapeDrawable.paint.strokeWidth = 1.0F
-                shapeDrawable.paint.color = ContextCompat.getColor(requireContext(), R.color.blueGray)
-                setTextColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
-            }
         }
     }
 
@@ -258,18 +242,41 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         }
     }
 
+    private fun setFollowButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean){
+
+        if(currentUserFollowsOtherUser){
+            profile_detail_button_follow.apply {
+                isSelected = true
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
+                text = "Following"
+                setTypeface(null, Typeface.BOLD)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                text= "Following"
+            }
+        }else{
+            profile_detail_button_follow.apply {
+                isSelected = false
+                text = "Follow"
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
+                val shapeDrawable = ShapeDrawable()
+                shapeDrawable.paint.strokeWidth = 1.0F
+                shapeDrawable.paint.color = ContextCompat.getColor(requireContext(), R.color.blueGray)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
+            }
+        }
+    }
+
     private fun setupListeners(){
-        profile_detail_button_follow.setOnClickListener {
-            Log.i(TAG, "Enabled: ${it.isEnabled}")
+        profile_detail_button_follow.apply {
+            setOnClickListener {
+                if(it.isSelected){
+                    setFollowButtonViewForOtherUser(false)
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
 
-            if(it.isSelected){
-                Log.i(TAG, "WE ARE GOING TO UNFOLLOW")
-                it.isSelected = false
-                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
-
-            }else{
-                it.isSelected = true
-                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                }else{
+                    setFollowButtonViewForOtherUser(true)
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                }
             }
         }
     }
