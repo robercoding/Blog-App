@@ -1,13 +1,11 @@
 package com.rober.blogapp.ui.main.profile.profiledetail
 
 import android.util.Log
-import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.ui.main.feed.FeedState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -95,18 +93,18 @@ class ProfileDetailViewModel
     private fun getCurrentUserPosts() {
         _profileDetailState.value = ProfileDetailState.LoadingPosts
 
-        viewModelScope.launch {
-            firebaseRepository.retrieveProfileUserPosts(false)
-                .collect { resultData ->
-                    when (resultData) {
-
-                        is ResultData.Success -> {
-                            _profileDetailState.value =
-                                ProfileDetailState.SetUserPosts(resultData.data!!)
-                        }
-                    }
-                }
-        }
+//        viewModelScope.launch {
+//            firebaseRepository.retrieveProfileUserPosts(false)
+//                .collect { resultData ->
+//                    when (resultData) {
+//
+//                        is ResultData.Success -> {
+//                            _profileDetailState.value =
+//                                ProfileDetailState.SetUserPosts(resultData.data!!)
+//                        }
+//                    }
+//                }
+//        }
     }
 
     private fun checkIfUserIsCurrentUser(username: String): Boolean {
@@ -154,22 +152,21 @@ class ProfileDetailViewModel
     }
 
     private fun getOtherUserPosts(){
-        Log.i("RequestPosts", "RequestsPosts from otherUser")
         viewModelScope.launch {
-            firebaseRepository.retrieveProfileOtherUserPosts(user?.username!!)
-                .collect {resultData ->
-                    Log.i("RequestPosts", "Result data is $resultData")
-                    when(resultData){
-                        is ResultData.Success -> {
-                            Log.i("RequestPosts", "Result data is Success")
-
-                            _profileDetailState.value = ProfileDetailState.SetOtherUserPosts(resultData.data!!)
-                        }
-                        is ResultData.Error -> {
-                            _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
+            user?.user_id?.let {
+                firebaseRepository.retrieveProfileUsersPosts(it)
+                    .collect {resultData ->
+                        when(resultData){
+                            is ResultData.Success -> {
+                                Log.i("RequestPosts", " Success ${resultData.data}")
+                                _profileDetailState.value = ProfileDetailState.SetOtherUserPosts(resultData.data!!)
+                            }
+                            is ResultData.Error -> {
+                                _profileDetailState.value = ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
+                            }
                         }
                     }
-                }
+            }
         }
     }
 

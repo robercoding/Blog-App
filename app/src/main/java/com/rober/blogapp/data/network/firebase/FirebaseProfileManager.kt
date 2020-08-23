@@ -15,7 +15,6 @@ import org.joda.time.DateTime
 import java.util.*
 import javax.inject.Inject
 import kotlin.Exception
-import kotlin.collections.HashMap
 
 class FirebaseProfileManager @Inject constructor(
     private val firebaseSource: FirebaseSource,
@@ -23,102 +22,145 @@ class FirebaseProfileManager @Inject constructor(
 ) {
     private val TAG = "FirebaseProfileManager"
 
-    private var userPaginationLimit = 0
-    private var savedUserListPost: MutableList<Post> = mutableListOf()
+//    private var userPaginationLimit = 0
+//    private var savedUserListPost: MutableList<Post> = mutableListOf()
     private var savedUserHashMapPost = hashMapOf<String, MutableList<Post>>()
+    private var savedUserHashMapDates = hashMapOf<String, MutableList<Date>>()
+    private var savedUserHashMapMinusDays = hashMapOf<String, Int>()
+    private var savedUserHashMapRetrieveNewerPosts = hashMapOf<String, Date>()
 
     private var hashMapCurrentUserFollowsOtherUser = hashMapOf<String, Boolean>()
     private var hashMapOthersUsersFollowings = hashMapOf<String, MutableList<Following>>()
 
     private var dateToRetrieveNewerPosts : Date? = null
-    private var dateLessThan : Date? = null
-    private var dateGreaterThan : Date? = null
-    private var minusDays = 0
 
-    suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = flow {
-        try {
-            if (!morePosts && userPaginationLimit == 0) {
-                val userPosts = getProfileUserPostsLimit()
+    suspend fun retrieveProfileUsersPosts(userID : String): Flow<ResultData<List<Post>>> = flow {
+        emit(ResultData.Loading)
+        //Initialize variable
+        var minusDays = 0
+        var dateLessThan = DateTime.now().minusDays(minusDays).toDate()
+        var dateGreaterThan = DateTime.now().minusDays(minusDays+1).toDate()
 
-                emit(ResultData.Success(userPosts))
-            }
+        var userContainsSavedPosts = savedUserHashMapPost[userID]
 
-            if (!morePosts && userPaginationLimit > 0) {
-                emit(ResultData.Success(savedUserListPost))
-            }
-
-            if (morePosts) {
-                val userPosts = getProfileUserPostsLimit()
-
-                emit(ResultData.Success(userPosts))
-            }
-        } catch (e: Exception) {
-            emit(ResultData.Error(e, null))
-        }
-    }
-
-    private suspend fun getProfileUserPostsLimit(): List<Post> {
-        userPaginationLimit++
-
-        val userPostsCollection =
-            firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
-
-        val userPosts = userPostsCollection
-            .limit((userPaginationLimit * 8).toLong())
-            .get()
-            .await()
-            .toObjects(Post::class.java)
-
-        savedUserListPost = userPosts
-
-        return savedUserListPost
-    }
-
-    suspend fun retrieveProfileOtherUserPosts(userID : String): Flow<ResultData<List<Post>>> = flow {
-
-        //get the total number of posts that user has
         val countPosts = getCountPostsFromOtherUser(userID)
+        var userContainsSavedPostsSize = 0
 
-        var listPostsOtherUser = mutableListOf<Post>()
-
-        if(listPostsOtherUser.size <= 20){
-            listPostsOtherUser = getProfilePosts(userID).toMutableList()
-        }else {
-            while (listPostsOtherUser.size < 5 && listPostsOtherUser.size < countPosts) {
-                dateLessThan = DateTime.now().minusDays(minusDays).toDate()
-                dateGreaterThan = DateTime.now().minusDays(minusDays - 1).toDate()
-
-
-                val listPostsOtherUserByDay =
-                    getProfilePostsByDateLessAndGreater(userID, dateLessThan!!, dateGreaterThan!!)
-
-                for (post in listPostsOtherUserByDay)
-                    listPostsOtherUser.add(post)
-
-                minusDays.minus(1)
-            }
+        userContainsSavedPosts?.let {
+            Log.i("RequestPosts", " UserContainsSavedPosts TRUE")
+            dateLessThan = savedUserHashMapDates[userID]?.get(0)
+            dateGreaterThan = savedUserHashMapDates[userID]?.get(0)
+            minusDays = savedUserHashMapMinusDays[userID]!!
+            userContainsSavedPostsSize = it.size
+        }?: run {
+            Log.i("RequestPosts", " UserContainsSavedPosts FALSE")
+            savedUserHashMapRetrieveNewerPosts[userID] = Date()
+            userContainsSavedPosts = mutableListOf()
+            userContainsSavedPostsSize = 0
         }
 
-        var tempMutableListPostsFromHashMap = mutableListOf<Post>()
+        val newUserMutableListPosts = mutableListOf<Post>()
+        Log.i("RequestPosts", " Before while we got SavedPostsSize = ${userContainsSavedPosts?.size} and countPosts = $countPosts")
+        while(newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts) {
+            val listPosts = getUserPostsByDateLessAndGreater(userID, dateLessThan, dateGreaterThan)
 
-        if(savedUserHashMapPost.containsKey(userID)){
-            tempMutableListPostsFromHashMap = savedUserHashMapPost[userID]!!
+            Log.i("RequestPosts", "We got this new posts $listPosts")
 
-            for(post in listPostsOtherUser) {
-                tempMutableListPostsFromHashMap.add(post)
+            listPosts.let {
+                for(post in listPosts){
+                    newUserMutableListPosts.add(post)
+                    userContainsSavedPostsSize.plus(1)
+                }
             }
-        }else{
-            tempMutableListPostsFromHashMap = listPostsOtherUser
+
+            minusDays += 1
+            dateLessThan =DateTime.now().minusDays(minusDays).toDate()
+            dateGreaterThan = DateTime.now().minusDays(minusDays +1).toDate()
+        }
+        Log.i("RequestPosts", "Exit posts while")
+
+
+        //Save dates on local
+        savedUserHashMapMinusDays[userID] = minusDays
+        savedUserHashMapDates[userID] = mutableListOf(dateLessThan, dateGreaterThan)
+
+        for(userPosts in newUserMutableListPosts){
+            userContainsSavedPosts?.add(userPosts)
         }
 
-        tempMutableListPostsFromHashMap.sortByDescending { post -> post.created_at }
 
-        savedUserHashMapPost[userID] = tempMutableListPostsFromHashMap
+        userContainsSavedPosts?.let {
+            Log.i("RequestPosts", "Lets send it $userContainsSavedPosts")
+            savedUserHashMapPost.put(userID, it)
+            emit(ResultData.Success(it))
+        }?: kotlin.run {
+            android.util.Log.i("RequestPosts", "Lets remove and error")
+            savedUserHashMapPost.remove(userID)
+            savedUserHashMapMinusDays.remove(userID)
+            savedUserHashMapDates.remove(userID)
+            emit(com.rober.blogapp.data.ResultData.Error(kotlin.Exception("Sorry we couldn't load user posts, try again later")))
+        }
 
-        emit(ResultData.Success(tempMutableListPostsFromHashMap))
+//        //get the total number of posts that user has
+//        val countPosts = getCountPostsFromOtherUser(userID)
+//
+//        var listPostsOtherUser = mutableListOf<Post>()
+//
+//        if(listPostsOtherUser.size <= 20){
+//            listPostsOtherUser = getProfilePosts(userID).toMutableList()
+//        }else {
+//            while (listPostsOtherUser.size < 5 && listPostsOtherUser.size < countPosts) {
+//                dateLessThan = DateTime.now().minusDays(minusDays).toDate()
+//                dateGreaterThan = DateTime.now().minusDays(minusDays - 1).toDate()
+//
+//
+//                val listPostsOtherUserByDay =
+//                    getProfilePostsByDateLessAndGreater(userID, dateLessThan!!, dateGreaterThan!!)
+//
+//                for (post in listPostsOtherUserByDay)
+//                    listPostsOtherUser.add(post)
+//
+//                minusDays.minus(1)
+//            }
+//        }
+//
+//        var tempMutableListPostsFromHashMap = mutableListOf<Post>()
+//
+//        if(savedUserHashMapPost.containsKey(userID)){
+//            tempMutableListPostsFromHashMap = savedUserHashMapPost[userID]!!
+//
+//            for(post in listPostsOtherUser) {
+//                tempMutableListPostsFromHashMap.add(post)
+//            }
+//        }else{
+//            tempMutableListPostsFromHashMap = listPostsOtherUser
+//        }
+//
+//        tempMutableListPostsFromHashMap.sortByDescending { post -> post.created_at }
+//
+//        savedUserHashMapPost[userID] = tempMutableListPostsFromHashMap
+//
+//        emit(ResultData.Success(tempMutableListPostsFromHashMap))
     }
+//
+//    private suspend fun getProfileUserPostsLimit(): List<Post> {
+//        userPaginationLimit++
+//
+//        val userPostsCollection =
+//            firebaseSource.db.collection("posts/${firebaseSource.username}/user_posts")
+//
+//        val userPosts = userPostsCollection
+//            .limit((userPaginationLimit * 8).toLong())
+//            .get()
+//            .await()
+//            .toObjects(Post::class.java)
+//
+//        savedUserListPost = userPosts
+//
+//        return savedUserListPost
+//    }
 
-    private suspend fun getProfilePostsByDateLessAndGreater(userID: String, dateLessThan: Date, dateGreaterThan: Date): List<Post> {
+    private suspend fun getUserPostsByDateLessAndGreater(userID: String, dateLessThan: Date, dateGreaterThan: Date): List<Post> {
         var listOtherUserPosts =
             firebaseSource.db
                 .collection("posts")

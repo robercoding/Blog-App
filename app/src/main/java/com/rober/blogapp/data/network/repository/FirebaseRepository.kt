@@ -53,9 +53,9 @@ constructor(
     suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
 
     //Profile
-    suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUserPosts(morePosts)
+//    suspend fun retrieveProfileUserPosts(morePosts: Boolean): Flow<ResultData<List<Post>>> = firebaseProfileManager.re(morePosts)
 
-    suspend fun retrieveProfileOtherUserPosts(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileOtherUserPosts(userID)
+    suspend fun retrieveProfileUsersPosts(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveProfileUsersPosts(userID)
 
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileManager.getUserProfile(username)
 

@@ -46,7 +46,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         return inflater.inflate(R.layout.fragment_profile_detail, container, false)
     }
 
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 

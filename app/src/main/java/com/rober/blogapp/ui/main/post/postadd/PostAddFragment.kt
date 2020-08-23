@@ -70,7 +70,9 @@ class PostAddFragment : Fragment() {
     private fun render(postAddState : PostAddState){
         when(postAddState){
             is PostAddState.PostHasBeenSaved -> {
+//                Toast.makeText(requireContext(),"Saved", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), postAddState.messageUtil.message, Toast.LENGTH_SHORT).show()
+                goToFeedFragment()
                 viewModel.setIntention(PostAddEvent.Idle)
             }
 
@@ -83,6 +85,7 @@ class PostAddFragment : Fragment() {
             }
 
             is PostAddState.Error -> {
+//                Toast.makeText(requireContext(),"No saved", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), postAddState.exception.message.toString(), Toast.LENGTH_SHORT).show()
             }
         }
@@ -96,7 +99,7 @@ class PostAddFragment : Fragment() {
         top_app_bar.setOnMenuItemClickListener {menuItem ->
             when(menuItem.itemId){
                 R.id.save_post -> {
-                    goToFeedFragment()
+//                    goToFeedFragment()
                     savePost()
                     true
                 }
