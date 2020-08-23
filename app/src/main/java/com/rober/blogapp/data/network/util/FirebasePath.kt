@@ -9,5 +9,5 @@ class FirebasePath {
 
 
     val user_count_posts = "user_count_posts"
-    val countPosts ="count_posts"
+    val countPosts ="countPosts"
 }

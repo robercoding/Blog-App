@@ -65,7 +65,11 @@ constructor(
                 .collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
         var success = false
 
-        if (doesCountPostsPathExists()) {
+        val doesCountPostsPathExists = doesCountPostsPathExists()
+
+        Log.i("CountPosts", "Exists?= $doesCountPostsPathExists")
+
+        if (doesCountPostsPathExists) {
             collRef
                 .update("countPosts", FieldValue.increment(1))
                 .addOnSuccessListener {
@@ -82,6 +86,7 @@ constructor(
                     success = true
                 }
                 .addOnFailureListener {
+                    Log.i("CountPosts", "$it")
                     success = false
                 }
                 .await()
@@ -98,7 +103,7 @@ constructor(
         var documentExists = false
         pathExists.get()
             .addOnSuccessListener {
-                documentExists = true
+                documentExists = it.exists()
             }.addOnFailureListener {
                 documentExists = false
             }

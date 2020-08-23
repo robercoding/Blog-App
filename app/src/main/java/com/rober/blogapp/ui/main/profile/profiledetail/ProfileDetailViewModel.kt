@@ -77,7 +77,6 @@ class ProfileDetailViewModel
                     when (resultData) {
                         is ResultData.Success -> {
                             resultData.data?.let {resultDataUser ->
-
                                 user = resultDataUser
                                 _profileDetailState.value = ProfileDetailState.SetUserProfile(user!!)
 
@@ -153,8 +152,8 @@ class ProfileDetailViewModel
 
     private fun getOtherUserPosts(){
         viewModelScope.launch {
-            user?.user_id?.let {
-                firebaseRepository.retrieveProfileUsersPosts(it)
+            user?.let {
+                firebaseRepository.retrieveProfileUsersPosts(it.username)
                     .collect {resultData ->
                         when(resultData){
                             is ResultData.Success -> {

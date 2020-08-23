@@ -22,8 +22,6 @@ class FirebaseProfileManager @Inject constructor(
 ) {
     private val TAG = "FirebaseProfileManager"
 
-//    private var userPaginationLimit = 0
-//    private var savedUserListPost: MutableList<Post> = mutableListOf()
     private var savedUserHashMapPost = hashMapOf<String, MutableList<Post>>()
     private var savedUserHashMapDates = hashMapOf<String, MutableList<Date>>()
     private var savedUserHashMapMinusDays = hashMapOf<String, Int>()
@@ -32,14 +30,14 @@ class FirebaseProfileManager @Inject constructor(
     private var hashMapCurrentUserFollowsOtherUser = hashMapOf<String, Boolean>()
     private var hashMapOthersUsersFollowings = hashMapOf<String, MutableList<Following>>()
 
-    private var dateToRetrieveNewerPosts : Date? = null
+    private var dateToRetrieveNewerPosts: Date? = null
 
-    suspend fun retrieveProfileUsersPosts(userID : String): Flow<ResultData<List<Post>>> = flow {
+    suspend fun retrieveProfileUsersPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
         //Initialize variable
         var minusDays = 0
         var dateLessThan = DateTime.now().minusDays(minusDays).toDate()
-        var dateGreaterThan = DateTime.now().minusDays(minusDays+1).toDate()
+        var dateGreaterThan = DateTime.now().minusDays(minusDays + 1).toDate()
 
         var userContainsSavedPosts = savedUserHashMapPost[userID]
 
@@ -49,52 +47,54 @@ class FirebaseProfileManager @Inject constructor(
         userContainsSavedPosts?.let {
             Log.i("RequestPosts", " UserContainsSavedPosts TRUE")
             dateLessThan = savedUserHashMapDates[userID]?.get(0)
-            dateGreaterThan = savedUserHashMapDates[userID]?.get(0)
+            dateGreaterThan = savedUserHashMapDates[userID]?.get(1)
             minusDays = savedUserHashMapMinusDays[userID]!!
+            Log.i("MinusDays", "Minus days enter = $minusDays")
             userContainsSavedPostsSize = it.size
-        }?: run {
-            Log.i("RequestPosts", " UserContainsSavedPosts FALSE")
+        } ?: run {
             savedUserHashMapRetrieveNewerPosts[userID] = Date()
             userContainsSavedPosts = mutableListOf()
             userContainsSavedPostsSize = 0
         }
 
         val newUserMutableListPosts = mutableListOf<Post>()
-        Log.i("RequestPosts", " Before while we got SavedPostsSize = ${userContainsSavedPosts?.size} and countPosts = $countPosts")
-        while(newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts) {
+
+        while (newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts) {
             val listPosts = getUserPostsByDateLessAndGreater(userID, dateLessThan, dateGreaterThan)
 
-            Log.i("RequestPosts", "We got this new posts $listPosts")
+            Log.i(
+                TAG,
+                "We got these dates: DatesLess $dateLessThan and DateGreater = $dateGreaterThan"
+            )
 
             listPosts.let {
-                for(post in listPosts){
+                for (post in listPosts) {
                     newUserMutableListPosts.add(post)
-                    userContainsSavedPostsSize.plus(1)
+                    userContainsSavedPostsSize += 1
                 }
             }
 
             minusDays += 1
-            dateLessThan =DateTime.now().minusDays(minusDays).toDate()
-            dateGreaterThan = DateTime.now().minusDays(minusDays +1).toDate()
+            dateLessThan = DateTime.now().minusDays(minusDays).toDate()
+            dateGreaterThan = DateTime.now().minusDays(minusDays + 1).toDate()
         }
-        Log.i("RequestPosts", "Exit posts while")
-
 
         //Save dates on local
         savedUserHashMapMinusDays[userID] = minusDays
         savedUserHashMapDates[userID] = mutableListOf(dateLessThan, dateGreaterThan)
 
-        for(userPosts in newUserMutableListPosts){
+        for (userPosts in newUserMutableListPosts) {
             userContainsSavedPosts?.add(userPosts)
         }
 
 
+
         userContainsSavedPosts?.let {
-            Log.i("RequestPosts", "Lets send it $userContainsSavedPosts")
-            savedUserHashMapPost.put(userID, it)
-            emit(ResultData.Success(it))
-        }?: kotlin.run {
-            android.util.Log.i("RequestPosts", "Lets remove and error")
+            val userContainedSavedPostsSortedByDescending =
+                it.sortedByDescending { post -> post.created_at }.toMutableList()
+            savedUserHashMapPost[userID] = userContainedSavedPostsSortedByDescending
+            emit(ResultData.Success(userContainedSavedPostsSortedByDescending))
+        } ?: kotlin.run {
             savedUserHashMapPost.remove(userID)
             savedUserHashMapMinusDays.remove(userID)
             savedUserHashMapDates.remove(userID)
@@ -160,7 +160,11 @@ class FirebaseProfileManager @Inject constructor(
 //        return savedUserListPost
 //    }
 
-    private suspend fun getUserPostsByDateLessAndGreater(userID: String, dateLessThan: Date, dateGreaterThan: Date): List<Post> {
+    private suspend fun getUserPostsByDateLessAndGreater(
+        userID: String,
+        dateLessThan: Date,
+        dateGreaterThan: Date
+    ): List<Post> {
         var listOtherUserPosts =
             firebaseSource.db
                 .collection("posts")
@@ -175,31 +179,38 @@ class FirebaseProfileManager @Inject constructor(
         return listOtherUserPosts
     }
 
-    private suspend fun getProfilePosts(userID: String) : List<Post>{
-        var listOtherUserPosts =
-            firebaseSource.db
-                .collection("posts")
-                .document(userID)
-                .collection(firebasePath.user_posts)
-                .get()
-                .await()
-                .toObjects(Post::class.java)
-
-        return listOtherUserPosts
-    }
+//Without date by
+//    private suspend fun getProfilePosts(userID: String) : List<Post>{
+//        var listOtherUserPosts =
+//            firebaseSource.db
+//                .collection("posts")
+//                .document(userID)
+//                .collection(firebasePath.user_posts)
+//                .get()
+//                .await()
+//                .toObjects(Post::class.java)
+//
+//        return listOtherUserPosts
+//    }
 
     private suspend fun getCountPostsFromOtherUser(userID: String): Int {
-        val countPostsDocRef = firebaseSource.db.collection("posts").document(userID).collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+        val countPostsDocRef = firebaseSource.db.collection(firebasePath.posts).document(userID)
+            .collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+
+        Log.i("CountPosts", "Path =${countPostsDocRef.path}")
 
         val countPosts = countPostsDocRef
             .get()
             .await()
             .toObject(CountsPosts::class.java)
 
-        if(countPosts != null)
-            return countPosts.count
-        else
+        Log.i("CountPosts", "CountPosts =$countPosts")
+
+        countPosts?.let { it ->
+            return it.countPosts
+        } ?: kotlin.run {
             return 0
+        }
     }
 
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = flow {
@@ -305,7 +316,7 @@ class FirebaseProfileManager @Inject constructor(
             emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
         }
 
-        if(hasUserBeenFollowed){
+        if (hasUserBeenFollowed) {
             firebaseSource.listNewFollowingsUsername.add(user.username)
             if (checkIfNewFollowingHasBeenUnfollowedBefore(user.username))
                 removeNewFollowingFromUnfollowing(user.username)
@@ -353,7 +364,7 @@ class FirebaseProfileManager @Inject constructor(
             emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
         }
 
-        if(hasUserBeenUnfollowed){
+        if (hasUserBeenUnfollowed) {
             if (checkIfNewUnfollowingHasBeenFollowedBefore(user.username))
                 removeNewUnfollowingFromFollowing(user.username)
 
@@ -367,16 +378,17 @@ class FirebaseProfileManager @Inject constructor(
     }
 
     suspend fun updateFollowingCount(didUserFollowOtherUser: Boolean) {
-        val userDocumentRef = firebaseSource.db.collection("users").document(firebaseSource.username)
+        val userDocumentRef =
+            firebaseSource.db.collection("users").document(firebaseSource.username)
         try {
-            if(didUserFollowOtherUser){
+            if (didUserFollowOtherUser) {
                 userDocumentRef.update("following", FieldValue.increment(1))
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
                     }.addOnFailureListener {
                         Log.i("CheckUpdate", "NOT UPDATED")
                     }.await()
-            }else{
+            } else {
                 userDocumentRef.update("following", FieldValue.increment(-1))
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
@@ -384,7 +396,7 @@ class FirebaseProfileManager @Inject constructor(
                         Log.i("CheckUpdate", "NOT UPDATED")
                     }.await()
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.i("CheckUpdate", "Exception")
         }
     }
@@ -393,14 +405,14 @@ class FirebaseProfileManager @Inject constructor(
         val userDocumentRef = firebaseSource.db.collection("users").document(userID)
 
         try {
-            if(didOtherUserGetFollowed){
+            if (didOtherUserGetFollowed) {
                 userDocumentRef.update("follower", FieldValue.increment(1))
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
                     }.addOnFailureListener {
                         Log.i("CheckUpdate", "NOT UPDATED")
                     }.await()
-            }else{
+            } else {
                 userDocumentRef.update("follower", FieldValue.increment(-1))
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
@@ -408,7 +420,7 @@ class FirebaseProfileManager @Inject constructor(
                         Log.i("CheckUpdate", "NOT UPDATED")
                     }.await()
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.i("CheckUpdate", "Exception")
         }
     }
