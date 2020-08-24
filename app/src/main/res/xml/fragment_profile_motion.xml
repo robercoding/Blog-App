@@ -9,7 +9,7 @@
         app:constraintSetEnd="@id/end">
         <OnSwipe
             app:moveWhenScrollAtTop="true"
-            app:touchAnchorId="@+id/swipe_refresh_layout"
+            app:touchAnchorId="@+id/profile_detail_swipe_refresh_layout"
             app:touchAnchorSide="top"
             app:dragDirection="dragUp"/>
     </Transition>
