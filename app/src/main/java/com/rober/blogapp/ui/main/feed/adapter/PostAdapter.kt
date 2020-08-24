@@ -102,6 +102,7 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
         private fun setupClickListeners(){
             title?.setOnClickListener {recyclerViewActionInterface.clickListenerOnPost(adapterPosition)}
             text?.setOnClickListener {recyclerViewActionInterface.clickListenerOnPost(adapterPosition)}
+            container_post?.setOnClickListener { recyclerViewActionInterface.clickListenerOnPost(adapterPosition) }
 
             uid_name?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition) }
             uid_image?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition)}
