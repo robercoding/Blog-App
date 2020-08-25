@@ -51,6 +51,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
 
+        Toast.makeText(requireContext(), "Its working", Toast.LENGTH_SHORT).show()
         setupListeners()
         subscribeObservers()
         getUserArgumentAndSetIntention()
@@ -148,19 +149,18 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun showViewMotionLayout(showMotionLayout: Boolean){
         if(showMotionLayout){
             profile_detail_motion_layout.visibility = View.VISIBLE
-            profile_detail_background_progress_bar.visibility = View.VISIBLE
+//            profile_detail_background_progress_bar.visibility = View.VISIBLE
         } else{
-            profile_detail_background_progress_bar.visibility = View.GONE
+//            profile_detail_background_progress_bar.visibility = View.GONE
             profile_detail_motion_layout.visibility = View.GONE
-
         }
     }
 
     private fun setUserProfile(user: User){
 
         uid_name.text = "@${user.username}"
-        uid_biography.text = user.biography
-        uid_following.text = "${user.following} Following"
+//        uid_biography.text = user.biography
+//        uid_following.text = "${user.following} Following"
 
         Glide.with(requireView())
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
@@ -186,8 +186,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun setOtherUserProfile(user: User){
 
         uid_name.text = "@${user.username}"
-        uid_biography.text = user.biography
-        uid_following.text = "${user.following} Following"
+//        uid_biography.text = user.biography
+//        uid_following.text = "${user.following} Following"
         Glide.with(requireView())
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
             .into(uid_image)
@@ -196,10 +196,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun setFollowerText(follower: Int){
-        uid_followers.text = "${follower} Follower"
-
-        if(follower > 1)
-            uid_followers.append("s")
+//        uid_followers.text = "${follower} Follower"
+//
+//        if(follower > 1)
+//            uid_followers.append("s")
     }
 
     private fun setViewForOtherUser(){
@@ -220,10 +220,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun setUserPosts(listUserPosts: MutableList<Post>){
         postAdapter.setPosts(listUserPosts)
 
-        recycler_profile_detail_posts.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = postAdapter
-        }
+//        recycler_profile_detail_posts.apply {
+//            layoutManager = LinearLayoutManager(requireContext())
+//            adapter = postAdapter
+//        }
     }
 
     private fun setFollowButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean){
@@ -264,20 +264,20 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             }
         }
 
-        profile_detail_swipe_refresh_layout.setOnRefreshListener {
-            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
-        }
+//        profile_detail_swipe_refresh_layout.setOnRefreshListener {
+//            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
+//        }
     }
 
     private fun stopSwipeRefresh(){
-        profile_detail_swipe_refresh_layout.isRefreshing = false
+//        profile_detail_swipe_refresh_layout.isRefreshing = false
     }
 
     private fun displayProgressBar(isDisplayed: Boolean){
-        if (isDisplayed)
-            progress_bar_profile_posts.visibility = View.VISIBLE
-        else
-            progress_bar_profile_posts.visibility = View.GONE
+//        if (isDisplayed)
+//            progress_bar_profile_posts.visibility = View.VISIBLE
+//        else
+//            progress_bar_profile_posts.visibility = View.GONE
     }
 
     private fun displayBottomNavigation(display: Boolean){
