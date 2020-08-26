@@ -4,21 +4,32 @@
     xmlns:motion="http://schemas.android.com/tools">
 
     <Transition
-        app:duration="3000"
+        app:duration="1500"
         app:constraintSetStart="@id/start"
         app:constraintSetEnd="@id/end">
         <OnSwipe
             app:touchAnchorId="@+id/space"
-            app:dragDirection="dragDown"/>
+            app:dragDirection="dragUp"/>
+
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
+
         <Constraint
-            android:id="@+id/profile_detail_refresh_user"
-            android:layout_height="1dp"
+            android:id="@+id/profile_detail_app_bar_layout"
             android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_image_background"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             />
 
         <Constraint
@@ -26,9 +37,31 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="30dp"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
+            android:layout_marginTop="40dp"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="30dp" />
+            android:elevation="10dp"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_button_edit"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_image_background"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_button_follow"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_image_background"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="20dp"
+            android:visibility="visible"/>
+
         <Constraint
             android:id="@+id/uid_name"
             android:layout_width="150dp"
@@ -37,94 +70,138 @@
             android:layout_marginStart="30dp"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="10dp" />
+
         <Constraint
-            android:id="@+id/profile_detail_button_edit"
-            android:layout_width="120dp"
+            android:id="@+id/uid_biography"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
-            android:layout_marginEnd="30dp"
-            android:layout_marginTop="30dp"
-            android:visibility="gone"/>
-        <Constraint
-            android:id="@+id/profile_detail_button_follow"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="30dp"
-            android:layout_marginEnd="30dp"
-            android:visibility="gone"/>
-<!--        <Constraint-->
-<!--            android:id="@+id/uid_biography"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="20dp"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/uid_name"-->
-<!--            android:layout_marginStart="30dp"-->
-<!--            android:layout_marginTop="15dp" />-->
+            android:layout_marginEnd="20dp"
+            app:layout_constraintTop_toBottomOf="@id/uid_name"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp" />
+
         <Constraint
             android:id="@+id/space"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_name"/>
+            app:layout_constraintTop_toBottomOf="@id/uid_biography"/>
+
+        <Constraint
+            android:id="@+id/uid_following"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space" />
+
+        <Constraint
+            android:id="@+id/uid_followers"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/space" />
+
+        <Constraint
+            android:id="@+id/divider_profile"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/uid_following"
+            android:layout_marginBottom="20dp"
+            />
+
+
+        <Constraint
+            android:id="@+id/container_user_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_profile"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/container_user_tabs"/>
+
 
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
 
         <Constraint
-            android:id="@+id/profile_detail_refresh_user"
-            android:layout_height="40dp"
+            android:id="@+id/profile_detail_app_bar_layout"
             android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="visible"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:elevation="6dp"/>
+
+        <Constraint
+            android:id="@+id/profile_detail_image_background"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:elevation="3dp"
+            />
 
         <Constraint
             android:id="@+id/profile_detail_button_edit"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
-            android:layout_marginTop="30dp"
-            android:layout_marginEnd="30dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="30dp" />
 
         <Constraint
             android:id="@+id/profile_detail_button_follow"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="30dp"
-            android:layout_marginStart="30dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="30dp"
+            />
 
         <Constraint
             android:id="@+id/uid_image"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginStart="50dp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="30dp"
-            android:layout_marginStart="30dp"/>
+            android:elevation="10dp"/>
 
         <Constraint
             android:id="@+id/uid_name"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_image"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="30dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="93dp"
+            android:elevation="10dp"/>
 
-<!--        <Constraint-->
-<!--            android:id="@+id/uid_biography"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="35dp"-->
-<!--            android:layout_marginStart="30dp"-->
-<!--            android:layout_marginEnd="20dp"/>-->
+        <Constraint
+            android:id="@+id/uid_biography"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="30dp"
+            android:visibility="gone"/>
 
         <Constraint
             android:id="@+id/space"
@@ -132,7 +209,52 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_name"/>
+            app:layout_constraintTop_toBottomOf="@id/uid_biography"/>
+
+        <Constraint
+            android:id="@+id/uid_following"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            />
+
+        <Constraint
+            android:id="@+id/uid_followers"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
+
+        <Constraint
+            android:id="@+id/divider_profile"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Constraint
+            android:id="@+id/container_user_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
+            android:elevation="5dp"/>
+        <Constraint
+            android:id="@+id/profile_detail_swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/container_user_tabs"/>
 
     </ConstraintSet>
 </MotionScene>

@@ -5,8 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.profile.profiledetail.ProfileFragment"
-    android:background="@color/background"
-    android:id="@+id/profile_detail_background"
+    android:id="@+id/profile_detail_layout_background"
     >
 
 <!--    <ProgressBar-->
@@ -17,7 +16,6 @@
 <!--        app:layout_constraintTop_toTopOf="parent"-->
 <!--        app:layout_constraintEnd_toEndOf="parent"-->
 <!--        app:layout_constraintBottom_toBottomOf="parent"/>-->
-
     <androidx.constraintlayout.motion.widget.MotionLayout
         android:id="@+id/profile_detail_motion_layout"
         android:layout_width="match_parent"
@@ -32,53 +30,88 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/profile_detail_refresh_user"
+
+
+        <ImageView
+            android:id="@+id/profile_detail_image_background"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="120dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:background="@color/colorBlack"
-            android:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:elevation="1dp"
+            />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/profile_detail_app_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="#80000000">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/profile_detail_arrow_back"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@drawable/ic_arrow_left"
+                    android:backgroundTint="@color/colorGray2TextSpotify" />
+
+                <ImageView
+                    android:id="@+id/profile_detail_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_settings_black_24dp"
+                    android:backgroundTint="@color/colorGray2TextSpotify"
+                    android:layout_marginLeft="340dp"
+                    android:elevation="2dp"/>
+
+            </com.google.android.material.appbar.MaterialToolbar>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/uid_image"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="30dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             android:scaleType="centerCrop"
             android:src="@drawable/outline_account_circle_black_24dp"
             app:civ_border_color="@color/colorGray2TextSpotify"
             app:civ_border_width="3dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user" />
+            android:alpha="0"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/profile_detail_button_edit"
             style="@style/ProfileDetailEditButtonEditProfile"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="30dp"
             android:text="Edit profile"
             android:textAllCaps="false"
             android:textColor="@color/white"
-            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user" />
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
         <Button
             android:id="@+id/profile_detail_button_follow"
             style="@style/ProfileDetailEditButtonFollow"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="30dp"
             android:text="Follow"
             android:textAllCaps="false"
-            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_refresh_user"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             app:strokeColor="@color/blueGray" />
 
 
@@ -96,94 +129,93 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/uid_image" />
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_biography"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:lines="2"
+            android:maxHeight="60dp"
+            android:textColor="@color/white"
+            android:text="test"
+            app:layout_constraintTop_toBottomOf="@id/uid_name" />
+
         <Space
             android:id="@+id/space"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_name"/>
+            app:layout_constraintTop_toBottomOf="@id/uid_biography"/>
 
-<!--        <com.google.android.material.textview.MaterialTextView-->
-<!--            android:id="@+id/uid_biography"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="30dp"-->
-<!--            android:layout_marginTop="15dp"-->
-<!--            android:layout_marginEnd="20dp"-->
-<!--            android:lines="3"-->
-<!--            android:maxHeight="60dp"-->
-<!--            android:textColor="@color/white"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/uid_name" />-->
-        
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_following"
+            style="@style/PostText"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp"
+            android:text="0 following"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space" />
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_followers"
+            style="@style/PostText"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="30dp"
+            android:text="10 followers"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/space" />
 
-<!--        <com.google.android.material.textview.MaterialTextView-->
-<!--            android:id="@+id/uid_following"-->
-<!--            style="@style/PostText"-->
-<!--            android:layout_width="100dp"-->
-<!--            android:layout_height="20dp"-->
-<!--            android:layout_marginStart="30dp"-->
-<!--            android:layout_marginTop="15dp"-->
-<!--            android:text="20 following"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/uid_biography" />-->
-
-<!--        <com.google.android.material.textview.MaterialTextView-->
-<!--            android:id="@+id/uid_followers"-->
-<!--            style="@style/PostText"-->
-<!--            android:layout_width="100dp"-->
-<!--            android:layout_height="20dp"-->
-<!--            android:layout_marginTop="15dp"-->
-<!--            android:layout_marginEnd="30dp"-->
-<!--            android:text="10 followers"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/uid_biography" />-->
-
-<!--        <View-->
-<!--            android:id="@+id/divider_profile"-->
-<!--            style="@style/Divider"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="2dp"-->
-<!--            android:layout_marginTop="15dp"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/uid_following" />-->
+        <View
+            android:id="@+id/divider_profile"
+            style="@style/Divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/space" />
 
 
-<!--        <com.google.android.material.tabs.TabLayout-->
-<!--            android:id="@+id/container_user_tabs"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:background="@color/background"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/divider_profile"-->
-<!--            app:tabSelectedTextColor="@color/white"-->
-<!--            app:tabTextColor="@color/colorGray2TextSpotify">-->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/container_user_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@color/background"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_profile"
+            app:tabSelectedTextColor="@color/white"
+            app:tabTextColor="@color/colorGray2TextSpotify">
 
-<!--            <com.google.android.material.tabs.TabItem-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Posts" />-->
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Posts" />
 
-<!--        </com.google.android.material.tabs.TabLayout>-->
+        </com.google.android.material.tabs.TabLayout>
 
-<!--        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout-->
-<!--            android:id="@+id/profile_detail_swipe_refresh_layout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="0dp"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/container_user_tabs">-->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/profile_detail_swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/container_user_tabs">
 
-<!--            <androidx.recyclerview.widget.RecyclerView-->
-<!--                android:id="@+id/recycler_profile_detail_posts"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:scrollbarSize="2dp"-->
-<!--                android:scrollbars="vertical" />-->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_profile_detail_posts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbarSize="2dp"
+                android:scrollbars="vertical" />
 
-<!--        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>-->
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
 <!--        <ProgressBar-->

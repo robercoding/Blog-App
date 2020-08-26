@@ -159,8 +159,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun setUserProfile(user: User){
 
         uid_name.text = "@${user.username}"
-//        uid_biography.text = user.biography
-//        uid_following.text = "${user.following} Following"
+        uid_biography.text = user.biography
+        uid_following.text = "${user.following} Following"
 
         Glide.with(requireView())
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
@@ -170,6 +170,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun setViewForCurrentUser(){
+        Log.i("SetView", "Setting current User!")
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
@@ -186,8 +187,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun setOtherUserProfile(user: User){
 
         uid_name.text = "@${user.username}"
-//        uid_biography.text = user.biography
-//        uid_following.text = "${user.following} Following"
+        uid_biography.text = user.biography
+        uid_following.text = "${user.following} Following"
         Glide.with(requireView())
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
             .into(uid_image)
@@ -196,14 +197,14 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun setFollowerText(follower: Int){
-//        uid_followers.text = "${follower} Follower"
-//
-//        if(follower > 1)
-//            uid_followers.append("s")
+        uid_followers.text = "${follower} Follower"
+
+        if(follower > 1)
+            uid_followers.append("s")
     }
 
     private fun setViewForOtherUser(){
-
+        Log.i("SetView", "Setting other User!")
         profile_detail_button_follow.visibility = View.VISIBLE
         profile_detail_button_edit.visibility = View.GONE
 
@@ -220,10 +221,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     private fun setUserPosts(listUserPosts: MutableList<Post>){
         postAdapter.setPosts(listUserPosts)
 
-//        recycler_profile_detail_posts.apply {
-//            layoutManager = LinearLayoutManager(requireContext())
-//            adapter = postAdapter
-//        }
+        recycler_profile_detail_posts.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = postAdapter
+        }
     }
 
     private fun setFollowButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean){
@@ -264,13 +265,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             }
         }
 
-//        profile_detail_swipe_refresh_layout.setOnRefreshListener {
-//            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
-//        }
+        profile_detail_swipe_refresh_layout.setOnRefreshListener {
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
+        }
     }
 
     private fun stopSwipeRefresh(){
-//        profile_detail_swipe_refresh_layout.isRefreshing = false
+        profile_detail_swipe_refresh_layout.isRefreshing = false
     }
 
     private fun displayProgressBar(isDisplayed: Boolean){
