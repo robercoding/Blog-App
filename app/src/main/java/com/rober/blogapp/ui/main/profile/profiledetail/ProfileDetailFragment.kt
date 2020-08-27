@@ -210,20 +210,23 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
-//        Palette.Builder(bitmap).generate {palette ->
-//            palette?.let {
-//                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
-//                Log.i("DominantColor", "Before ${color}")
-//
-//            }?: kotlin.run {
-//                Log.i("Palette", "Not work")
-//            }
-//        }
+        Palette.Builder(bitmap).generate {palette ->
+            palette?.let {
+                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
+                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireContext(), requireView(), imageToolbarMotionLayoutStart, color)
+                profile_detail_motion_layout.apply {
+                    setTransitionListener(motionLayoutTransitionListener)
+                }
+
+
+            }?: kotlin.run {
+                Log.i("Palette", "Not work")
+            }
+        }
 
         //When I apply this inside the palette the edit profile doesn't appear like follow button
         profile_detail_motion_layout.apply {
             Log.i("CurrentColor", "$dominantColorToolbarMotionLayoutEnd")
-//            val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireContext(), requireView(), imageToolbarMotionLayoutStart, color)
 
 //            setTransitionListener(motionLayoutTransitionListener)
             getConstraintSet(R.id.start)?.let {
