@@ -1,18 +1,27 @@
 package com.rober.blogapp.ui.main.profile.profiledetail
 
+import android.app.Application
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import com.rober.blogapp.R
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import androidx.palette.graphics.Palette
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
 class ProfileDetailViewModel
 @ViewModelInject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val firebaseRepository: FirebaseRepository,
+    private val application: Application
 ) : ViewModel() {
 
     private val TAG = "ProfileDetailViewModel"
@@ -22,6 +31,11 @@ class ProfileDetailViewModel
         get() = _profileDetailState
 
     var user: User? = null
+
+    private val imageUrl =
+        "https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmewww.jpg?alt=media&token=41952158-a73d-4e09-a634-09182c5c10d7"
+
+    private var colorUrl = 0
 
     fun setIntention(event: ProfileDetailFragmentEvent) {
         when (event) {
@@ -86,8 +100,11 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
+
+                                var bitmap : Bitmap? = null
+                                bitmap = getBitmapFromUrl(imageUrl)
                                 _profileDetailState.value =
-                                    ProfileDetailState.SetCurrentUserProfile(resultData.data)
+                                    ProfileDetailState.SetCurrentUserProfile(resultData.data, colorUrl, imageUrl, bitmap)
 
                             } ?: kotlin.run {
                                 _profileDetailState.value =
@@ -128,8 +145,13 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                val currentUserFollowsOtherUser = currentUserFollowsOtherUser(username)
-                                _profileDetailState.value = ProfileDetailState.SetOtherUserProfile( user!!, currentUserFollowsOtherUser)
+                                val currentUserFollowsOtherUser =
+                                    currentUserFollowsOtherUser(username)
+
+                                _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(
+                                    user!!,
+                                    currentUserFollowsOtherUser
+                                )
                             }
                         }
 
@@ -140,6 +162,45 @@ class ProfileDetailViewModel
                     }
                 }
         }
+    }
+
+    private fun getBitmapFromUrl(urlImage: String): Bitmap {
+        val imageBitmapFromUrlAsyncTask = GetImageBitmapFromUrlAsyncTask()
+        imageBitmapFromUrlAsyncTask.execute(urlImage)
+
+        while (!imageBitmapFromUrlAsyncTask.success) {}
+
+        if (!imageBitmapFromUrlAsyncTask.success) {
+            return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
+        }
+        Log.i("CurrentBitmap", "Returning bitmap ${imageBitmapFromUrlAsyncTask.get()}")
+
+        return imageBitmapFromUrlAsyncTask.get()
+    }
+
+    private fun getDominantColorFromBitmap(bitmap: Bitmap){
+        Log.i("CurrentColor", "Inside lets get the color")
+//        Palette.Builder(bitmap).generate { palette ->
+//            if(palette == null)
+//                Log.i("CurrentColor", "Palette null wtf")
+//            else{
+//                Log.i("CurrentColor", "Not null wtf")
+//            }
+//
+//            palette?.let {
+//                Log.i("CurrentColor", "$colorUrl")
+//                colorUrl = it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
+//                Log.i("CurrentColor", "$colorUrl")
+//            }
+//        }
+        Palette.Builder(bitmap).generate {palette ->
+            colorUrl = palette?.let {
+                it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
+            }?: kotlin.run {
+                Log.i("Palette", "Not work")
+            }
+        }
+        Log.i("CurrentColor", "We are outside woah")
     }
 
     private fun getUserPosts() {
