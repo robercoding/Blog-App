@@ -14,6 +14,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -94,6 +95,7 @@ class ProfileDetailViewModel
         _profileDetailState.value = ProfileDetailState.LoadingPosts
         _profileDetailState.value = ProfileDetailState.LoadingUser
         viewModelScope.launch {
+            delay(200)
             firebaseRepository.getCurrentUser()
                 .collect { resultData ->
                     when (resultData) {
@@ -103,6 +105,7 @@ class ProfileDetailViewModel
 
                                 var bitmap : Bitmap? = null
                                 bitmap = getBitmapFromUrl(imageUrl)
+
                                 _profileDetailState.value =
                                     ProfileDetailState.SetCurrentUserProfile(resultData.data, colorUrl, imageUrl, bitmap)
 
@@ -137,7 +140,6 @@ class ProfileDetailViewModel
     }
 
     private fun getUserProfile(username: String) {
-
         viewModelScope.launch {
             firebaseRepository.getUserProfile(username)
                 .collect { resultData ->
@@ -204,6 +206,7 @@ class ProfileDetailViewModel
     }
 
     private fun getUserPosts() {
+//        _profileDetailState.value = ProfileDetailState.LoadingPosts
         viewModelScope.launch {
             firebaseRepository.retrieveProfileUsersPosts(user!!.username)
                 .collect { resultData ->

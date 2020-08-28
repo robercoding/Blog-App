@@ -10,7 +10,6 @@
         <OnSwipe
             app:touchAnchorId="@+id/space"
             app:dragDirection="dragUp"/>
-
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
@@ -82,7 +81,11 @@
             android:layout_marginStart="30dp"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="10dp"
-            android:elevation="5dp"/>
+            android:elevation="5dp">
+            <CustomAttribute
+                app:attributeName="textColor"
+                app:customColorValue="@color/colorGray2TextSpotify"/>
+        </Constraint>
 
         <Constraint
             android:id="@+id/uid_biography"
@@ -130,7 +133,6 @@
             android:layout_marginBottom="20dp"
             />
 
-
         <Constraint
             android:id="@+id/container_user_tabs"
             android:layout_width="match_parent"
@@ -139,14 +141,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider_profile"/>
 
-
         <Constraint
             android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/container_user_tabs"
             app:layout_constraintBottom_toBottomOf="parent"/>
-
 
     </ConstraintSet>
 
@@ -228,7 +228,12 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="20dp"
             android:layout_marginStart="93dp"
-            android:elevation="5dp"/>
+            android:elevation="5dp">
+            <CustomAttribute
+                app:attributeName="textColor"
+                app:customColorValue="@color/white"/>
+
+        </Constraint>
 
         <Constraint
             android:id="@+id/uid_biography"
@@ -292,6 +297,5 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/container_user_tabs"
             app:layout_constraintBottom_toBottomOf="parent"/>
-
     </ConstraintSet>
 </MotionScene>

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
@@ -39,10 +40,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
     var dominantColorToolbarMotionLayoutEnd = 0
     var imageToolbarMotionLayoutStart = ""
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -116,6 +113,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                 setUserPosts(listUserPosts.toMutableList())
                 displayProgressBar(false)
                 stopSwipeRefresh()
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Idle)
             }
 
             is ProfileDetailState.LoadingPosts -> {
@@ -174,6 +172,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                     Toast.LENGTH_SHORT
                 ).show()
                 backToPreviousFragment()
+            }
+
+            is ProfileDetailState.Idle -> {
+                //Nothing
             }
         }
     }
@@ -348,10 +350,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun displayProgressBar(isDisplayed: Boolean) {
-//        if (isDisplayed)
-//            progress_bar_profile_posts.visibility = View.VISIBLE
-//        else
-//            progress_bar_profile_posts.visibility = View.GONE
+        if (isDisplayed){
+            progress_bar_profile_posts.visibility = View.VISIBLE
+        }else{
+            progress_bar_profile_posts.visibility = View.GONE
+        }
     }
 
     private fun displayBottomNavigation(display: Boolean) {

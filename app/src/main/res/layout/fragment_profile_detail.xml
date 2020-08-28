@@ -10,8 +10,9 @@
 
     <ProgressBar
         android:id="@+id/profile_detail_background_progress_bar"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:indeterminateTint="@color/blueTwitter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -211,7 +212,6 @@
 
         </com.google.android.material.tabs.TabLayout>
 
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
@@ -220,20 +220,17 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:scrollbarSize="2dp"
             android:scrollbars="vertical" />
-
-
-
-
-<!--        <ProgressBar-->
-<!--            android:id="@+id/progress_bar_profile_posts"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:visibility="gone"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="@id/container_user_tabs" />-->
-
     </androidx.constraintlayout.motion.widget.MotionLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar_profile_posts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminateTint="@color/blueTwitter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="150dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
