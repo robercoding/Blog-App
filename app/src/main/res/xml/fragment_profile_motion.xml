@@ -4,12 +4,12 @@
     xmlns:motion="http://schemas.android.com/tools">
 
     <Transition
-        app:duration="1500"
+        app:constraintSetEnd="@id/end"
         app:constraintSetStart="@id/start"
-        app:constraintSetEnd="@id/end">
+        app:duration="1500">
         <OnSwipe
-            app:touchAnchorId="@+id/space"
-            app:dragDirection="dragUp"/>
+            app:dragDirection="dragUp"
+            app:touchAnchorId="@+id/space" />
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
@@ -18,30 +18,35 @@
             android:id="@+id/profile_detail_swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:elevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="0dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/profile_detail_app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:elevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="0dp">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
         </Constraint>
 
         <Constraint
-            android:id="@+id/profile_detail_image_background"
+            android:id="@+id/profile_detail_image_background_clear"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Constraint
+            android:id="@+id/profile_detail_image_background_blurred"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Constraint
             android:id="@+id/uid_image"
@@ -49,52 +54,52 @@
             android:layout_height="60dp"
             android:layout_marginStart="30dp"
             android:layout_marginTop="40dp"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
+            android:elevation="5dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:elevation="5dp"/>
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
         <Constraint
             android:id="@+id/profile_detail_button_edit"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
-            android:layout_marginEnd="30dp"
             android:layout_marginTop="80dp"
-            android:visibility="visible"/>
+            android:layout_marginEnd="30dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
         <Constraint
             android:id="@+id/profile_detail_button_follow"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
-            android:layout_marginEnd="30dp"
             android:layout_marginTop="80dp"
-            android:visibility="visible"/>
+            android:layout_marginEnd="30dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
         <Constraint
             android:id="@+id/uid_name"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/uid_image"
             android:layout_marginStart="30dp"
-            app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="10dp"
-            android:elevation="5dp">
+            android:elevation="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/uid_image">
             <CustomAttribute
                 app:attributeName="textColor"
-                app:customColorValue="@color/colorGray2TextSpotify"/>
+                app:customColorValue="@color/colorGray2TextSpotify" />
         </Constraint>
 
         <Constraint
             android:id="@+id/uid_biography"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintTop_toBottomOf="@id/uid_name"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="15dp" />
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintTop_toBottomOf="@id/uid_name" />
 
         <Constraint
             android:id="@+id/space"
@@ -102,7 +107,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_biography"/>
+            app:layout_constraintTop_toBottomOf="@id/uid_biography" />
 
         <Constraint
             android:id="@+id/uid_following"
@@ -127,11 +132,10 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginTop="15dp"
+            android:layout_marginBottom="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_following"
-            android:layout_marginBottom="20dp"
-            />
+            app:layout_constraintTop_toBottomOf="@id/uid_following" />
 
         <Constraint
             android:id="@+id/container_user_tabs"
@@ -139,14 +143,14 @@
             android:layout_height="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/divider_profile"/>
+            app:layout_constraintTop_toBottomOf="@id/divider_profile" />
 
         <Constraint
             android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/container_user_tabs"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/container_user_tabs" />
 
     </ConstraintSet>
 
@@ -156,69 +160,76 @@
             android:id="@+id/profile_detail_swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:elevation="3dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="3dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/profile_detail_app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:elevation="3dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="3dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
-            android:id="@+id/profile_detail_image_background"
+            android:id="@+id/profile_detail_image_background_clear"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_height="120dp"
+            android:elevation="3dp"
+            android:translationY="-60dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="3dp"/>
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Constraint
+            android:id="@+id/profile_detail_image_background_blurred"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:elevation="3dp"
+            android:translationY="-60dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Constraint
             android:id="@+id/profile_detail_button_edit"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="30dp"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/profile_detail_button_follow"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="30dp"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/uid_image"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginTop="13dp"
             android:layout_marginStart="50dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="13dp"
+            android:elevation="5dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:elevation="5dp"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/uid_name"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="20dp"
             android:layout_marginStart="93dp"
-            android:elevation="5dp">
+            android:layout_marginTop="20dp"
+            android:elevation="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
             <CustomAttribute
                 app:attributeName="textColor"
-                app:customColorValue="@color/white"/>
+                app:customColorValue="@color/white" />
 
         </Constraint>
 
@@ -226,10 +237,10 @@
             android:id="@+id/uid_biography"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="30dp"
-            android:visibility="gone"/>
+            android:layout_marginEnd="20dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/space"
@@ -237,34 +248,33 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_biography"/>
+            app:layout_constraintTop_toBottomOf="@id/uid_biography" />
 
         <Constraint
             android:id="@+id/uid_following"
             android:layout_width="100dp"
             android:layout_height="20dp"
             android:layout_marginStart="30dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="10dp"
             android:visibility="invisible"
-            />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/uid_followers"
             android:layout_width="100dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="30dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Constraint
             android:id="@+id/divider_profile"
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="40dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -273,16 +283,17 @@
             android:id="@+id/container_user_tabs"
             android:layout_width="match_parent"
             android:layout_height="30dp"
+            android:elevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
-            android:elevation="4dp"/>
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
         <Constraint
             android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/container_user_tabs"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:elevation="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/container_user_tabs" />
     </ConstraintSet>
 </MotionScene>

@@ -34,7 +34,7 @@ class ProfileDetailViewModel
     var user: User? = null
 
     private val imageUrl =
-        "https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmewww.jpg?alt=media&token=41952158-a73d-4e09-a634-09182c5c10d7"
+        "https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fflakked.jpg?alt=media&token=41834b34-5d7c-4dad-bd54-0d1e7c7dad29"
 
     private var colorUrl = 0
 

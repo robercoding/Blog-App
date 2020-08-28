@@ -6,6 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.profile.profiledetail.ProfileFragment"
     android:id="@+id/profile_detail_layout_background"
+
     >
 
     <ProgressBar
@@ -32,16 +33,24 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-
         <ImageView
-            android:id="@+id/profile_detail_image_background"
+            android:id="@+id/profile_detail_image_background_blurred"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:scaleType="fitXY"
-            android:background="@drawable/black_screen"
+
+            />
+
+        <ImageView
+            android:id="@+id/profile_detail_image_background_clear"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:scaleType="fitXY"
+
             />
 
         <com.google.android.material.appbar.AppBarLayout
@@ -220,7 +229,6 @@
         </com.google.android.material.tabs.TabLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:background="@color/background"
             android:id="@+id/recycler_profile_detail_posts"
             android:layout_width="match_parent"
             android:layout_height="0dp"

@@ -226,7 +226,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         Glide.with(requireView())
             .load(imageFromUrlToolbarStart)
-            .into(profile_detail_image_background)
+            .into(profile_detail_image_background_clear)
 
     }
 
@@ -255,7 +255,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         Glide.with(requireView())
             .load(imageFromUrlToolbarStart)
-            .into(profile_detail_image_background)
+            .into(profile_detail_image_background_clear)
 
     }
 

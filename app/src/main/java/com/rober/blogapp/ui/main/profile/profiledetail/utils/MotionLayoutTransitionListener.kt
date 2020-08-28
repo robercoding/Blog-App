@@ -1,13 +1,16 @@
 package com.rober.blogapp.ui.main.profile.profiledetail.utils
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.ViewTarget
 import com.rober.blogapp.R
 import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.android.synthetic.main.fragment_feed.view.*
@@ -19,6 +22,9 @@ class MotionLayoutTransitionListener constructor(
     private val imageFromUrl: String,
     private val dominantColorFromImageUrl: Int
 ) : MotionLayout.TransitionListener {
+
+    var blurredImageGlide : ViewTarget<ImageView, Drawable>? = null
+    var isImageBlurred = false
 
     override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {
 
@@ -57,25 +63,55 @@ class MotionLayoutTransitionListener constructor(
 //                view.profile_detail_swipe_refresh_layout.isEnabled = false
 //            }
 //        }
-        if (p3 > 0 && p3 < 0.35) {
+        //KEEP BLURRED IMAGE UNTIL IT'S FULLY COLOR DOMINANT
+//        if (p3 > 0 && p3 < 0.35) {
+//            Glide.with(view)
+//                .load(imageFromUrl)
+//                .into(view.profile_detail_image_background)
+//            view.profile_detail_swipe_refresh_layout.isEnabled = true
+//        }else if(p3 > 0.35f && p3 < 0.45){
+//            applyBlurrToImageBackground(25, 1)
+//            view.profile_detail_swipe_refresh_layout.isEnabled = true
+//        }else if(p3 > 0.45 && p3 < 0.55){
+//
+//        }else if(p3 > 0.55 && p3 < 0.65){
+//                applyBlurrToImageBackground(25, 1)
+//                view.profile_detail_swipe_refresh_layout.isEnabled = true
+//        }else if(p3 > 0.65 && p3 < 0.90){
+//            view.profile_detail_swipe_refresh_layout.isEnabled = false
+//        }else if(p3 > 0.90){
+//            Glide.with(view)
+//                .clear(view.profile_detail_image_background)
+//            view.profile_detail_image_background.setBackgroundColor(dominantColorFromImageUrl)
+//            view.profile_detail_swipe_refresh_layout.isEnabled = false
+//        }
+        if(p3 < 0.70f){
             Glide.with(view)
                 .load(imageFromUrl)
-                .into(view.profile_detail_image_background)
+                .into(view.profile_detail_image_background_clear)
+            view.profile_detail_image_background_clear.visibility = View.VISIBLE
+            view.profile_detail_image_background_blurred.visibility = View.INVISIBLE
             view.profile_detail_swipe_refresh_layout.isEnabled = true
-        }else if(p3 > 0.35f && p3 < 0.45){
-            applyBlurrToImageBackground(25, 1)
-            view.profile_detail_swipe_refresh_layout.isEnabled = true
-        }else if(p3 > 0.45 && p3 < 0.55){
+            if(!isImageBlurred){
+                applyBlurrToImageBackground(10, 2)
+                isImageBlurred = true
+            }
 
-        }else if(p3 > 0.55 && p3 < 0.65){
-                applyBlurrToImageBackground(25, 1)
-                view.profile_detail_swipe_refresh_layout.isEnabled = true
-        }else if(p3 > 0.65 && p3 < 0.90){
+        }else if(p3>0.70f && p3< 0.85f){
+            view.profile_detail_image_background_blurred.visibility = View.VISIBLE
+            view.profile_detail_image_background_clear.visibility = View.INVISIBLE
             view.profile_detail_swipe_refresh_layout.isEnabled = false
-        }else if(p3 > 0.90){
+
+        }else if(p3> 0.85f){
+            view.profile_detail_image_background_clear.visibility = View.VISIBLE
+            view.profile_detail_image_background_blurred.visibility = View.INVISIBLE
+
+            view.profile_detail_image_background_clear.setBackgroundColor(dominantColorFromImageUrl)
             Glide.with(view)
-                .clear(view.profile_detail_image_background)
-            view.profile_detail_image_background.setBackgroundColor(dominantColorFromImageUrl)
+                .clear(view.profile_detail_image_background_clear)
+//            Glide.with(view)
+//                .clear(view.profile_detail_image_background_blurred)
+
             view.profile_detail_swipe_refresh_layout.isEnabled = false
         }
 //        if(p3 > 75f){
@@ -100,6 +136,6 @@ class MotionLayoutTransitionListener constructor(
         Glide.with(view)
             .load(imageFromUrl)
             .apply(RequestOptions.bitmapTransform(BlurTransformation(radius,sampling)))
-            .into(view.profile_detail_image_background)
+            .into(view.profile_detail_image_background_blurred)
     }
 }
