@@ -28,6 +28,7 @@ import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
@@ -54,7 +55,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
 
-        Toast.makeText(requireContext(), "Its working", Toast.LENGTH_SHORT).show()
         setupListeners()
         subscribeObservers()
         getUserArgumentAndSetIntention()
@@ -86,7 +86,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                 showViewMotionLayout(true)
 
                 val user = profileDetailState.user
-                dominantColorToolbarMotionLayoutEnd = profileDetailState.color
                 imageToolbarMotionLayoutStart = profileDetailState.imageBackground
 
                 setViewForCurrentUser(profileDetailState.bitmap)
@@ -215,14 +214,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         Palette.Builder(bitmap).generate {palette ->
             palette?.let {
                 val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
-                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireContext(), requireView(), imageToolbarMotionLayoutStart, color)
+                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireView(), imageToolbarMotionLayoutStart, color)
                 profile_detail_motion_layout.apply {
                     setTransitionListener(motionLayoutTransitionListener)
                 }
 
-
             }?: kotlin.run {
-                Log.i("Palette", "Not work")
+                Log.i("Palette", "Palette is not working")
             }
         }
 
@@ -230,7 +228,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_motion_layout.apply {
             Log.i("CurrentColor", "$dominantColorToolbarMotionLayoutEnd")
 
-//            setTransitionListener(motionLayoutTransitionListener)
             getConstraintSet(R.id.start)?.let {
                 it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility =
                     View.VISIBLE

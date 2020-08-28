@@ -107,7 +107,7 @@ class ProfileDetailViewModel
                                 bitmap = getBitmapFromUrl(imageUrl)
 
                                 _profileDetailState.value =
-                                    ProfileDetailState.SetCurrentUserProfile(resultData.data, colorUrl, imageUrl, bitmap)
+                                    ProfileDetailState.SetCurrentUserProfile(resultData.data, imageUrl, bitmap)
 
                             } ?: kotlin.run {
                                 _profileDetailState.value =
