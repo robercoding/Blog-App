@@ -103,7 +103,7 @@ class ProfileDetailViewModel
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
 
-                                var bitmap : Bitmap? = null
+                                var bitmap: Bitmap? = null
                                 bitmap = getBitmapFromUrl(imageUrl)
 
                                 _profileDetailState.value =
@@ -140,7 +140,10 @@ class ProfileDetailViewModel
     }
 
     private fun getUserProfile(username: String) {
+        _profileDetailState.value = ProfileDetailState.LoadingPosts
+        _profileDetailState.value = ProfileDetailState.LoadingUser
         viewModelScope.launch {
+            delay(200)
             firebaseRepository.getUserProfile(username)
                 .collect { resultData ->
                     when (resultData) {
@@ -150,10 +153,15 @@ class ProfileDetailViewModel
                                 val currentUserFollowsOtherUser =
                                     currentUserFollowsOtherUser(username)
 
-                                _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(
-                                    user!!,
-                                    currentUserFollowsOtherUser
-                                )
+                                val bitmap = getBitmapFromUrl(imageUrl)
+
+                                _profileDetailState.value =
+                                    ProfileDetailState.SetOtherUserProfile(
+                                        user!!,
+                                        currentUserFollowsOtherUser,
+                                        imageUrl,
+                                        bitmap
+                                    )
                             }
                         }
 
@@ -170,7 +178,8 @@ class ProfileDetailViewModel
         val imageBitmapFromUrlAsyncTask = GetImageBitmapFromUrlAsyncTask()
         imageBitmapFromUrlAsyncTask.execute(urlImage)
 
-        while (!imageBitmapFromUrlAsyncTask.success) {}
+        while (!imageBitmapFromUrlAsyncTask.success) {
+        }
 
         if (!imageBitmapFromUrlAsyncTask.success) {
             return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
@@ -180,7 +189,7 @@ class ProfileDetailViewModel
         return imageBitmapFromUrlAsyncTask.get()
     }
 
-    private fun getDominantColorFromBitmap(bitmap: Bitmap){
+    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
         Log.i("CurrentColor", "Inside lets get the color")
 //        Palette.Builder(bitmap).generate { palette ->
 //            if(palette == null)
@@ -195,10 +204,10 @@ class ProfileDetailViewModel
 //                Log.i("CurrentColor", "$colorUrl")
 //            }
 //        }
-        Palette.Builder(bitmap).generate {palette ->
+        Palette.Builder(bitmap).generate { palette ->
             colorUrl = palette?.let {
                 it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
-            }?: kotlin.run {
+            } ?: kotlin.run {
                 Log.i("Palette", "Not work")
             }
         }

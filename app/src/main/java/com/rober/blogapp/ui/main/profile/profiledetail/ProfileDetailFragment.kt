@@ -39,9 +39,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
 
-    var dominantColorToolbarMotionLayoutEnd = 0
-    var imageToolbarMotionLayoutStart = ""
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -83,13 +80,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         when (profileDetailState) {
             is ProfileDetailState.SetCurrentUserProfile -> {
                 Log.i(TAG, "SetCurrentUserProfile")
-                showViewMotionLayout(true)
+                showProfileDetailView(true)
 
                 val user = profileDetailState.user
-                imageToolbarMotionLayoutStart = profileDetailState.imageBackground
 
-                setViewForCurrentUser(profileDetailState.bitmap)
-                setUserProfile(user)
+                setViewForCurrentUser(profileDetailState.imageFromUrlToolbarStart, profileDetailState.bitmap)
+                setUserProfileData(user)
 
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
             }
@@ -98,12 +94,15 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                 val user = profileDetailState.user
 
                 displayBottomNavigation(false)
-                showViewMotionLayout(true)
+                showProfileDetailView(true)
 
                 setFollowButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
 
-                setViewForOtherUser()
-                setOtherUserProfile(user)
+                val imageFromUrlToolbarStart = profileDetailState.imageFromUrlToolbarStart
+                val bitmap = profileDetailState.bitmap
+
+                setViewForOtherUser(imageFromUrlToolbarStart, bitmap)
+                setOtherUserProfileData(user)
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
             }
 
@@ -120,7 +119,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is ProfileDetailState.LoadingUser -> {
-                showViewMotionLayout(false)
+                showProfileDetailView(false)
             }
 
             is ProfileDetailState.Followed -> {
@@ -179,7 +178,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun showViewMotionLayout(showMotionLayout: Boolean) {
+    private fun showProfileDetailView(showMotionLayout: Boolean) {
         if (showMotionLayout) {
             profile_detail_motion_layout.visibility = View.VISIBLE
             profile_detail_background_progress_bar.visibility = View.VISIBLE
@@ -189,56 +188,30 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun setUserProfile(user: User) {
+    private fun setUserProfileData(user: User) {
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
         uid_following.text = "${user.following} Following"
-
-        Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
-            .into(uid_image)
-
-        Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
-            .into(profile_detail_image_background)
 
         setFollowerText(user.follower)
     }
 
-    private fun setViewForCurrentUser(bitmap: Bitmap) {
+    private fun setViewForCurrentUser(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
         Log.i("SetView", "Setting current User!")
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
-        Palette.Builder(bitmap).generate {palette ->
-            palette?.let {
-                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
-                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireView(), imageToolbarMotionLayoutStart, color)
-                profile_detail_motion_layout.apply {
-                    setTransitionListener(motionLayoutTransitionListener)
-                }
+        setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart, bitmap)
 
-            }?: kotlin.run {
-                Log.i("Palette", "Palette is not working")
-            }
-        }
-
-        //When I apply this inside the palette the edit profile doesn't appear like follow button
         profile_detail_motion_layout.apply {
-            Log.i("CurrentColor", "$dominantColorToolbarMotionLayoutEnd")
-
-            getConstraintSet(R.id.start)?.let {
+            this.getConstraintSet(R.id.start)?.let {
                 it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility =
                     View.VISIBLE
                 it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility =
                     View.GONE
-                Glide.with(requireView())
-                    .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
-                    .into(profile_detail_image_background)
             }
-
-            getConstraintSet(R.id.end)?.let {
+            this.getConstraintSet(R.id.end)?.let {
                 it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility =
                     View.VISIBLE
                 it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility =
@@ -246,21 +219,65 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             }
         }
 
-
-    }
-
-    private fun setOtherUserProfile(user: User) {
-
-        uid_name.text = "@${user.username}"
-        uid_biography.text = user.biography
-        uid_following.text = "${user.following} Following"
+        //Load user images: profileImage hardcoded url
         Glide.with(requireView())
             .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
             .into(uid_image)
 
         Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .load(imageFromUrlToolbarStart)
             .into(profile_detail_image_background)
+
+    }
+
+    private fun setViewForOtherUser(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
+        Log.i("SetView", "Setting other User!")
+        profile_detail_button_follow.visibility = View.VISIBLE
+        profile_detail_button_edit.visibility = View.GONE
+
+        setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart, bitmap)
+
+        profile_detail_motion_layout.apply {
+            this.getConstraintSet(R.id.start)?.let {constraintSet ->
+                constraintSet.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
+                constraintSet.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
+            }
+            this.getConstraintSet(R.id.end)?.let {
+                it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
+                it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
+            }
+        }
+
+        //Load user images: profileImage hardcoded url
+        Glide.with(requireView())
+            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .into(uid_image)
+
+        Glide.with(requireView())
+            .load(imageFromUrlToolbarStart)
+            .into(profile_detail_image_background)
+
+    }
+
+    private fun setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
+        Palette.Builder(bitmap).generate { palette ->
+            palette?.let {
+                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
+                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireView(), imageFromUrlToolbarStart, color)
+                profile_detail_motion_layout.apply {
+                    setTransitionListener(motionLayoutTransitionListener)
+                }
+            } ?: kotlin.run {
+                Log.i("Palette", "Palette is not working")
+            }
+        }
+    }
+
+    private fun setOtherUserProfileData(user: User) {
+
+        uid_name.text = "@${user.username}"
+        uid_biography.text = user.biography
+        uid_following.text = "${user.following} Following"
 
         setFollowerText(user.follower)
     }
@@ -272,22 +289,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             uid_followers.append("s")
     }
 
-    private fun setViewForOtherUser() {
-        Log.i("SetView", "Setting other User!")
-        profile_detail_button_follow.visibility = View.VISIBLE
-        profile_detail_button_edit.visibility = View.GONE
-
-        profile_detail_motion_layout.getConstraintSet(R.id.start)?.let {
-            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
-            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility =
-                View.VISIBLE
-        }
-        profile_detail_motion_layout.getConstraintSet(R.id.end)?.let {
-            it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
-            it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility =
-                View.VISIBLE
-        }
-    }
 
     private fun setUserPosts(listUserPosts: MutableList<Post>) {
         postAdapter.setPosts(listUserPosts)
@@ -347,9 +348,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun displayProgressBar(isDisplayed: Boolean) {
-        if (isDisplayed){
+        if (isDisplayed) {
             progress_bar_profile_posts.visibility = View.VISIBLE
-        }else{
+        } else {
             progress_bar_profile_posts.visibility = View.GONE
         }
     }

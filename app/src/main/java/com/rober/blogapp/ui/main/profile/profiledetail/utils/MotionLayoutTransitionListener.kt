@@ -7,7 +7,9 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.rober.blogapp.R
+import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.android.synthetic.main.fragment_feed.view.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.view.*
@@ -27,23 +29,77 @@ class MotionLayoutTransitionListener constructor(
     }
 
     override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {
-        if (p3 < 0.65f) {
+        Log.i("PTres", "${p3}")
+//        when(p3){
+//            0f -> {
+////                applyBlurrToImageBackground(0, 0)
+//                Glide.with(view)
+//                    .load(imageFromUrl)
+//                    .into(view.profile_detail_image_background)
+//                view.profile_detail_swipe_refresh_layout.isEnabled = true
+//            }
+//            0.35f -> {
+//                applyBlurrToImageBackground(25, 1)
+//            }
+//
+//            0.45f -> {
+//                applyBlurrToImageBackground(25, 2)
+//            }
+//            0.55f -> {
+//                applyBlurrToImageBackground(25, 3)
+//            }
+//            0.65f -> {
+//                applyBlurrToImageBackground(25, 4)
+//                view.profile_detail_swipe_refresh_layout.isEnabled = true
+//            }
+//            0.75f ->{
+//                view.profile_detail_image_background.setBackgroundColor(dominantColorFromImageUrl)
+//                view.profile_detail_swipe_refresh_layout.isEnabled = false
+//            }
+//        }
+        if (p3 > 0 && p3 < 0.35) {
             Glide.with(view)
-                .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+                .load(imageFromUrl)
                 .into(view.profile_detail_image_background)
             view.profile_detail_swipe_refresh_layout.isEnabled = true
-        } else {
+        }else if(p3 > 0.35f && p3 < 0.45){
+            applyBlurrToImageBackground(25, 1)
+            view.profile_detail_swipe_refresh_layout.isEnabled = true
+        }else if(p3 > 0.45 && p3 < 0.55){
+
+        }else if(p3 > 0.55 && p3 < 0.65){
+                applyBlurrToImageBackground(25, 1)
+                view.profile_detail_swipe_refresh_layout.isEnabled = true
+        }else if(p3 > 0.65 && p3 < 0.90){
+            view.profile_detail_swipe_refresh_layout.isEnabled = false
+        }else if(p3 > 0.90){
             Glide.with(view)
                 .clear(view.profile_detail_image_background)
-            view.profile_detail_swipe_refresh_layout.isEnabled = false
-            Log.i("ColorDiff", "White = ${R.color.white} and new ${dominantColorFromImageUrl}")
-//            view.profile_detail_image_background.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
             view.profile_detail_image_background.setBackgroundColor(dominantColorFromImageUrl)
-
+            view.profile_detail_swipe_refresh_layout.isEnabled = false
         }
+//        if(p3 > 75f){
+////            Glide.with(view)
+////                .clear(view.profile_detail_image_background)
+//            applyBlurrToImageBackground(25, 3)
+////            view.profile_detail_image_background.setBackgroundColor(dominantColorFromImageUrl)
+//            view.profile_detail_swipe_refresh_layout.isEnabled = false
+//        }else{
+//            Glide.with(view)
+//                .load(imageFromUrl)
+//                .into(view.profile_detail_image_background)
+//            view.profile_detail_swipe_refresh_layout.isEnabled = true
+//        }
     }
 
     override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
 
+    }
+
+    private fun applyBlurrToImageBackground(radius: Int, sampling: Int){
+        Glide.with(view)
+            .load(imageFromUrl)
+            .apply(RequestOptions.bitmapTransform(BlurTransformation(radius,sampling)))
+            .into(view.profile_detail_image_background)
     }
 }
