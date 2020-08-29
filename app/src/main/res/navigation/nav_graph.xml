@@ -74,6 +74,9 @@
         <action
             android:id="@+id/action_profileDetailFragment_to_postDetailFragment"
             app:destination="@id/postDetailFragment" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_profileEditFragment"
+            app:destination="@id/profileEditFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -123,5 +126,14 @@
         <action
             android:id="@+id/action_postDetailFragment_to_feedFragment"
             app:destination="@id/feedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileEditFragment"
+        android:name="com.rober.blogapp.ui.main.profile.profileedit.ProfileEditFragment"
+        android:label="fragment_profile_edit"
+        tools:layout="@layout/fragment_profile_edit" >
+        <action
+            android:id="@+id/action_profileEditFragment_to_profileDetailFragment"
+            app:destination="@id/profileDetailFragment" />
     </fragment>
 </navigation>
