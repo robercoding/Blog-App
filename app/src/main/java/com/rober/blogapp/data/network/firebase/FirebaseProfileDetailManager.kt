@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.Exception
 
-class FirebaseProfileManager @Inject constructor(
+class FirebaseProfileDetailManager @Inject constructor(
     private val firebaseSource: FirebaseSource,
     private val firebasePath: FirebasePath
 ) {

@@ -10,7 +10,6 @@ import com.rober.blogapp.data.network.util.FirebasePath
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -36,7 +35,8 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseAuthManager(firebaseSource: FirebaseSource, firebaseErrors: FirebaseErrors): FirebaseAuthManager = FirebaseAuthManager(firebaseSource, firebaseErrors)
+    fun provideFirebaseAuthManager(firebaseSource: FirebaseSource, firebaseErrors: FirebaseErrors): FirebaseAuthManager =
+        FirebaseAuthManager(firebaseSource, firebaseErrors)
 
     @Singleton
     @Provides
@@ -44,20 +44,39 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebasePostAddManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebasePostAddManager = FirebasePostAddManager(firebaseSource, firebasePath)
+    fun provideFirebasePostAddManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebasePostAddManager =
+        FirebasePostAddManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides
-    fun provideFirebaseProfileManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseProfileManager = FirebaseProfileManager(firebaseSource, firebasePath)
+    fun provideFirebaseProfileManager(
+        firebaseSource: FirebaseSource,
+        firebasePath: FirebasePath
+    ): FirebaseProfileDetailManager = FirebaseProfileDetailManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides
-    fun provideFirebaseSearchManager(firebaseSource: FirebaseSource): FirebaseSearchManager = FirebaseSearchManager(firebaseSource)
+    fun provideFirebaseSearchManager(firebaseSource: FirebaseSource): FirebaseSearchManager =
+        FirebaseSearchManager(firebaseSource)
 
     @Singleton
     @Provides
-    fun provideFirebaseRepository(firebaseAuthManager: FirebaseAuthManager, firebaseFeedManager: FirebaseFeedManager, firebasePostAddManager: FirebasePostAddManager, firebaseSearchManager: FirebaseSearchManager, firebaseProfileManager: FirebaseProfileManager)
-            : FirebaseRepository= FirebaseRepository(firebaseAuthManager, firebaseFeedManager, firebasePostAddManager, firebaseSearchManager, firebaseProfileManager)
+    fun provideFirebaseRepository(
+        firebaseAuthManager: FirebaseAuthManager,
+        firebaseFeedManager: FirebaseFeedManager,
+        firebasePostAddManager: FirebasePostAddManager,
+        firebaseSearchManager: FirebaseSearchManager,
+        firebaseProfileDetailManager: FirebaseProfileDetailManager,
+        firebaseProfileEditManager: FirebaseProfileEditManager
+
+    ): FirebaseRepository = FirebaseRepository(
+        firebaseAuthManager,
+        firebaseFeedManager,
+        firebasePostAddManager,
+        firebaseSearchManager,
+        firebaseProfileDetailManager,
+        firebaseProfileEditManager
+    )
 
 
 }

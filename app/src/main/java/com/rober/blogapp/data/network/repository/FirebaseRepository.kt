@@ -7,7 +7,6 @@ import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class FirebaseRepository @Inject
@@ -16,7 +15,8 @@ constructor(
     private val firebaseFeedManager: FirebaseFeedManager,
     private val firebasePostAddManager: FirebasePostAddManager,
     private val firebaseSearchManager: FirebaseSearchManager,
-    private val firebaseProfileManager: FirebaseProfileManager
+    private val firebaseProfileDetailManager: FirebaseProfileDetailManager,
+    private val firebaseProfileEditManager: FirebaseProfileEditManager
 ) {
     val TAG ="FirebaseRepository"
 
@@ -52,17 +52,21 @@ constructor(
     //Search
     suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
 
-    //Profile
+    //ProfileDetail
+    suspend fun retrieveProfileUsersPosts(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileDetailManager.retrieveUserPosts(userID)
 
-    suspend fun retrieveProfileUsersPosts(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveUserPosts(userID)
+    suspend fun retrieveNewerPostsUserProfile(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileDetailManager.retrieveUserNewerPosts(userID)
 
-    suspend fun retrieveNewerPostsUserProfile(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileManager.retrieveUserNewerPosts(userID)
+    suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileDetailManager.getUserProfile(username)
 
-    suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileManager.getUserProfile(username)
+    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.currentUserFollowsOtherUser(otherUsername)
 
-    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileManager.currentUserFollowsOtherUser(otherUsername)
+    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
 
-    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileManager.followOtherUser(user)
+    suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.unfollowOtherUser(user)
 
-    suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileManager.unfollowOtherUser(user)
+    //ProfileEdit
+    suspend fun updateUser(previousUser: User, newUser: User): Flow<ResultData<Boolean>> = firebaseProfileEditManager.updateUser(previousUser, newUser)
+
+    suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = firebaseProfileEditManager.checkIfUsernameAvailable(username)
 }
