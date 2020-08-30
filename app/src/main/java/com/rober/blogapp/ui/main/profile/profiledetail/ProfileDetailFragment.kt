@@ -13,9 +13,11 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -161,6 +163,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                     Toast.LENGTH_SHORT
                 ).show()
                 setFollowButtonViewForOtherUser(true)
+            }
+
+            is ProfileDetailState.NavigateToProfileEdit -> {
+                navigateToProfileEdit(profileDetailState.user)
             }
 
             is ProfileDetailState.Error -> {
@@ -338,6 +344,14 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             }
         }
 
+        profile_detail_button_edit.apply {
+            setOnClickListener {
+                Toast.makeText(requireContext(), "Clicked", Toast.LENGTH_SHORT).show()
+
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToProfileEdit)
+            }
+        }
+
         profile_detail_swipe_refresh_layout.setOnRefreshListener {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
         }
@@ -366,6 +380,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         navController.findNavController().popBackStack()
     }
 
+    private fun navigateToProfileEdit(user: User){
+        Toast.makeText(requireContext(), "We are going to profile edit", Toast.LENGTH_SHORT).show()
+        val navController = findNavController()
+        val userBundle = bundleOf("user" to user)
+        navController.navigate(R.id.profileEditFragment, userBundle)
+    }
+
 
     override fun clickListenerOnPost(positionAdapter: Int) {
         //TODO
@@ -389,5 +410,6 @@ sealed class ProfileDetailFragmentEvent {
     object Unfollow : ProfileDetailFragmentEvent()
     object Follow : ProfileDetailFragmentEvent()
 
+    object NavigateToProfileEdit: ProfileDetailFragmentEvent()
     object Idle : ProfileDetailFragmentEvent()
 }

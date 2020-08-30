@@ -10,6 +10,7 @@ class Destinations @Inject constructor(){
     val REGISTER_FRAGMENT = R.id.registerFragment
     val POST_ADD_FRAGMENT = R.id.postAddFragment
     val POST_DETAIL_FRAGMENT = R.id.postDetailFragment
+    val PROFILE_EDIT_FRAGMENT = R.id.profileEditFragment
 
     //With BottomNavigation
     val FEED_FRAGMENT = R.id.feedFragment
@@ -20,7 +21,8 @@ class Destinations @Inject constructor(){
         LOGIN_FRAGMENT,
         REGISTER_FRAGMENT,
         POST_ADD_FRAGMENT,
-        POST_DETAIL_FRAGMENT
+        POST_DETAIL_FRAGMENT,
+        PROFILE_EDIT_FRAGMENT
     )
 
     val fragmentsWithBottomNavigationList = listOf(

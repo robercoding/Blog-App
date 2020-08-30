@@ -85,6 +85,14 @@ class ProfileDetailViewModel
                 }
             }
 
+            is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
+                user?.let {user ->
+                    _profileDetailState.value = ProfileDetailState.NavigateToProfileEdit(user)
+                }?: kotlin.run {
+                    _profileDetailState.value = ProfileDetailState.Idle
+                }
+            }
+
             is ProfileDetailFragmentEvent.Idle -> {
                 _profileDetailState.value = ProfileDetailState.Idle
             }

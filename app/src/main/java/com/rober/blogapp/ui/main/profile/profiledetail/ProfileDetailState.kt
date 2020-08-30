@@ -18,6 +18,7 @@ sealed class ProfileDetailState {
     object UnfollowError: ProfileDetailState()
     object FollowError: ProfileDetailState()
 
+    data class NavigateToProfileEdit(val user: User): ProfileDetailState()
     object Idle : ProfileDetailState()
 
     object LoadingUser : ProfileDetailState()

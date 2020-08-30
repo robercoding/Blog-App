@@ -5,7 +5,7 @@
     <item
         android:title="SAVE"
         android:contentDescription="Save profile configuration"
-        android:id="toolbar_profile_edit_save"
+        android:id="@+id/toolbar_profile_edit_save"
         app:showAsAction="ifRoom"/>
 
 </menu>
