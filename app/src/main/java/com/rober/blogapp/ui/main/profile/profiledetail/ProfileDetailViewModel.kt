@@ -110,7 +110,7 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-
+                                Log.i("Username", "${user?.username}")
                                 var bitmap: Bitmap? = null
                                 bitmap = getBitmapFromUrl(imageUrl)
 

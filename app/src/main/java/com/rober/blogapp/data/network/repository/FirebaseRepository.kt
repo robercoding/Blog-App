@@ -1,5 +1,6 @@
 package com.rober.blogapp.data.network.repository
 
+import android.net.Uri
 import com.google.firebase.firestore.Source
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
@@ -69,4 +70,6 @@ constructor(
     suspend fun updateUser(previousUser: User, newUser: User): Flow<ResultData<Boolean>> = firebaseProfileEditManager.updateUser(previousUser, newUser)
 
     suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = firebaseProfileEditManager.checkIfUsernameAvailable(username)
+
+    suspend fun saveImage(uri: Uri, intentImageCode: Int): Flow<ResultData<String>> = firebaseProfileEditManager.saveImage(uri, intentImageCode)
 }

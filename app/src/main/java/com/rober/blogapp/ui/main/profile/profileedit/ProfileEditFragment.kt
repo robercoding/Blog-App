@@ -30,6 +30,7 @@ class ProfileEditFragment : Fragment() {
     private val profileEditViewModel: ProfileEditViewModel by viewModels()
 
     private var INTENT_IMAGE_CODE = 0
+    private var usernameAvailable = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,6 +84,28 @@ class ProfileEditFragment : Fragment() {
                 INTENT_IMAGE_CODE = profileEditState.INTENT_IMAGE_CODE
                 getImageFromGallery()
             }
+
+            is ProfileEditState.PreviewImage -> setPreviewImage(profileEditState.uri)
+
+            is ProfileEditState.ValidateChanges -> {
+                val saveChanges = validateChanges()
+                if(saveChanges){
+                    saveActualChanges()
+                }
+            }
+
+            is ProfileEditState.SavingChanges -> {
+                displayProgressBarSaveChanges(true)
+            }
+
+            is ProfileEditState.ErrorSave -> {
+                displayProgressBarSaveChanges(false)
+                Toast.makeText(requireContext(), "There were some errors, try again later", Toast.LENGTH_SHORT).show()
+            }
+            is ProfileEditState.SuccessSave -> {
+                Toast.makeText(requireContext(), "Successfully updated!", Toast.LENGTH_SHORT).show()
+                navigateToProfileDetail()
+            }
         }
     }
 
@@ -110,7 +133,7 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun displayProgressBar(display: Boolean) {
-        if (display) profile_edit_progress_bar.visibility = View.VISIBLE else profile_edit_progress_bar.visibility =
+        if (display) profile_edit_progress_bar_loading_user_details.visibility = View.VISIBLE else profile_edit_progress_bar_loading_user_details.visibility =
             View.GONE
     }
 
@@ -153,7 +176,37 @@ class ProfileEditFragment : Fragment() {
             profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
         }
 
-//        profile_edit_
+        profile_edit_material_toolbar.setOnMenuItemClickListener {menuItem ->
+            when(menuItem.itemId){
+                R.id.toolbar_profile_edit_save ->{
+                    profileEditViewModel.setIntention(ProfileEditFragmentEvent.ValidateChanges)
+                    true
+                }
+                else -> true
+            }
+        }
+    }
+
+    private fun saveActualChanges(){
+        displayProgressBarSaveChanges(true)
+        val username = profile_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
+        val biography = profile_edit_biography.text.toString()
+        val location = profile_edit_location.text.toString()
+
+        profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveChanges(username, biography, location))
+    }
+
+    private fun validateChanges(): Boolean{
+        if(profile_edit_biography.lineCount >= 4){
+            return false
+        }
+        if(profile_edit_location.text.toString().length > 20){
+            return false
+        }
+        if(!usernameAvailable || profile_edit_username.text.toString().isEmpty()){
+            return false
+        }
+        return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -161,11 +214,15 @@ class ProfileEditFragment : Fragment() {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             val result = CropImage.getActivityResult(data)
             if (resultCode == RESULT_OK) {
-                setPreviewImage(result.uri)
+                saveUri(result.uri)
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Log.i(TAG, "${result.error.message}")
             }
         }
+    }
+
+    private fun saveUri(uri: Uri){
+        profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveUriAndPreviewNewImage(uri, INTENT_IMAGE_CODE))
     }
 
     private fun setPreviewImage(uri: Uri) {
@@ -174,6 +231,10 @@ class ProfileEditFragment : Fragment() {
 
             IntentImageCodes.BACKGROUND_IMAGE_CODE -> Glide.with(requireView()).load(uri).into(profile_edit_image_background)
         }
+    }
+
+    private fun displayProgressBarSaveChanges(display: Boolean){
+        if(display) profile_edit_progress_bar_save_changes.visibility = View.VISIBLE else profile_edit_progress_bar_save_changes.visibility = View.GONE
     }
 }
 
@@ -186,6 +247,11 @@ sealed class ProfileEditFragmentEvent {
 
     object GetImageFromGalleryForProfile : ProfileEditFragmentEvent()
     object GetImageFromGalleryForBackground : ProfileEditFragmentEvent()
+
+    data class SaveUriAndPreviewNewImage(val uri:Uri, val IntentImageCode: Int): ProfileEditFragmentEvent()
+
+    object ValidateChanges : ProfileEditFragmentEvent()
+    data class SaveChanges(val username: String, val biography: String, val location: String): ProfileEditFragmentEvent()
 
     object LoadingUser : ProfileEditFragmentEvent()
 }

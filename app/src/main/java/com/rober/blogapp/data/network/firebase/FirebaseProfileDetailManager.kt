@@ -36,7 +36,6 @@ class FirebaseProfileDetailManager @Inject constructor(
         emit(ResultData.Loading)
 
         //Initialize variable
-        var dateRetrieveNewerPosts = Date()
         var minusDays = 0
         var dateLessThan = DateTime.now().minusDays(minusDays).toDate()
         var dateGreaterThan = DateTime.now().minusDays(minusDays + 1).toDate()
