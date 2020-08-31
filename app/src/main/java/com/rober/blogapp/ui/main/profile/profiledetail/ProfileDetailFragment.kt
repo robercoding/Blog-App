@@ -384,7 +384,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         Toast.makeText(requireContext(), "We are going to profile edit", Toast.LENGTH_SHORT).show()
         val navController = findNavController()
         val userBundle = bundleOf("user" to user)
-        navController.navigate(R.id.profileEditFragment, userBundle)
+        navController.navigate(R.id.action_profileDetailFragment_to_profileEditFragment, userBundle)
     }
 
 

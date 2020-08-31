@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -41,5 +42,9 @@ class MainActivity : AppCompatActivity() {
 
     fun displayBottomNavigation(display: Boolean){
         if(display) bottom_navigation.visibility = View.VISIBLE else bottom_navigation.visibility = View.GONE
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

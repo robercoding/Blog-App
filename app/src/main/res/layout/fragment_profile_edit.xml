@@ -70,7 +70,19 @@
             app:layout_constraintTop_toBottomOf="@id/profile_edit_app_bar_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/black_screen"/>
+            android:background="@drawable/black_screen"
+            android:scaleType="fitXY"/>
+
+        <ImageView
+            android:id="@+id/profile_edit_image_background_add"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profile_edit_app_bar_layout"
+            android:src="@drawable/ic_add_photo_alternate_24px"
+            android:tint="@color/white"
+            android:layout_marginTop="40dp"/>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_edit_image_profile"

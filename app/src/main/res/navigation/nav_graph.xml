@@ -76,7 +76,11 @@
             app:destination="@id/postDetailFragment" />
         <action
             android:id="@+id/action_profileDetailFragment_to_profileEditFragment"
-            app:destination="@id/profileEditFragment" />
+            app:destination="@id/profileEditFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -134,7 +138,9 @@
         tools:layout="@layout/fragment_profile_edit" >
         <action
             android:id="@+id/action_profileEditFragment_to_profileDetailFragment"
-            app:destination="@id/profileDetailFragment" />
+            app:destination="@id/profileDetailFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right" />
         <argument
             android:name="user"
             app:argType="com.rober.blogapp.entity.User"

@@ -5,7 +5,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:itemTextAppearance">@color/blueTwitter</item>
+        <item name="actionMenuTextColor">@color/blueTwitter</item>
     </style>
 
     <style name="TopBar" parent="Theme.MaterialComponents.NoActionBar">
@@ -13,7 +13,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:itemTextAppearance">@color/blueTwitter</item>
     </style>
 
     <style name="Divider">

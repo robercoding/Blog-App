@@ -7,5 +7,7 @@ sealed class ProfileEditState {
 
     data class LoadUser(val user: User) : ProfileEditState()
 
+    data class GetImageFromGallery(val INTENT_IMAGE_CODE: Int) : ProfileEditState()
+
     object NavigateToProfileDetail : ProfileEditState()
 }
