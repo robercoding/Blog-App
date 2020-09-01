@@ -118,6 +118,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:21.2.1'
     //Storage
     implementation 'com.google.firebase:firebase-storage-ktx:19.2.0'
+    //Functions
+    implementation 'com.google.firebase:firebase-functions:19.1.0'
 
 
     //coroutines services for await()

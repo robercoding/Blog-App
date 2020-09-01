@@ -4,6 +4,8 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.rober.blogapp.entity.Follower
 import com.rober.blogapp.entity.Following
@@ -19,6 +21,7 @@ class FirebaseSource {
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val storage = FirebaseStorage.getInstance()
+    val functions = FirebaseFunctions.getInstance()
 
     var userAuth: FirebaseUser? = null
     var user: User? = null

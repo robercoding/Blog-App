@@ -52,6 +52,8 @@ class FirebaseProfileEditManager @Inject constructor(
                     return@flow
                 }
 
+
+                //Get posts before they delete
                 var listPostsFromPreviousUser = listOf<Post>()
                 var countPostsFromPreviousUser = CountsPosts(0)
 
@@ -62,15 +64,15 @@ class FirebaseProfileEditManager @Inject constructor(
                     return@flow
                 }
                 //Set PostsCollection to the new user
-                val successSetListPosts = setAllDocumentsToCollection(listPostsFromPreviousUser, newUser)
+                val successSetListPosts = setAllPostsToCollection(listPostsFromPreviousUser, newUser)
                 val successSetCountPosts = setCountPosts(countPostsFromPreviousUser, newUser)
 
-                //Delete the old one once new user has been set
+                //Delete the old posts and user once new data has been set
                 val successDeleteUser: Boolean
-                val successDeletePreviousUserPosts : Boolean
+                val successDeletePreviousUserPosts: Boolean
                 if (successSetListPosts) {
                     successDeleteUser = deleteUserDocument(previousUser.username)
-                    successDeletePreviousUserPosts = deleteUserPostsDocument(previousUser.username)
+                    successDeletePreviousUserPosts = deletePostsPathRecursive(previousUser.username)
                 } else {
                     return@flow
                 }
@@ -193,8 +195,32 @@ class FirebaseProfileEditManager @Inject constructor(
         }
     }
 
-    private suspend fun setAllDocumentsToCollection(listPostsFromPreviousUser: List<Post>, newUser: User): Boolean {
-        val collectionNewUser = firebaseSource.db.collection("posts").document(newUser.username).collection("user_posts")
+    private suspend fun setAllPostsToCollection(listPostsFromPreviousUser: List<Post>, newUser: User): Boolean {
+//        val collectionNewUser = firebaseSource.db.collection("posts").document(newUser.username).collection("user_posts")
+
+        val successCreatePostsDocumentForNewUser = createPostsDocumentForNewUser(newUser)
+        if (!successCreatePostsDocumentForNewUser) {
+            return false
+        }
+        return setPostsInCollection(listPostsFromPreviousUser, newUser)
+    }
+
+    private suspend fun createPostsDocumentForNewUser(newUser: User): Boolean {
+        val postsDocumentUsername = firebaseSource.db.collection("posts").document(newUser.username)
+        var success = false
+        val documentContainsCollections = hashMapOf("documentContainsCollections" to false)
+        postsDocumentUsername
+            .set(documentContainsCollections)
+            .addOnSuccessListener {
+                success = true
+            }.addOnFailureListener {
+                success = false
+            }.await()
+
+        return success
+    }
+
+    private suspend fun setPostsInCollection(listPostsFromPreviousUser: List<Post>, newUser: User): Boolean {
         var success = false
 
         for (post in listPostsFromPreviousUser) {
@@ -210,7 +236,6 @@ class FirebaseProfileEditManager @Inject constructor(
                     Log.i(TAG, "Exception: $it")
                 }.await()
         }
-
         return success
     }
 
@@ -232,21 +257,29 @@ class FirebaseProfileEditManager @Inject constructor(
         return success
     }
 
-    private suspend fun deleteUserPostsDocument(documentPreviousUsernameID: String): Boolean {
-        val userPostsDocumentReference = firebaseSource.db.collection("posts").document(documentPreviousUsernameID)
+    private suspend fun deleteAnyDocumentRecursive(path: String): Boolean {
+        val data = hashMapOf(
+            "path" to path
+        )
+
         var success = false
 
-        userPostsDocumentReference
-            .delete()
-            .addOnSuccessListener {
-                success = true
-            }.addOnFailureListener {
-                success = false
-            }
-            .await()
+        firebaseSource.functions
+            .getHttpsCallable("deleteDocumentRecursive")
+            .call(data)
+            .continueWith { task ->
+                success = task.isSuccessful
+            }.await()
 
-        Log.i("Posts", "Success Deleting? = $success")
+
+        Log.i("SuccessDeletePosts", "$success")
         return success
+    }
+
+    private suspend fun deletePostsPathRecursive(documentPreviousUsernameID: String): Boolean {
+        val path = "/posts/$documentPreviousUsernameID"
+
+        return deleteAnyDocumentRecursive(path)
     }
 
     private suspend fun setNewUserDocument(documentUsernameID: String, newUser: User): Boolean {
@@ -279,20 +312,31 @@ class FirebaseProfileEditManager @Inject constructor(
         return successUpdate
     }
 
+    private suspend fun getFollowingCollection(){
+
+    }
+
+    //TODO
+    private suspend fun deleteFollowingPathRecursive(documentPreviousUsernameID: String): Boolean {
+        val path = "/posts/$documentPreviousUsernameID"
+
+        return deleteAnyDocumentRecursive(path)
+    }
+
     suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = flow {
-        var nameAvaliable = false
+        var nameAvailable = false
 
         try {
             val userDocumentRef = firebaseSource.db.collection("users").document(username)
             userDocumentRef
                 .get()
                 .addOnSuccessListener {
-                    nameAvaliable = false
+                    nameAvailable = false
                 }.addOnSuccessListener {
-                    nameAvaliable = true
+                    nameAvailable = true
                 }.await()
 
-            emit(ResultData.Success(nameAvaliable))
+            emit(ResultData.Success(nameAvailable))
 
         } catch (e: Exception) {
             Log.i(TAG, "${e.message}")
