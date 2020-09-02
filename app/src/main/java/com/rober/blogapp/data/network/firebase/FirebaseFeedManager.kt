@@ -307,7 +307,7 @@ constructor
         return firebaseSource.listNewFollowingsUsername.size > 0
     }
 
-    //Retrieve all posts from the folling the newest one to the oldest one of the actual timeline
+    //Retrieve all posts from the following, the newest one to the oldest one of the actual timeline
     private suspend fun getListPostsFromNewFollowings(): List<Post> {
         val listNewFollowingsUsername = firebaseSource.listNewFollowingsUsername
         val listNewFollowingPosts = mutableListOf<Post>()

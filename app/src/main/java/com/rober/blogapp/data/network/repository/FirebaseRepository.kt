@@ -60,7 +60,7 @@ constructor(
 
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileDetailManager.getUserProfile(username)
 
-    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.currentUserFollowsOtherUser(otherUsername)
+    suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(otherUsername)
 
     suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
 

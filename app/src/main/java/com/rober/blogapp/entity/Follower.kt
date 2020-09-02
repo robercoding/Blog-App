@@ -5,10 +5,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "followers")
 data class Follower(
     @PrimaryKey
-    val follower_id: Long,
-    var followers: List<User>
+    val follower_id: String
 ) {
+  constructor() : this("")
 }

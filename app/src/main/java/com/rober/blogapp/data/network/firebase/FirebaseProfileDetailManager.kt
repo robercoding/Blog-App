@@ -4,10 +4,7 @@ import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
-import com.rober.blogapp.entity.CountsPosts
-import com.rober.blogapp.entity.Following
-import com.rober.blogapp.entity.Post
-import com.rober.blogapp.entity.User
+import com.rober.blogapp.entity.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -34,6 +31,7 @@ class FirebaseProfileDetailManager @Inject constructor(
 
     suspend fun retrieveUserPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
+        Log.i("UserRequestPosts", "UserRequestPosts = ${userID}")
 
         //Initialize variable
         var minusDays = 0
@@ -106,6 +104,7 @@ class FirebaseProfileDetailManager @Inject constructor(
             val userContainedSavedPostsSortedByDescending =
                 it.sortedByDescending { post -> post.created_at }.toMutableList()
             savedUserHashMapPost[userID] = userContainedSavedPostsSortedByDescending
+            Log.i("UserRequestPosts", "UserRequestPosts = ${savedUserHashMapPost[userID]}")
             emit(ResultData.Success(userContainedSavedPostsSortedByDescending))
         } ?: kotlin.run {
             savedUserHashMapPost.remove(userID)
@@ -134,16 +133,17 @@ class FirebaseProfileDetailManager @Inject constructor(
             } else {
                 val newUserListPosts = savedUserHashMapPost[userID]
 
-                listNewerPosts.onEach {post ->
+                listNewerPosts.onEach { post ->
                     newUserListPosts?.add(post)
                 }
 
-                val newUserListPostsSortedByDescending = newUserListPosts?.sortedByDescending { post -> post.created_at }?.toMutableList()
+                val newUserListPostsSortedByDescending =
+                    newUserListPosts?.sortedByDescending { post -> post.created_at }?.toMutableList()
 
-                newUserListPostsSortedByDescending?.let {list ->
+                newUserListPostsSortedByDescending?.let { list ->
                     savedUserHashMapPost[userID] = list
                     emit(ResultData.Success(savedUserHashMapPost[userID]))
-                }?: kotlin.run {
+                } ?: kotlin.run {
                     emit(com.rober.blogapp.data.ResultData.Success(savedUserHashMapPost[userID]))
                 }
             }
@@ -238,7 +238,7 @@ class FirebaseProfileDetailManager @Inject constructor(
         }
     }
 
-    suspend fun currentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> =
+    suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> =
         flow {
             emit(ResultData.Loading)
 
@@ -292,13 +292,29 @@ class FirebaseProfileDetailManager @Inject constructor(
         firebaseSource.listNewUnfollowingsUsername.remove(followingId)
     }
 
-    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = flow {
+    private fun checkIfNewFollowerHasBeenFollowedBefore(followerId: String) {
+
+    }
+
+    suspend fun followOtherUser(otherUser: User): Flow<ResultData<Boolean>> = flow {
+        val successAddFollowing = addCurrentUserFollowingOtherUser(otherUser)
+
+        val successAddFollower = addOtherUserFollower(otherUser)
+
+        if (successAddFollowing && successAddFollower) {
+            emit(ResultData.Success(successAddFollowing))
+        } else {
+            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+        }
+    }
+
+    private suspend fun addCurrentUserFollowingOtherUser(otherUser: User): Boolean {
         var hasUserBeenFollowed = false
         try {
             val followingRef =
                 firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
 
-            val followingUser = Following(user.username)
+            val followingUser = Following(otherUser.username)
 
             followingRef
                 .document(followingUser.following_id)
@@ -311,18 +327,48 @@ class FirebaseProfileDetailManager @Inject constructor(
                 }
                 .await()
         } catch (e: Exception) {
-            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+            return false
         }
 
         if (hasUserBeenFollowed) {
-            firebaseSource.listNewFollowingsUsername.add(user.username)
-            if (checkIfNewFollowingHasBeenUnfollowedBefore(user.username))
-                removeNewFollowingFromUnfollowing(user.username)
+            firebaseSource.listNewFollowingsUsername.add(otherUser.username)
+            if (checkIfNewFollowingHasBeenUnfollowedBefore(otherUser.username))
+                removeNewFollowingFromUnfollowing(otherUser.username)
             updateFollowingCount(true)
-            updateFollower(user.username, true)
         }
 
-        emit(ResultData.Success(hasUserBeenFollowed))
+        return hasUserBeenFollowed
+    }
+
+    private suspend fun addOtherUserFollower(otherUser: User): Boolean {
+        var otherUserHasFollower = false
+        try {
+            val followingUserDocRef = firebaseSource.db.collection("followers").document(otherUser.username)
+
+            val followingRef =
+                firebaseSource.db.collection("follower/${otherUser.username}/user_followers")
+
+            val followingUser = Follower(firebaseSource.username)
+
+            followingRef
+                .document(followingUser.follower_id)
+                .set(followingUser)
+                .addOnSuccessListener {
+                    otherUserHasFollower = true
+                }
+                .addOnFailureListener {
+                    otherUserHasFollower = false
+                }
+                .await()
+        } catch (e: Exception) {
+            return false
+        }
+
+        if (otherUserHasFollower) {
+            updateFollower(otherUser.username, true)
+        }
+
+        return otherUserHasFollower
     }
 
     private fun checkIfNewUnfollowingHasBeenFollowedBefore(followingUsername: String): Boolean {
@@ -341,15 +387,62 @@ class FirebaseProfileDetailManager @Inject constructor(
 //        firebaseSource.listNewUnfollowingsUsername.remove(followingUsername)
 //    }
 
-    suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = flow {
-        var hasUserBeenUnfollowed = false
+    suspend fun unfollowOtherUser(otherUser: User): Flow<ResultData<Boolean>> = flow {
+
+        val removedFollowing = removeFollowing(otherUser)
+        val removedFollower = removeFollower(otherUser)
+
+        if (removedFollowing && removedFollower) {
+            emit(ResultData.Success(true))
+        } else {
+            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+        }
+    }
+
+    suspend fun removeFollowing(otherUser: User): Boolean {
+        var removedFollowing = false
 
         try {
             val followingRef =
                 firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
 
             followingRef
-                .document(user.username)
+                .document(otherUser.username)
+                .delete()
+                .addOnSuccessListener {
+                    removedFollowing = true
+                }
+                .addOnFailureListener {
+                    removedFollowing = false
+                }.await()
+
+        } catch (e: Exception) {
+            removedFollowing = false
+        }
+
+        if (removedFollowing) {
+            //Update local lists unfollowing
+            if (checkIfNewUnfollowingHasBeenFollowedBefore(otherUser.username))
+                removeNewUnfollowingFromFollowing(otherUser.username)
+
+            firebaseSource.listNewUnfollowingsUsername.add(otherUser.username)
+
+            //substract 1 count of following and follower
+            updateFollowingCount(false)
+        }
+
+        return removedFollowing
+    }
+
+    suspend fun removeFollower(otherUser: User): Boolean {
+        var hasUserBeenUnfollowed = false
+
+        try {
+            val followerRef =
+                firebaseSource.db.collection("follower/${otherUser.username}/user_followers")
+
+            followerRef
+                .document(firebaseSource.username)
                 .delete()
                 .addOnSuccessListener {
                     hasUserBeenUnfollowed = true
@@ -359,39 +452,40 @@ class FirebaseProfileDetailManager @Inject constructor(
                 }.await()
 
         } catch (e: Exception) {
-            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+            hasUserBeenUnfollowed = false
         }
 
         if (hasUserBeenUnfollowed) {
-            if (checkIfNewUnfollowingHasBeenFollowedBefore(user.username))
-                removeNewUnfollowingFromFollowing(user.username)
+            //Update local lists unfollowing
+            if (checkIfNewUnfollowingHasBeenFollowedBefore(otherUser.username))
+                removeNewUnfollowingFromFollowing(otherUser.username)
 
-            firebaseSource.listNewUnfollowingsUsername.add(user.username)
-            updateFollowingCount(false)
-            updateFollower(user.username, false)
+            firebaseSource.listNewUnfollowingsUsername.add(otherUser.username)
 
+            //substract 1 count of following and follower
+            updateFollower(otherUser.username, false)
         }
 
-        emit(ResultData.Success(hasUserBeenUnfollowed))
+        return hasUserBeenUnfollowed
     }
 
-    suspend fun updateFollowingCount(didUserFollowOtherUser: Boolean) {
+    suspend fun updateFollowingCount(didCurrentUserFollowOtherUser: Boolean) {
         val userDocumentRef =
             firebaseSource.db.collection("users").document(firebaseSource.username)
         try {
-            if (didUserFollowOtherUser) {
+            if (didCurrentUserFollowOtherUser) {
                 userDocumentRef.update("following", FieldValue.increment(1))
                     .addOnSuccessListener {
-                        Log.i("CheckUpdate", "Updated")
+
                     }.addOnFailureListener {
-                        Log.i("CheckUpdate", "NOT UPDATED")
+
                     }.await()
             } else {
                 userDocumentRef.update("following", FieldValue.increment(-1))
                     .addOnSuccessListener {
-                        Log.i("CheckUpdate", "Updated")
+
                     }.addOnFailureListener {
-                        Log.i("CheckUpdate", "NOT UPDATED")
+
                     }.await()
             }
         } catch (e: Exception) {

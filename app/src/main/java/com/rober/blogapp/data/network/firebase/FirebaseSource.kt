@@ -29,6 +29,7 @@ class FirebaseSource {
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
 
+    //When user goes back to FeedFragment check if there's a new activity on following to retrieve or not the their feeds
     val listNewFollowingsUsername = HashSet<String>()
     val listNewUnfollowingsUsername = HashSet<String>()
 

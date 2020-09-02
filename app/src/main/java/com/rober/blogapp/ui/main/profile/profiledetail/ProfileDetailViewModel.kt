@@ -159,7 +159,7 @@ class ProfileDetailViewModel
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
                                 val currentUserFollowsOtherUser =
-                                    currentUserFollowsOtherUser(username)
+                                    checkIfCurrentUserFollowsOtherUser(username)
 
                                 val bitmap = getBitmapFromUrl(imageUrl)
 
@@ -259,10 +259,10 @@ class ProfileDetailViewModel
         }
     }
 
-    private suspend fun currentUserFollowsOtherUser(otherUsername: String): Boolean {
+    private suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Boolean {
         var currentUserFollowsOtherUser = false
 
-        firebaseRepository.currentUserFollowsOtherUser(otherUsername)
+        firebaseRepository.checkIfCurrentUserFollowsOtherUser(otherUsername)
             .collect { resultData ->
                 when (resultData) {
                     is ResultData.Success -> {
