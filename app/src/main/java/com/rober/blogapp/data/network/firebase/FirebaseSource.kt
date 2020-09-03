@@ -25,9 +25,15 @@ class FirebaseSource {
 
     var userAuth: FirebaseUser? = null
     var user: User? = null
-    var username  = ""
+    var username = ""
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
+
+    var userChangedUsername = false
+    var usernameBeforeChange = ""
+
+    var feedCheckedUserChangedUsername = false
+    var profileDetailCheckedUserChangedUsername = false
 
     //When user goes back to FeedFragment check if there's a new activity on following to retrieve or not the their feeds
     val listNewFollowingsUsername = HashSet<String>()
@@ -36,41 +42,43 @@ class FirebaseSource {
     val listNewFollowersUsername = HashSet<String>()
     val listNewUnfollowersUsername = HashSet<String>()
 
-
-    suspend fun setCurrentUser(){
+    suspend fun setCurrentUser() {
         Log.i("User:", "First time user -> $user and $username")
         var tempUsername = Username()
         var tempUser = User()
         Log.i(TAG, "${userAuth.toString()}")
-        if(userAuth!=null){
-            try{
-                Log.i("User:","FirebaseSource: uid ${userAuth!!.uid}" )
+        if (userAuth != null) {
+            try {
+                Log.i("User:", "FirebaseSource: uid ${userAuth!!.uid}")
                 db.collection("usernames").document(userAuth!!.uid)
                     .get()
                     .addOnSuccessListener {
-                        if(it != null)
+                        if (it != null)
                             tempUsername = it.toObject(Username::class.java)!!
                     }.addOnFailureListener { username = "noname" }
                     .await()
 
-                if(!tempUsername.isEmpty()) {
-                    tempUser = db.collection("users").document(tempUsername.username).get().await().toObject(User::class.java)!!
+                if (!tempUsername.isEmpty()) {
+                    tempUser =
+                        db.collection("users").document(tempUsername.username).get().await().toObject(User::class.java)!!
                 }
 
-            }catch (e: Exception){ Log.i(TAG, e.message.toString()) }
+            } catch (e: Exception) {
+                Log.i(TAG, e.message.toString())
+            }
 
-            if(!tempUser.isEmpty())
+            if (!tempUser.isEmpty())
                 user = tempUser
 
-            if(!tempUsername.isEmpty())
+            if (!tempUsername.isEmpty())
                 username = tempUsername.username
 
             Log.i(TAG, "User: $user")
         }
     }
 
-    suspend fun setCurrentFollowing(){
-        try{
+    suspend fun setCurrentFollowing() {
+        try {
             val followingRef = db.collection("following").document(username)
                 .collection("user_following")
 
@@ -79,13 +87,13 @@ class FirebaseSource {
                 .await()
                 .toObjects(Following::class.java)
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
             Log.i(TAG, "$e")
         }
     }
 
-    suspend fun setCurrentFollower(){
-        try{
+    suspend fun setCurrentFollower() {
+        try {
             val followerRef = db.collection("follower").document(username)
                 .collection("user_follower")
 
@@ -94,20 +102,20 @@ class FirebaseSource {
                 .await()
                 .toObjects(Follower::class.java)
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
             Log.i(TAG, "$e")
         }
     }
 
-    fun getCurrentUser(): User{
-        return if(user != null)
+    fun getCurrentUser(): User {
+        return if (user != null)
             user!!
         else
             User()
     }
 
-    fun checkUser(): Boolean{
-        if(user?.isEmpty()!!){
+    fun checkUser(): Boolean {
+        if (user?.isEmpty()!!) {
             return false
         }
         Log.i("User:", "FirebaseSource check: $user")

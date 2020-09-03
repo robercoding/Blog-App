@@ -84,6 +84,7 @@ class FirebaseProfileEditManager @Inject constructor(
                 //Check everything went good
                 if (successUpdateUsername && successSetNewUser && successDeleteUser && successDeletePreviousUserPosts)
                     successUpdateUser = true
+
             } else {
                 val updateUserMap = mapOf(
                     "biography" to newUser.biography,
@@ -106,7 +107,11 @@ class FirebaseProfileEditManager @Inject constructor(
                 emit(ResultData.Error(Exception("Sorry we couldn't update the user and its username")))
 
             } else if (differentUsernames && successUpdateUser) {
+                firebaseSource.userChangedUsername = true
+                firebaseSource.usernameBeforeChange = previousUser.username
+
                 firebaseSource.user = newUser
+                firebaseSource.username = newUser.username
                 emit(ResultData.Success(successUpdateUser))
 
             } else if (!differentUsernames && successUpdateUser) {
@@ -224,6 +229,7 @@ class FirebaseProfileEditManager @Inject constructor(
         var success = false
 
         for (post in listPostsFromPreviousUser) {
+            post.user_creator_id = newUser.username
             val userPostsDocument =
                 firebaseSource.db.collection("posts").document(newUser.username).collection("user_posts").document()
 

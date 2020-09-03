@@ -11,6 +11,7 @@ import org.joda.time.DateTime
 import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.HashMap
 
 class FirebaseFeedManager
 @Inject
@@ -25,6 +26,7 @@ constructor
     private var dateToRetrieveNewerPosts: Date? = null
 
     private var savedFeedListPosts: MutableList<Post> = mutableListOf()
+    private var savedFeedHashMapPosts: HashMap<String, MutableList<Post>> = hashMapOf()
     private var restDays = 0
     private var currentIntervalHoursIndex = 0
 
@@ -38,12 +40,17 @@ constructor
     suspend fun getInitFeedPosts(): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
 
-        if (checkIfNewFollowings()) {
-            val listPostsFromNewFollowings  = getListPostsFromNewFollowings().toMutableList()
+        if (hasUserChangedHisUsername()) {
+            Log.i("ChangedUsername", "Yes Changed")
+            changeHashMapPostsUsername()
+        }else{
+            Log.i("ChangedUsername", "No Changed")
+        }
 
-            for (postFromNewFollowings in listPostsFromNewFollowings) {
-                savedFeedListPosts.add( postFromNewFollowings)
-            }
+        if (checkIfNewFollowings()) {
+            val listPostsFromNewFollowings = getPostsFromNewFollowings()
+            savedFeedListPosts.addAll(listPostsFromNewFollowings)
+
             savedFeedListPosts = savedFeedListPosts.sortedByDescending { post -> post.created_at }.toMutableList()
         }
 
@@ -51,10 +58,10 @@ constructor
             removeUnfollowingsFromLocalLists()
         }
 
-        if (!savedFeedListPosts.isNullOrEmpty()) {
+        if (!savedFeedListPosts.isNullOrEmpty()) { //Send listPosts if there's already posts saved in cache
             Log.i(TAG, "We sending database ")
             emit(ResultData.Success(savedFeedListPosts))
-        } else {
+        } else { //Get posts
             dateToRetrieveNewerPosts = DateTime.now().toDate()
 
             var dateLessThanInit = DateTime.now().minusDays(restDays).toDate()
@@ -66,45 +73,77 @@ constructor
                     savedListFollowing = firebaseSource.followingList
                 }
 
-                val newListUsersPosts: MutableList<Post> = mutableListOf()
+
                 var newListFollowing = emptyList<Following>()
 
                 if (!savedListFollowing.isNullOrEmpty())
                     newListFollowing = savedListFollowing!!.toList()
 
+                var countTotalPosts = 0
                 var getPostsTries = 0
-                while (newListUsersPosts.size < 10 && getPostsTries < 10) {
+                while (countTotalPosts < 10 && getPostsTries < 10) {
                     getPostsTries += 1
 
                     if (!newListFollowing.isNullOrEmpty()) {
                         for (following in newListFollowing) {
-                            val listFollowingPosts = getFollowingPostsByLessAndGreaterThan(following.following_id, dateLessThanInit, dateGreaterThan)
-                            for (followingPost in listFollowingPosts)
-                                newListUsersPosts.add(followingPost)
+                            var listUserPostsHashMap = mutableListOf<Post>()
+                            if(savedFeedHashMapPosts.containsKey(following.following_id))
+                                listUserPostsHashMap = savedFeedHashMapPosts.getValue(following.following_id)
+
+                            val listFollowingNewPosts = getFollowingPostsByLessAndGreaterThan(
+                                following.following_id,
+                                dateLessThanInit,
+                                dateGreaterThan
+                            )
+                            if(listFollowingNewPosts.isNotEmpty()){
+                                listUserPostsHashMap.addAll(listFollowingNewPosts)
+                                countTotalPosts.plus(listFollowingNewPosts.size)
+                                savedFeedHashMapPosts[following.following_id] = listUserPostsHashMap
+                            }
                         }
                     }
 
                     //Get User Logged In posts
-                    val listUserLoggedInPosts = getFollowingPostsByLessAndGreaterThan(
+                    val listUserLoggedInNewPosts = getFollowingPostsByLessAndGreaterThan(
                         firebaseSource.username,
                         dateLessThanInit,
                         dateGreaterThan
                     )
-                    for (userLoggedInPost in listUserLoggedInPosts)
-                        newListUsersPosts.add(userLoggedInPost)
+                    Log.i("HashMapPosts", "ListUserLoggedIn: ${listUserLoggedInNewPosts}")
+
+
+
+                    var listUserLoggedInPostsFromHashMap = mutableListOf<Post>()
+                    if(savedFeedHashMapPosts.containsKey(firebaseSource.username))
+                        listUserLoggedInPostsFromHashMap = savedFeedHashMapPosts.getValue(firebaseSource.username)
+
+                    if(listUserLoggedInNewPosts.isNotEmpty()){
+                        listUserLoggedInPostsFromHashMap.addAll(listUserLoggedInNewPosts)
+                        countTotalPosts.plus(listUserLoggedInNewPosts.size)
+                        savedFeedHashMapPosts[firebaseSource.username] = listUserLoggedInPostsFromHashMap
+                    }
 
                     restDays += 1
-                    if (newListUsersPosts.size < 10) {
+                    if (countTotalPosts < 10) {
                         dateLessThanInit = DateTime.now().minusDays(restDays).toDate()
                         dateGreaterThan = DateTime.now().minusDays(restDays + 1).toDate()
                     }
                 }
 
-                val feedPostsOrdered =
-                    newListUsersPosts.sortedByDescending { post -> post.created_at.time }
-                        .toMutableList()
-                savedFeedListPosts = feedPostsOrdered
+                val allPosts = mutableListOf<Post>()
+                savedFeedHashMapPosts.mapKeys {mapEntry->
+                    allPosts.addAll(mapEntry.value)
+                }
 
+                Log.i("HashMapPosts", "Hash ${savedFeedHashMapPosts[firebaseSource.username]}")
+                Log.i("HashMapPosts", "List ${allPosts}")
+
+
+                val feedPostsOrdered =
+                    allPosts.sortedByDescending { post -> post.created_at.time }
+                        .toMutableList()
+
+                savedFeedListPosts = feedPostsOrdered
                 emit(ResultData.Success(savedFeedListPosts))
             } catch (exception: Exception) {
                 emit(ResultData.Error<List<Post>>(exception, null))
@@ -139,18 +178,37 @@ constructor
             val newListPosts = mutableListOf<Post>()
 
             for (following in savedListFollowing!!) {
-                val listFollowingPosts = getListPostsFromIdByGreaterDate(
+                val tempListNewPostsFromFollowing = getListPostsFromIdByGreaterDate(
                     following.following_id,
                     dateToRetrieveNewerPosts
                 )
-                for (followingPost in listFollowingPosts)
-                    newListPosts.add(followingPost)
+
+                //Get old local posts from following if exists
+                var mapSavedPostsFromFollowing = mutableListOf<Post>()
+                if(savedFeedHashMapPosts.containsKey(following.following_id))
+                    mapSavedPostsFromFollowing = savedFeedHashMapPosts.getValue(following.following_id)
+
+                //If there are new posts then add to local map and add to outter scope list
+                if(tempListNewPostsFromFollowing.isNotEmpty()){
+                    mapSavedPostsFromFollowing.addAll(tempListNewPostsFromFollowing)
+                    savedFeedHashMapPosts[following.following_id] = mapSavedPostsFromFollowing
+
+                    newListPosts.addAll(tempListNewPostsFromFollowing)
+                }
             }
 
+            //
+            var mapSavedPostsFromUserLoggedIn = mutableListOf<Post>()
+            savedFeedHashMapPosts[firebaseSource.username] = mapSavedPostsFromUserLoggedIn
+
             val listUserPosts =
-                getListPostsFromIdByGreaterDate(firebaseSource.username, dateToRetrieveNewerPosts)
-            for (userPost in listUserPosts) {
-                newListPosts.add(userPost)
+                getListPostsFromIdByGreaterDate(firebaseSource.username, dateToRetrieveNewerPosts).toMutableList()
+
+            if(listUserPosts.isNotEmpty()){
+                mapSavedPostsFromUserLoggedIn.addAll(listUserPosts)
+                savedFeedHashMapPosts[firebaseSource.username] = mapSavedPostsFromUserLoggedIn
+
+                newListPosts.addAll(listUserPosts)
             }
 
             dateToRetrieveNewerPosts = DateTime.now().toDate()
@@ -307,31 +365,41 @@ constructor
         return firebaseSource.listNewFollowingsUsername.size > 0
     }
 
-    //Retrieve all posts from the following, the newest one to the oldest one of the actual timeline
+    private suspend fun getPostsFromNewFollowings(): MutableList<Post>{
+        val listPostsFromNewFollowings = getListPostsFromNewFollowings().toMutableList()
+
+        return listPostsFromNewFollowings
+    }
+
+    //Retrieve all posts from the new followings, the newest one to the oldest one of the actual timeline
     private suspend fun getListPostsFromNewFollowings(): List<Post> {
         val listNewFollowingsUsername = firebaseSource.listNewFollowingsUsername
-        val listNewFollowingPosts = mutableListOf<Post>()
+        val listNewUsernamesFollowingPosts = mutableListOf<Post>()
 
         if (listNewFollowingsUsername.isNotEmpty()) {
             for (newFollowingUsername in listNewFollowingsUsername) {
 
-                var followingListPosts = emptyList<Post>()
-                followingListPosts = getFollowingPostsByLessAndGreaterThan(
+                var newFollowingListPosts = emptyList<Post>()
+
+                newFollowingListPosts = getFollowingPostsByLessAndGreaterThan(
                     newFollowingUsername,
                     dateToRetrieveNewerPosts,
                     dateGreaterThan
-                )
-                Log.i("CheckFollowing", "Here's all the posts $followingListPosts")
-                for (post in followingListPosts) {
-                    listNewFollowingPosts.add(post)
-                }
+                ).toMutableList()
+
+                savedFeedHashMapPosts[newFollowingUsername] = newFollowingListPosts
+                listNewUsernamesFollowingPosts.addAll(newFollowingListPosts)
+
+                Log.i("CheckFollowing", "Here's all the posts $newFollowingListPosts")
+
                 firebaseSource.listNewFollowingsUsername.remove(newFollowingUsername)
                 addFollowingToSavedListFollowing(newFollowingUsername)
             }
         }
-        return listNewFollowingPosts
+        return listNewUsernamesFollowingPosts
     }
 
+    //Get Following object from firestore and add local list following
     private suspend fun addFollowingToSavedListFollowing(followingUsername: String) {
         val followingToSaveInSavedListFollowingDocRef =
             firebaseSource.db.collection("following").document(firebaseSource.username)
@@ -356,9 +424,36 @@ constructor
         val unfollowingUsers = firebaseSource.listNewUnfollowingsUsername
 
         for (unfollowingUser in unfollowingUsers) {
+            savedFeedHashMapPosts.remove(unfollowingUser)
             savedListFollowing?.removeAll { following -> following.following_id == unfollowingUser }
             savedFeedListPosts.removeAll { post -> post.user_creator_id == unfollowingUser }
             firebaseSource.listNewFollowingsUsername.remove(unfollowingUser)
+        }
+    }
+
+    private fun hasUserChangedHisUsername(): Boolean {
+        return firebaseSource.userChangedUsername
+    }
+
+    //When username change it updates local saved posts
+    private fun changeHashMapPostsUsername(){
+        val previousUsername = firebaseSource.usernameBeforeChange
+        val previousUsernameListPosts = savedFeedHashMapPosts[previousUsername]
+
+        val listPostsOfNewUsername = mutableListOf<Post>()
+        if(previousUsernameListPosts != null){
+            for(post in previousUsernameListPosts){
+                post.user_creator_id = firebaseSource.username
+                listPostsOfNewUsername.add(post)
+            }
+
+            savedFeedHashMapPosts.remove(previousUsername)
+            savedFeedListPosts.removeAll { post-> post.user_creator_id == previousUsername }
+
+            savedFeedHashMapPosts[firebaseSource.username] = listPostsOfNewUsername
+            savedFeedListPosts.addAll(listPostsOfNewUsername)
+
+            savedFeedListPosts = savedFeedListPosts.sortedByDescending { post-> post.created_at }.toMutableList()
         }
     }
 
