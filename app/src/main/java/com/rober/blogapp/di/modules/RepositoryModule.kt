@@ -23,7 +23,7 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseSource(): FirebaseSource = FirebaseSource()
+    fun provideFirebaseSource(firebasePath: FirebasePath): FirebaseSource = FirebaseSource(firebasePath)
 
     @Singleton
     @Provides
@@ -40,7 +40,7 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseFeedManager(firebaseSource: FirebaseSource): FirebaseFeedManager = FirebaseFeedManager(firebaseSource)
+    fun provideFirebaseFeedManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseFeedManager = FirebaseFeedManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides

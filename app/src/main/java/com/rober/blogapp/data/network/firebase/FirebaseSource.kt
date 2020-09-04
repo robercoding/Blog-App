@@ -7,15 +7,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.rober.blogapp.entity.Follower
-import com.rober.blogapp.entity.Following
-import com.rober.blogapp.entity.User
-import com.rober.blogapp.entity.Username
+import com.rober.blogapp.data.network.util.FirebasePath
+import com.rober.blogapp.entity.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import java.lang.Exception
+import javax.inject.Inject
+import kotlin.Exception
 
-class FirebaseSource {
+class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath) {
     private val TAG = "FirebaseSource"
 
     val db = FirebaseFirestore.getInstance()
@@ -26,6 +25,7 @@ class FirebaseSource {
     var userAuth: FirebaseUser? = null
     var user: User? = null
     var username = ""
+    var userDocumentUID: UserDocumentUID? = null
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
 
@@ -53,14 +53,18 @@ class FirebaseSource {
                 db.collection("usernames").document(userAuth!!.uid)
                     .get()
                     .addOnSuccessListener {
-                        if (it != null)
+                        Log.i("User:", "Success")
+                        if (it.exists())
                             tempUsername = it.toObject(Username::class.java)!!
-                    }.addOnFailureListener { username = "noname" }
+                    }.addOnFailureListener {
+                        Log.i("User:", "Failure")
+                        username = "noname"
+                    }
                     .await()
 
                 if (!tempUsername.isEmpty()) {
                     tempUser =
-                        db.collection("users").document(tempUsername.username).get().await().toObject(User::class.java)!!
+                        db.collection(firebasePath.users_col).document(tempUsername.username).get().await().toObject(User::class.java)!!
                 }
 
             } catch (e: Exception) {
@@ -77,10 +81,38 @@ class FirebaseSource {
         }
     }
 
-    suspend fun setCurrentFollowing() {
+    suspend fun setCurrentUserDocumentsUID() {
+        if(user == null)
+            return
+
         try {
-            val followingRef = db.collection("following").document(username)
-                .collection("user_following")
+            val userDocumentsRef = db.collection(firebasePath.user_documents_uid).whereEqualTo("username", user!!.username)
+
+            userDocumentsRef
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (!querySnapshot.isEmpty) {
+                        val listUserDocumentsUID = querySnapshot.toObjects(UserDocumentUID::class.java)
+                        when (listUserDocumentsUID.size) {
+                            1 -> userDocumentUID = listUserDocumentsUID[0]
+                            else -> throw Exception("Something went wrong when getting the documents UID")
+                        }
+                    }
+                }.await()
+        } catch (e: Exception) {
+
+        }
+
+        Log.i("UserDocumentsUID", "$userDocumentUID")
+    }
+
+    suspend fun setCurrentFollowing() {
+        if (userDocumentUID == null)
+            return
+
+        try {
+            val followingRef = db.collection(firebasePath.following_col).document(userDocumentUID!!.followerDocumentUid)
+                .collection(firebasePath.user_following)
 
             followingList = followingRef
                 .get()
@@ -93,9 +125,12 @@ class FirebaseSource {
     }
 
     suspend fun setCurrentFollower() {
+        if (userDocumentUID == null)
+            return
+
         try {
-            val followerRef = db.collection("follower").document(username)
-                .collection("user_follower")
+            val followerRef = db.collection(firebasePath.follower_col).document(userDocumentUID!!.followerDocumentUid)
+                .collection(firebasePath.user_followers)
 
             followerList = followerRef
                 .get()
@@ -112,13 +147,5 @@ class FirebaseSource {
             user!!
         else
             User()
-    }
-
-    fun checkUser(): Boolean {
-        if (user?.isEmpty()!!) {
-            return false
-        }
-        Log.i("User:", "FirebaseSource check: $user")
-        return true
     }
 }

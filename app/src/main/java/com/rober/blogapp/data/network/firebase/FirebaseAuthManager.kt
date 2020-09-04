@@ -10,6 +10,7 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.entity.UserDocumentUID
 import com.rober.blogapp.entity.Username
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -25,20 +26,21 @@ class FirebaseAuthManager @Inject constructor(
     private var exception = Exception("There was an error in our servers")
     private val authErrors = firebaseErrors.authErrors
 
-    suspend fun setCurrentUser(){
+    suspend fun setCurrentUser() {
         Log.i("User", "AuthManager = Setting ")
         firebaseSource.setCurrentUser()
+        firebaseSource.setCurrentUserDocumentsUID()
         firebaseSource.setCurrentFollowing()
         firebaseSource.setCurrentFollower()
     }
 
     suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
-        val user =  firebaseSource.getCurrentUser()
+        val user = firebaseSource.getCurrentUser()
 
-        if(user.isEmpty()) {
+        if (user.isEmpty()) {
             firebaseSource.setCurrentUser()
             emit(ResultData.Error(Exception("Sorry, user is empty"), null))
-        }else {
+        } else {
             emit(ResultData.Success(user))
         }
     }
@@ -46,7 +48,7 @@ class FirebaseAuthManager @Inject constructor(
     suspend fun login(email: String, password: String): Flow<ResultAuth> = flow {
         emit(ResultAuth.Loading)
         var loggedIn = false
-        try{
+        try {
             firebaseSource.auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
                     firebaseSource.userAuth = it.user
@@ -58,13 +60,13 @@ class FirebaseAuthManager @Inject constructor(
                     loggedIn = false
                 }
                 .await()
-        }catch (e: FirebaseAuthException){
-            val error = authErrors.find { error -> error[0].contains(e.errorCode)}
+        } catch (e: FirebaseAuthException) {
+            val error = authErrors.find { error -> error[0].contains(e.errorCode) }
 
-            if(error!=null){
+            if (error != null) {
                 exception = Exception(error[1])
                 Log.i(TAG, "Error found: $error")
-            } else{
+            } else {
                 exception = Exception(firebaseErrors.generalError)
                 Log.i(TAG, "Error NOT found: $e")
                 Log.i(TAG, "Error NOT found: ${e.errorCode}")
@@ -74,16 +76,27 @@ class FirebaseAuthManager @Inject constructor(
 
         setCurrentUser()
 
-        if(loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null){
-            while (firebaseSource.username.equals("")){
+
+        if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null || firebaseSource.userDocumentUID == null)) {
+            var tries = 0
+            while (firebaseSource.username.isEmpty() && tries < 20) {
                 kotlinx.coroutines.delay(200)
+                tries += 1
+                Log.i("User:", "$tries and username= ${firebaseSource.username}")
             }
         }
 
-        if(!loggedIn)
+
+        if (!loggedIn) {
             emit(ResultAuth.Error(exception))
-        else
+        } else if (loggedIn && firebaseSource.username.isEmpty()) {
+            exception = Exception("There was an issue with our servers")
+            emit(ResultAuth.Error(exception))
+        }else if(loggedIn && firebaseSource.username.isNotEmpty()){
             emit(ResultAuth.Success)
+        }
+
+
     }
 
     suspend fun signUpWithEmail(email: String, password: String, name: String): Flow<ResultAuth> = flow {
@@ -91,13 +104,13 @@ class FirebaseAuthManager @Inject constructor(
         var createdAccount = false
         var savedInDatabase = false
 
-        if(checkIfNameIsAlreadyPicked(name)){
+        if (checkIfNameIsAlreadyPicked(name)) {
             Log.i(TAG, "Name has been found")
             emit(ResultAuth.Error(Exception("Name is already in use, try other name")))
             return@flow
         }
 
-        try{
+        try {
             val userAuthResult = firebaseSource.auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
                     createdAccount = true
@@ -107,27 +120,29 @@ class FirebaseAuthManager @Inject constructor(
                 }.await()
 
             savedInDatabase = saveNewUserInDatabase(userAuthResult, name)
-        }catch (e: FirebaseAuthException){
+        } catch (e: FirebaseAuthException) {
             exception = e
         }
 
-        if(createdAccount && savedInDatabase)
+        if (createdAccount && savedInDatabase)
             emit(ResultAuth.Success)
         else
             emit(ResultAuth.Error(exception))
     }
 
-    private suspend fun saveNewUserInDatabase(userAuthResult: AuthResult, name: String): Boolean{
+    private suspend fun saveNewUserInDatabase(userAuthResult: AuthResult, username: String): Boolean {
         val uid = userAuthResult.user!!.uid
 
-        if(!saveUsername(uid, name)) return false
+        if (!saveUsername(uid, username)) return false
 
-        if(!saveUser(uid, name)) return false
+        if (!saveUser(uid, username)) return false
+
+        if (!createUserDocumentsUID(username)) return false
 
         return true
     }
 
-    private suspend fun saveUsername(uid:String, name: String): Boolean{
+    private suspend fun saveUsername(uid: String, name: String): Boolean {
         var success = false
 
         val userNameCollection = firebaseSource.db.collection("usernames").document(uid)
@@ -141,7 +156,7 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-    private suspend fun saveUser(uid: String, name: String): Boolean{
+    private suspend fun saveUser(uid: String, name: String): Boolean {
         var success = false
 
         val userToSave = User(0, uid, name, "", "", 0, 0)
@@ -161,7 +176,37 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-    private suspend fun checkIfNameIsAlreadyPicked(name: String): Boolean{
+    private suspend fun createUserDocumentsUID(username: String): Boolean {
+        val usernameHashMap = hashMapOf("username" to username)
+        //Create document for the new user
+        val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
+        val followingDocumentUidDocRef = firebaseSource.db.collection("following").document()
+        val followerDocumentUidDocRef = firebaseSource.db.collection("follower").document()
+        //Set the username who pertains the documents
+        postDocumentUidDocRef.set(usernameHashMap).await()
+        followingDocumentUidDocRef.set(usernameHashMap).await()
+        followerDocumentUidDocRef.set(usernameHashMap).await()
+
+        //Create object with the ID generated and store them
+        val userDocumentUID =
+            UserDocumentUID(username, postDocumentUidDocRef.id, followingDocumentUidDocRef.id, followerDocumentUidDocRef.id)
+        val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
+
+        var success = false
+        userDocumentsUidDocRef
+            .set(userDocumentUID)
+            .addOnSuccessListener {
+                success = true
+            }
+            .addOnFailureListener {
+                success = false
+            }.await()
+
+        return success
+    }
+
+
+    private suspend fun checkIfNameIsAlreadyPicked(name: String): Boolean {
         val usersCollection = firebaseSource.db.collection("users")
 
         val users = usersCollection.get().await().toObjects(User::class.java)
@@ -178,18 +223,14 @@ class FirebaseAuthManager @Inject constructor(
 
         firebaseSource.userAuth = null
 
-       emit(if(checkUser(user)) ResultAuth.SuccessSignout else ResultAuth.FailureSignout)
+        emit(if (checkUser(user)) ResultAuth.SuccessSignout else ResultAuth.FailureSignout)
     }
 
-    private fun checkUser(user: FirebaseUser?): Boolean{
-        if(user != null){
+    private fun checkUser(user: FirebaseUser?): Boolean {
+        if (user != null) {
             return true
         }
         return false
-    }
-
-    fun checkUserLoggedIn(): Boolean{
-        return firebaseSource.checkUser()
     }
 
 //    private fun checkIfUserAlreadyLoggedIn(): Boolean{

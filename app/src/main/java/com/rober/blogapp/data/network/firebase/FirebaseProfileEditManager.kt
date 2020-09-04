@@ -67,6 +67,8 @@ class FirebaseProfileEditManager @Inject constructor(
                 val successSetListPosts = setAllPostsToCollection(listPostsFromPreviousUser, newUser)
                 val successSetCountPosts = setCountPosts(countPostsFromPreviousUser, newUser)
 
+                //Set new document for user
+
                 //Delete the old posts and user once new data has been set
                 val successDeleteUser: Boolean
                 val successDeletePreviousUserPosts: Boolean

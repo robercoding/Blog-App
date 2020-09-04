@@ -16,6 +16,7 @@ import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
+import org.joda.time.DateTime
 import java.util.*
 
 
@@ -119,7 +120,6 @@ class PostAddFragment : Fragment() {
         displayKeyBoard(false)
         displayActionBar(false)
         findNavController().popBackStack()
-
     }
 
     private fun displayActionBar(display: Boolean){
@@ -137,7 +137,7 @@ class PostAddFragment : Fragment() {
             Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
         }
 
-        val post = Post(0, "", title, text, "", Date(), 0)
+        val post = Post(0, "", title, text, "", DateTime.now().minusMinutes(2).toDate(), 0)
 
         viewModel.setIntention(PostAddEvent.SavePost(post))
     }
