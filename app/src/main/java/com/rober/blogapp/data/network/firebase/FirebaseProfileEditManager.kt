@@ -32,96 +32,68 @@ class FirebaseProfileEditManager @Inject constructor(
             //Check if they are different names
             if (differentUsernames) {
                 //Change the username field from the collection usernames
-                //Find the document that contains username
+                //Find the  document that contains username
                 val usernameDocumentID = findDocumentIDByField("username", previousUser.username)
 
                 //Update username
-                val successUpdateUsername: Boolean
+                val updateUsernameMap = hashMapOf(
+                    "previousUsername" to previousUser.username,
+                    "newUsername" to newUser.username
+                )
 
+                //if usernameDocumentID exists then change it on server-side
                 if (usernameDocumentID != null) {
-                    successUpdateUsername = updateDocumentByField(usernameDocumentID, "username", newUser.username)
+                    firebaseSource.functions
+                        .getHttpsCallable("changeUsername")
+                        .call(updateUsernameMap)
+                        .addOnCompleteListener {
+                            Log.i("ChangeUsername", "SuccessChangeUsername = ${it.isSuccessful}")
+                            successUpdateUser = it.isSuccessful
+                        }.await()
                 } else {
                     return@flow
                 }
-
-                //Set new user once username is changed
-                val successSetNewUser: Boolean
-                if (successUpdateUsername) {
-                    successSetNewUser = setNewUserDocument(newUser.username, newUser)
-                } else {
-                    return@flow
-                }
-
-
-                //Get posts before they delete
-                var listPostsFromPreviousUser = listOf<Post>()
-                var countPostsFromPreviousUser = CountsPosts(0)
-
-                if (successSetNewUser) {
-                    listPostsFromPreviousUser = getAllDocumentsFromCollection(previousUser)
-                    countPostsFromPreviousUser = getDocumentCountPosts(previousUser)
-                } else {
-                    return@flow
-                }
-                //Set PostsCollection to the new user
-                val successSetListPosts = setAllPostsToCollection(listPostsFromPreviousUser, newUser)
-                val successSetCountPosts = setCountPosts(countPostsFromPreviousUser, newUser)
-
-                //Set new document for user
-
-                //Delete the old posts and user once new data has been set
-                val successDeleteUser: Boolean
-                val successDeletePreviousUserPosts: Boolean
-                if (successSetListPosts) {
-                    successDeleteUser = deleteUserDocument(previousUser.username)
-                    successDeletePreviousUserPosts = deletePostsPathRecursive(previousUser.username)
-                } else {
-                    return@flow
-                }
-
-                if (!successSetCountPosts) {
-                    //Count all documents and set new counts
-                }
-
-                //Check everything went good
-                if (successUpdateUsername && successSetNewUser && successDeleteUser && successDeletePreviousUserPosts)
-                    successUpdateUser = true
 
             } else {
                 val updateUserMap = mapOf(
+                    "username" to newUser.username,
                     "biography" to newUser.biography,
                     "location" to newUser.location
                 )
+                Log.i("ChangeUsername", "Change bio and loc = $updateUserMap")
 
-                firebaseSource.db
-                    .collection("users")
-                    .document(newUser.username)
-                    .update(updateUserMap)
-                    .addOnSuccessListener {
-                        successUpdateUser = true
-                    }
-                    .addOnFailureListener {
-                        successUpdateUser = false
+                firebaseSource.functions
+                    .getHttpsCallable("changeUserDetails")
+                    .call(updateUserMap)
+                    .addOnCompleteListener {
+                        Log.i("ChangeUsername", "SuccessSmallDetails = ${it.isSuccessful}")
+                        successUpdateUser = it.isSuccessful
                     }.await()
             }
 
-            if (differentUsernames && !successUpdateUser) {
-                emit(ResultData.Error(Exception("Sorry we couldn't update the user and its username")))
+            Log.i("ChangeUsername", "Success = $successUpdateUser")
 
-            } else if (differentUsernames && successUpdateUser) {
-                firebaseSource.userChangedUsername = true
-                firebaseSource.usernameBeforeChange = previousUser.username
+            when(successUpdateUser){
+                true -> {
+                    if(differentUsernames){ //Change firebase source, so it updates in the rest of fragments.
+                        firebaseSource.userChangedUsername = true
+                        firebaseSource.usernameBeforeChange = previousUser.username
 
-                firebaseSource.user = newUser
-                firebaseSource.username = newUser.username
-                emit(ResultData.Success(successUpdateUser))
-
-            } else if (!differentUsernames && successUpdateUser) {
-                firebaseSource.user = newUser
-                emit(ResultData.Success(successUpdateUser))
-
-            } else if (!differentUsernames && !successUpdateUser) {
-                emit(ResultData.Error(Exception("Sorry we couldn't update the user")))
+                        firebaseSource.user = newUser
+                        firebaseSource.username = newUser.username
+                        emit(ResultData.Success(successUpdateUser))
+                    }else{
+                        firebaseSource.user = newUser
+                        emit(ResultData.Success(successUpdateUser))
+                    }
+                }
+                false -> {
+                    if(differentUsernames){
+                        emit(ResultData.Error(Exception("Sorry we couldn't update the username")))
+                    }else{
+                        emit(ResultData.Error(Exception("Sorry we couldn't update the user")))
+                    }
+                }
             }
 
         } catch (e: Exception) {
@@ -320,7 +292,7 @@ class FirebaseProfileEditManager @Inject constructor(
         return successUpdate
     }
 
-    private suspend fun getFollowingCollection(){
+    private suspend fun getFollowingCollection() {
 
     }
 
