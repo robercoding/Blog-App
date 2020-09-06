@@ -7,8 +7,8 @@ import java.lang.Exception
 
 sealed class ProfileDetailState {
 
-    data class SetCurrentUserProfile(val user: User, val imageFromUrlToolbarStart: String, val bitmap: Bitmap) : ProfileDetailState()
-    data class SetOtherUserProfile(val user: User, val currentUserFollowsOtherUser: Boolean, val imageFromUrlToolbarStart: String, val bitmap: Bitmap) : ProfileDetailState()
+    data class SetCurrentUserProfile(val user: User, val bitmap: Bitmap) : ProfileDetailState()
+    data class SetOtherUserProfile(val user: User, val currentUserFollowsOtherUser: Boolean, val bitmap: Bitmap) : ProfileDetailState()
 
     data class SetUserPosts(val listUserPosts: List<Post>) : ProfileDetailState()
 

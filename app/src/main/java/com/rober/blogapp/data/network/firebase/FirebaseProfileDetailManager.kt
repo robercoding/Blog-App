@@ -1,7 +1,11 @@
 package com.rober.blogapp.data.network.firebase
 
+import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
+import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.*
@@ -9,15 +13,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import org.joda.time.DateTime
-import org.threeten.bp.Duration
+import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.Exception
 
+
 class FirebaseProfileDetailManager @Inject constructor(
     private val firebaseSource: FirebaseSource,
-    private val firebasePath: FirebasePath
+    private val firebasePath: FirebasePath,
+    private val application: Application
 ) {
     private val TAG = "FirebaseProfileManager"
 
@@ -29,7 +35,11 @@ class FirebaseProfileDetailManager @Inject constructor(
     private var hashMapCurrentUserFollowsOtherUser = hashMapOf<String, Boolean>()
     private var hashMapOthersUsersFollowings = hashMapOf<String, MutableList<Following>>()
 
+    private var savedUsersBitmaps = hashMapOf<String, Bitmap>()
+    private var savedUsersBackgroundImageUrl = hashMapOf<String, String>()
+
     private var userDocumentUID: UserDocumentUID? = null
+    private var bitmap: Bitmap? = null
 
     suspend fun retrieveUserPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
@@ -556,18 +566,80 @@ class FirebaseProfileDetailManager @Inject constructor(
         userDocumentUIDQuery
             .get()
             .addOnSuccessListener {
-                if(it.isEmpty)
+                if (it.isEmpty)
                     return@addOnSuccessListener
 
                 val listUserDocumentUID = it.toObjects(UserDocumentUID::class.java)
-                if(listUserDocumentUID.isEmpty())
+                if (listUserDocumentUID.isEmpty())
                     return@addOnSuccessListener
 
-                when(listUserDocumentUID.size){
-                    1-> userDocumentUID = listUserDocumentUID[0]
+                when (listUserDocumentUID.size) {
+                    1 -> userDocumentUID = listUserDocumentUID[0]
                     else -> return@addOnSuccessListener
                 }
             }.await()
         return userDocumentUID
+    }
+
+    suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
+        val user = firebaseSource.getCurrentUser()
+
+        if (user.isEmpty()) {
+            firebaseSource.setCurrentUser()
+            emit(ResultData.Error(Exception("Sorry, user is empty"), null))
+        } else {
+            emit(ResultData.Success(user))
+        }
+    }
+
+    suspend fun getBitmapLightWeight(user: User): Flow<ResultData<Bitmap>> = flow {
+
+
+
+        if(bitmap != null){
+            bitmap?.recycle()
+            bitmap = null
+        }
+
+        bitmap = createBitmap(user.backgroundImageUrl)
+        emit(ResultData.Success(bitmap))
+    }
+
+    suspend fun getBitmap(user: User): Flow<ResultData<Bitmap>> = flow {
+
+        Log.i("BackgroundBitmap", "Contains? ${savedUsersBitmaps.containsKey(user.username)}")
+        if (savedUsersBackgroundImageUrl.containsKey(user.username) && savedUsersBitmaps.containsKey(user.username)) {
+            if (user.backgroundImageUrl != savedUsersBackgroundImageUrl.get(user.username)) {
+                Log.i("BackgroundBitmap", "DifferentbackgroundUrl lets create")
+
+                savedUsersBitmaps[user.username] = createBitmap(user.backgroundImageUrl)
+                savedUsersBackgroundImageUrl[user.username] = user.backgroundImageUrl
+            }
+        } else {
+            Log.i("BackgroundBitmap", "No contains, lets create")
+            savedUsersBitmaps[user.username] = createBitmap(user.backgroundImageUrl)
+            savedUsersBackgroundImageUrl[user.username] = user.backgroundImageUrl
+            Log.i("BackgroundBitmap", "Now contains? ${savedUsersBitmaps.containsKey(user.username)}")
+        }
+
+        Log.i("BackgroundBitmap", "Send")
+        emit(ResultData.Success(savedUsersBitmaps[user.username]))
+    }
+
+    private fun createBitmap(newBackgroundImageUrl: String): Bitmap {
+        var bitmapTemp: Bitmap? = null
+
+        Thread(Runnable {
+            try {
+                val url = URL(newBackgroundImageUrl)
+                val options = BitmapFactory.Options()
+                options.inSampleSize = 8
+                bitmapTemp = BitmapFactory.decodeStream(url.openConnection().getInputStream(), null, options)
+            } catch (e: Exception) {
+                System.out.println(e)
+            }
+        }).start()
+
+        return bitmapTemp ?: return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
     }
 }

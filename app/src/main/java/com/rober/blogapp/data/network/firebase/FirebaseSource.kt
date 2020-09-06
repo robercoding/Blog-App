@@ -143,9 +143,10 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     }
 
     fun getCurrentUser(): User {
-        return if (user != null)
-            user!!
-        else
-            User()
+        user?.let {
+            return it
+        }?: kotlin.run {
+            return User()
+        }
     }
 }

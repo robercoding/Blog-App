@@ -26,6 +26,7 @@ import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
+import com.rober.blogapp.util.AsyncResponse
 import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +35,8 @@ import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(), RecyclerViewActionInterface {
+class ProfileFragment : Fragment(), RecyclerViewActionInterface{
+
     private val TAG = "ProfileDetailFragment"
 
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
@@ -70,6 +72,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     private fun getUserArgumentAndSetIntention() {
         val userName = arguments?.getString("user_id")
 
+        Log.i("ProfileDetailFreeze", "Username is blank? ${userName.isNullOrBlank()}")
         if (userName.isNullOrBlank()) {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(null))
         } else {
@@ -81,12 +84,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         Log.i(TAG, "State: ${profileDetailState}")
         when (profileDetailState) {
             is ProfileDetailState.SetCurrentUserProfile -> {
-                Log.i(TAG, "SetCurrentUserProfile")
+                Log.i("ProfileDetailFreeze", "SetCurrentUserProfile")
                 showProfileDetailView(true)
 
                 val user = profileDetailState.user
 
-                setViewForCurrentUser(profileDetailState.imageFromUrlToolbarStart, profileDetailState.bitmap)
+                setViewForCurrentUser(user,  profileDetailState.bitmap)
                 setUserProfileData(user)
 
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
@@ -100,10 +103,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
                 setFollowButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
 
-                val imageFromUrlToolbarStart = profileDetailState.imageFromUrlToolbarStart
                 val bitmap = profileDetailState.bitmap
 
-                setViewForOtherUser(imageFromUrlToolbarStart, bitmap)
+                setViewForOtherUser(bitmap, user)
                 setOtherUserProfileData(user)
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
             }
@@ -203,12 +205,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         setFollowerText(user.follower)
     }
 
-    private fun setViewForCurrentUser(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
+    private fun setViewForCurrentUser(user:User, bitmap: Bitmap) {
         Log.i("SetView", "Setting current User!")
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
-        setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart, bitmap)
+        setPaletteWithMotionLayoutListener(user.backgroundImageUrl, bitmap)
 
         profile_detail_motion_layout.apply {
             this.getConstraintSet(R.id.start)?.let {
@@ -227,21 +229,21 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         //Load user images: profileImage hardcoded url
         Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .load(user.profileImageUrl)
             .into(uid_image)
 
         Glide.with(requireView())
-            .load(imageFromUrlToolbarStart)
+            .load(user.backgroundImageUrl)
             .into(profile_detail_image_background_clear)
 
     }
 
-    private fun setViewForOtherUser(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
+    private fun setViewForOtherUser(bitmap: Bitmap, user: User) {
         Log.i("SetView", "Setting other User!")
         profile_detail_button_follow.visibility = View.VISIBLE
         profile_detail_button_edit.visibility = View.GONE
 
-        setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart, bitmap)
+        setPaletteWithMotionLayoutListener(user.backgroundImageUrl, bitmap)
 
         profile_detail_motion_layout.apply {
             this.getConstraintSet(R.id.start)?.let {constraintSet ->
@@ -256,11 +258,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         //Load user images: profileImage hardcoded url
         Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .load(user.profileImageUrl)
             .into(uid_image)
 
         Glide.with(requireView())
-            .load(imageFromUrlToolbarStart)
+            .load(user.backgroundImageUrl)
             .into(profile_detail_image_background_clear)
 
     }
@@ -400,6 +402,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
         //
     }
+
+
 }
 
 sealed class ProfileDetailFragmentEvent {

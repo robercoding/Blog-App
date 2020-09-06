@@ -1,29 +1,35 @@
 package com.rober.blogapp.ui.main.profile.profiledetail
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.rober.blogapp.R
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.main.profile.profiledetail.utils.ProfileUserCodes
+import com.rober.blogapp.util.AsyncResponse
 import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.net.URL
 
 
 class ProfileDetailViewModel
 @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository,
     private val application: Application
-) : ViewModel() {
+) : ViewModel(), AsyncResponse {
+
 
     private val TAG = "ProfileDetailViewModel"
     private var _profileDetailState: MutableLiveData<ProfileDetailState> = MutableLiveData()
@@ -33,8 +39,8 @@ class ProfileDetailViewModel
 
     var user: User? = null
 
-    private val imageUrl =
-        "https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fflakked.jpg?alt=media&token=41834b34-5d7c-4dad-bd54-0d1e7c7dad29"
+    private var currentUserFollowsOtherUser = false
+    private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
 
     private var colorUrl = 0
 
@@ -86,9 +92,9 @@ class ProfileDetailViewModel
             }
 
             is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
-                user?.let {user ->
+                user?.let { user ->
                     _profileDetailState.value = ProfileDetailState.NavigateToProfileEdit(user)
-                }?: kotlin.run {
+                } ?: kotlin.run {
                     _profileDetailState.value = ProfileDetailState.Idle
                 }
             }
@@ -100,8 +106,8 @@ class ProfileDetailViewModel
     }
 
     private fun getCurrentUser() {
-        _profileDetailState.value = ProfileDetailState.LoadingPosts
         _profileDetailState.value = ProfileDetailState.LoadingUser
+        PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
         viewModelScope.launch {
             delay(200)
             firebaseRepository.getCurrentUser()
@@ -110,12 +116,14 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                Log.i("Username", "${user?.username}")
-                                var bitmap: Bitmap? = null
-                                bitmap = getBitmapFromUrl(imageUrl)
+                                Log.i("ProfileDetailFreeze", "${user?.username}")
+//                                if(bitmap == null){
+////                                    bitmap = getBitmapFromUrl(imageUrl)
+//                                    bitmap = getBitmapLightWeight(imageUrl)
+//                                }
 
-                                _profileDetailState.value =
-                                    ProfileDetailState.SetCurrentUserProfile(resultData.data, imageUrl, bitmap)
+                                Log.i("ProfileDetailFreeze", "after bitmap")
+
 
                             } ?: kotlin.run {
                                 _profileDetailState.value =
@@ -124,6 +132,23 @@ class ProfileDetailViewModel
                         }
                     }
                 }
+
+            user?.let {
+                getBitmapFromUrl(it.backgroundImageUrl)
+//                firebaseRepository.getBitmap(it)
+//                    .collect {resultData ->
+//                        when(resultData){
+//                            is ResultData.Success ->{
+//                                bitmap = resultData.data
+//
+//                                bitmap?.run {
+//                                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(it,this)
+//                                }
+//                            }
+//                        }
+//                    }
+            }
+
         }
     }
 
@@ -131,7 +156,7 @@ class ProfileDetailViewModel
         var isUserCurrentUser = false
 
         viewModelScope.launch {
-            firebaseRepository.getCurrentUser()
+            firebaseRepository.getCurrentUserProfileDetail()
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
@@ -148,8 +173,8 @@ class ProfileDetailViewModel
     }
 
     private fun getUserProfile(username: String) {
-        _profileDetailState.value = ProfileDetailState.LoadingPosts
         _profileDetailState.value = ProfileDetailState.LoadingUser
+        PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         viewModelScope.launch {
             delay(200)
             firebaseRepository.getUserProfile(username)
@@ -158,18 +183,9 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                val currentUserFollowsOtherUser =
-                                    checkIfCurrentUserFollowsOtherUser(username)
-
-                                val bitmap = getBitmapFromUrl(imageUrl)
-
-                                _profileDetailState.value =
-                                    ProfileDetailState.SetOtherUserProfile(
-                                        user!!,
-                                        currentUserFollowsOtherUser,
-                                        imageUrl,
-                                        bitmap
-                                    )
+                                currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(username)
+//                                val bitmap = getBitmapFromUrl(imageUrl)
+//                                val bitmap = getBitmapLightWeight(imageUrl)
                             }
                         }
 
@@ -179,23 +195,58 @@ class ProfileDetailViewModel
                         }
                     }
                 }
+
+            user?.let {
+                getBitmapFromUrl(it.backgroundImageUrl)
+            }
         }
     }
 
-    private fun getBitmapFromUrl(urlImage: String): Bitmap {
+    private fun getBitmapFromUrl(urlImage: String) {
         val imageBitmapFromUrlAsyncTask = GetImageBitmapFromUrlAsyncTask()
+        imageBitmapFromUrlAsyncTask.delegate = this
         imageBitmapFromUrlAsyncTask.execute(urlImage)
 
-        while (!imageBitmapFromUrlAsyncTask.success) {
-        }
-
-        if (!imageBitmapFromUrlAsyncTask.success) {
-            return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
-        }
-        Log.i("CurrentBitmap", "Returning bitmap ${imageBitmapFromUrlAsyncTask.get()}")
-
-        return imageBitmapFromUrlAsyncTask.get()
+//        while (!imageBitmapFromUrlAsyncTask.success) {
+//        }
+//
+//        if (!imageBitmapFromUrlAsyncTask.success) {
+//            return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
+//        }
+//        Log.i("CurrentBitmap", "Returning bitmap ${imageBitmapFromUrlAsyncTask.get()}")
+//
+//        return imageBitmapFromUrlAsyncTask.get()
     }
+
+    override fun processFinish(bitmap: Bitmap) {
+        Log.i("BackgroundBitmap", "Received on processfinish")
+        user?.run {
+            if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
+                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(this, bitmap)
+            } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
+                _profileDetailState.value =
+                    ProfileDetailState.SetOtherUserProfile(this, currentUserFollowsOtherUser, bitmap)
+            }
+        }
+    }
+
+//    private fun getBitmapLightWeight(urlImage: String): Bitmap {
+//        var bitmap: Bitmap? = null
+//
+//        try {
+//            val url = URL(imageUrl)
+//            val options = BitmapFactory.Options()
+//            options.inSampleSize = 8
+//            bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream(), null, options)
+//        } catch (e: Exception) {
+//            System.out.println(e)
+//        }
+//
+//        bitmap?.run {
+//            return this
+//        }
+//        return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
+//    }
 
     private fun getDominantColorFromBitmap(bitmap: Bitmap) {
         Log.i("CurrentColor", "Inside lets get the color")

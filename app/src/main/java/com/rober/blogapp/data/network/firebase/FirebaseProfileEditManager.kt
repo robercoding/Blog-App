@@ -324,7 +324,7 @@ class FirebaseProfileEditManager @Inject constructor(
     }
 
     suspend fun saveImage(uri: Uri, intentImageCode: Int): Flow<ResultData<String>> = flow {
-        var storageReference: StorageReference?
+        val storageReference: StorageReference?
         var returnImageUrl = ""
 
         storageReference = if (intentImageCode == IntentImageCodes.PROFILE_IMAGE_CODE) {

@@ -1,5 +1,6 @@
 package com.rober.blogapp.data.network.repository
 
+import android.graphics.Bitmap
 import android.net.Uri
 import com.google.firebase.firestore.Source
 import com.rober.blogapp.data.ResultAuth
@@ -58,6 +59,8 @@ constructor(
 
     suspend fun retrieveNewerPostsUserProfile(userID: String): Flow<ResultData<List<Post>>> = firebaseProfileDetailManager.retrieveUserNewerPosts(userID)
 
+    suspend fun getCurrentUserProfileDetail() = firebaseProfileDetailManager.getCurrentUser()
+
     suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileDetailManager.getUserProfile(username)
 
     suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(otherUsername)
@@ -65,6 +68,8 @@ constructor(
     suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
 
     suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.unfollowOtherUser(user)
+
+    suspend fun getBitmap(user: User): Flow<ResultData<Bitmap>> = firebaseProfileDetailManager.getBitmapLightWeight(user)
 
     //ProfileEdit
     suspend fun updateUser(previousUser: User, newUser: User): Flow<ResultData<Boolean>> = firebaseProfileEditManager.updateUser(previousUser, newUser)

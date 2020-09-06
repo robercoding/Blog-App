@@ -1,5 +1,6 @@
 package com.rober.blogapp.di.modules
 
+import android.app.Application
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.data.network.util.FirebaseErrors
@@ -40,7 +41,8 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseFeedManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseFeedManager = FirebaseFeedManager(firebaseSource, firebasePath)
+    fun provideFirebaseFeedManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseFeedManager =
+        FirebaseFeedManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides
@@ -49,10 +51,11 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseProfileManager(
+    fun provideFirebaseProfileDetailManager(
         firebaseSource: FirebaseSource,
-        firebasePath: FirebasePath
-    ): FirebaseProfileDetailManager = FirebaseProfileDetailManager(firebaseSource, firebasePath)
+        firebasePath: FirebasePath,
+        application: Application
+    ): FirebaseProfileDetailManager = FirebaseProfileDetailManager(firebaseSource, firebasePath, application)
 
     @Singleton
     @Provides
