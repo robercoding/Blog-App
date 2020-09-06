@@ -114,11 +114,11 @@ class ProfileEditFragment : Fragment() {
         profile_edit_biography.setText(user.biography)
         profile_edit_location.setText(user.location)
         Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fmew_small_1024_x_1024.jpg?alt=media&token=21dfa28c-2416-49c3-81e1-2475aaf25150")
+            .load(user.profileImageUrl)
             .into(profile_edit_image_profile)
 
         Glide.with(requireView())
-            .load("https://firebasestorage.googleapis.com/v0/b/blog-app-d5912.appspot.com/o/users_profile_picture%2Fflakked.jpg?alt=media&token=41834b34-5d7c-4dad-bd54-0d1e7c7dad29")
+            .load(user.backgroundImageUrl)
             .into(profile_edit_image_background)
     }
 
