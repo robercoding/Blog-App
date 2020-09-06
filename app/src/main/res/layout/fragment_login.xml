@@ -24,7 +24,7 @@
             android:backgroundTint="@color/colorGray2TextSpotify"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
-            android:text="test@gmail.com"/>
+            android:text="newrober@gmail.com"/>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
@@ -37,7 +37,7 @@
             android:backgroundTint="@color/colorGray2TextSpotify"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
-            android:text="1234567"/>
+            android:text="newrober"/>
 
         <TextView
             android:id="@+id/tvPassword"

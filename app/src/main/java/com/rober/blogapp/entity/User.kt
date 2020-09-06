@@ -1,9 +1,7 @@
 package com.rober.blogapp.entity
 
 import android.os.Parcelable
-import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import kotlinx.android.parcel.Parcelize
@@ -20,9 +18,11 @@ data class User(
     var biography: String = "",
     var location: String = "",
     var following: Int = 0,
-    var follower: Int = 0
+    var follower: Int = 0,
+    var backgroundImageUrl :String = "",
+    var profileImageUrl :String = ""
 ) : Parcelable {
-    constructor() : this(0, "", "", "", "", 0, 0)
+    constructor() : this(0, "", "", "", "", 0, 0, "", "")
 
     fun isEmpty(): Boolean{
         if(this.username.isEmpty() || this.username.equals("")){
