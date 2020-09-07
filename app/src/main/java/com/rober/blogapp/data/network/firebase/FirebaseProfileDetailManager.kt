@@ -367,12 +367,12 @@ class FirebaseProfileDetailManager @Inject constructor(
         var otherUserHasFollower = false
         try {
             val followingRef =
-                firebaseSource.db.collection("${firebasePath.follower_col}/$userFollowerDocumentUID/${firebasePath.user_followers}")
+                firebaseSource.db.collection("${firebasePath.follower_col}/${userFollowerDocumentUID?.followerDocumentUid}/${firebasePath.user_followers}")
 
-            val followingUser = Follower(otherUser.username)
+            val followingUser = Follower(firebaseSource.username)
 
             followingRef
-                .document(followingUser.follower_id)
+                .document(firebaseSource.username)
                 .set(followingUser)
                 .addOnSuccessListener {
                     otherUserHasFollower = true
