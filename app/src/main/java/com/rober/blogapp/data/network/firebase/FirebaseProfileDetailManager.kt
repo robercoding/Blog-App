@@ -262,7 +262,7 @@ class FirebaseProfileDetailManager @Inject constructor(
             } else {
                 try {
                     val userFollowingRef =
-                        firebaseSource.db.collection("following/${firebaseSource.username}/user_following")
+                        firebaseSource.db.collection("following/${firebaseSource.userDocumentUID?.followingDocumentUid}/user_following")
 
                     val followingUser = userFollowingRef
                         .whereEqualTo("following_id", otherUsername)
@@ -349,6 +349,7 @@ class FirebaseProfileDetailManager @Inject constructor(
         }
 
         if (hasUserBeenFollowed) {
+            hashMapCurrentUserFollowsOtherUser[otherUser.username] = true
             firebaseSource.listNewFollowingsUsername.add(otherUser.username)
             if (checkIfNewFollowingHasBeenUnfollowedBefore(otherUser.username))
                 removeNewFollowingFromUnfollowing(otherUser.username)
@@ -447,6 +448,9 @@ class FirebaseProfileDetailManager @Inject constructor(
 
         if (removedFollowing) {
             //Update local lists unfollowing
+            if(hashMapCurrentUserFollowsOtherUser.containsKey(otherUser.username))
+                hashMapCurrentUserFollowsOtherUser.remove(otherUser.username)
+
             if (checkIfNewUnfollowingHasBeenFollowedBefore(otherUser.username))
                 removeNewUnfollowingFromFollowing(otherUser.username)
 
