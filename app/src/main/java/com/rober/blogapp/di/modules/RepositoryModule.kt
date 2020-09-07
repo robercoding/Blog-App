@@ -46,8 +46,8 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebasePostAddManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebasePostAddManager =
-        FirebasePostAddManager(firebaseSource, firebasePath)
+    fun provideFirebasePostAddManager(firebaseSource: FirebaseSource): FirebasePostAddManager =
+        FirebasePostAddManager(firebaseSource)
 
     @Singleton
     @Provides
@@ -65,6 +65,7 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun provideFirebaseRepository(
+        firebaseSource: FirebaseSource,
         firebaseAuthManager: FirebaseAuthManager,
         firebaseFeedManager: FirebaseFeedManager,
         firebasePostAddManager: FirebasePostAddManager,
@@ -73,6 +74,7 @@ object RepositoryModule {
         firebaseProfileEditManager: FirebaseProfileEditManager
 
     ): FirebaseRepository = FirebaseRepository(
+        firebaseSource,
         firebaseAuthManager,
         firebaseFeedManager,
         firebasePostAddManager,

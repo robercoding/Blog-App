@@ -12,11 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
-import org.joda.time.DateTime
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
 import java.util.*
 
 
@@ -57,9 +60,7 @@ class PostAddFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         observeViewModel()
-        viewModel.setIntention(PostAddEvent.ReadyToWrite)
-
-
+        viewModel.setIntention(PostAddEvent.LoadUserDetails)
     }
 
     private fun observeViewModel(){
@@ -70,6 +71,10 @@ class PostAddFragment : Fragment() {
 
     private fun render(postAddState : PostAddState){
         when(postAddState){
+            is PostAddState.SetUserDetail -> {
+                setUserDetail(postAddState.user)
+                viewModel.setIntention(PostAddEvent.ReadyToWrite)
+            }
             is PostAddState.PostHasBeenSaved -> {
 //                Toast.makeText(requireContext(),"Saved", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), postAddState.messageUtil.message, Toast.LENGTH_SHORT).show()
@@ -90,6 +95,12 @@ class PostAddFragment : Fragment() {
                 Toast.makeText(requireContext(), postAddState.exception.message.toString(), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun setUserDetail(user: User){
+        Glide.with(requireView())
+            .load(user.profileImageUrl)
+            .into(post_add_profile_picture)
     }
 
     private fun setupListeners() {
@@ -137,7 +148,7 @@ class PostAddFragment : Fragment() {
             Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
         }
 
-        val post = Post(0, "", title, text, "", DateTime.now().minusMinutes(2).toDate(), 0)
+        val post = Post(0, "", title, text, "", Instant.now().epochSecond , 0)
 
         viewModel.setIntention(PostAddEvent.SavePost(post))
     }
@@ -160,6 +171,7 @@ class PostAddFragment : Fragment() {
 }
 
 sealed class PostAddEvent{
+    object LoadUserDetails: PostAddEvent()
     object ReadyToWrite: PostAddEvent()
 
     data class SavePost(val post:Post): PostAddEvent()

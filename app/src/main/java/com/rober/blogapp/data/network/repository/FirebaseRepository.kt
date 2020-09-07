@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 class FirebaseRepository @Inject
 constructor(
+    private val firebaseSource: FirebaseSource,
     private val firebaseAuthManager: FirebaseAuthManager,
     private val firebaseFeedManager: FirebaseFeedManager,
     private val firebasePostAddManager: FirebasePostAddManager,
@@ -24,10 +25,11 @@ constructor(
 
     val source = Source.CACHE
 
+    //Global
+    fun getCurrentUser() = firebaseSource.getCurrentUser()
+
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
-
-    suspend fun getCurrentUser() = firebaseAuthManager.getCurrentUser()
 
     suspend fun login(email: String, password: String): Flow<ResultAuth> = firebaseAuthManager.login(email, password)
 

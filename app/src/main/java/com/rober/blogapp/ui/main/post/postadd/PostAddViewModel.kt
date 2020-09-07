@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.MessageUtil
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -21,11 +22,11 @@ class PostAddViewModel @ViewModelInject constructor(
     val statePost : LiveData<PostAddState>
         get() = _statePost
 
-    init {
-    }
+    var user : User? = null
 
     fun setIntention(event: PostAddEvent){
         when(event) {
+            is PostAddEvent.LoadUserDetails -> getCurrentUser()
             is PostAddEvent.SavePost -> {
                 savePost(event.post)
             }
@@ -37,6 +38,14 @@ class PostAddViewModel @ViewModelInject constructor(
             PostAddEvent.Idle -> {
                 _statePost.value = PostAddState.Idle
             }
+        }
+    }
+
+    private fun getCurrentUser() {
+        user = firebaseRepository.getCurrentUser()
+
+        user?.run {
+            _statePost.value = PostAddState.SetUserDetail(this)
         }
     }
 
