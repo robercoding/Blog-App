@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.auth.login.LoginFragment"
     android:orientation="vertical"
     android:background="@color/background"
@@ -21,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:hint="@string/email"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             android:text="newrober@gmail.com"/>
@@ -34,7 +35,7 @@
             android:layout_marginBottom="5dp"
             android:inputType="textPassword"
             android:hint="@string/password"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             android:text="newrober"/>
@@ -52,6 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/login"
+            android:backgroundTint="@color/blueTwitter"
             android:background="@drawable/layout_btn_login_register"/>
     </LinearLayout>
 
@@ -70,7 +72,8 @@
         android:padding="10dp"
         android:layout_margin="10dp"
         android:text="@string/sign_up_with_email"
-        android:textColor="@color/colorWhite"/>
+        android:backgroundTint="@color/blueTwitter"
+        android:textColor="@color/colorBlack"/>
 
     <Button
         android:id="@+id/btnRegisterGoogle"
@@ -81,6 +84,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
         android:text="@string/sign_up_with_google"
-        android:textColor="@color/colorWhite"/>
+        android:backgroundTint="@color/blueTwitter"
+        android:textColor="@color/colorBlack"/>
 
 </LinearLayout>

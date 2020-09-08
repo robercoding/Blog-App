@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorGray"
+    android:background="@color/background"
     android:gravity="center"
     >
 
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:hint="@string/name"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             />
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:hint="@string/email"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             />
@@ -46,7 +46,7 @@
             android:layout_marginBottom="5dp"
             android:inputType="textPassword"
             android:hint="@string/password"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             />
@@ -59,7 +59,7 @@
             android:layout_marginBottom="20dp"
             android:inputType="textPassword"
             android:hint="@string/password"
-            android:backgroundTint="@color/colorGray2TextSpotify"
+            android:backgroundTint="@color/colorBlueLight"
             android:textColorHint="@color/colorGray2TextSpotify"
             android:textColor="@color/colorWhite"
             />
@@ -69,6 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/sign_up"
+            android:backgroundTint="@color/blueTwitter"
             android:background="@drawable/layout_btn_login_register"
             />
 
