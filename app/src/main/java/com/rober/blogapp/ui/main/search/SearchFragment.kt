@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.search.adapter.UserSearchAdapter
@@ -48,7 +49,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        setupListeners()
+        viewModel.setIntention(SearchFragmentEvent.LoadUserDetails)
 
         userSearchAdapter = UserSearchAdapter(requireView(), R.layout.adapter_search_viewholder_user, this)
         subscribeObservers()
@@ -62,6 +63,11 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
     private fun render(searchState : SearchState){
         when(searchState){
+            is SearchState.SetUserDetails -> {
+                setUserDetails(searchState.user)
+                setupListeners()
+            }
+
             is SearchState.ReadySearchUser -> {
                 ReadySearchUser()
             }
@@ -93,6 +99,12 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
                 //Load
             }
         }
+    }
+
+    private fun setUserDetails(user: User){
+        Glide.with(requireView())
+            .load(user.profileImageUrl)
+            .into(search_toolbar_profile_image)
     }
 
     private fun recyclerAdapterApply(){
@@ -211,6 +223,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 }
 
 sealed class SearchFragmentEvent(){
+    object LoadUserDetails: SearchFragmentEvent()
     data class RetrieveUserByUsername(val searchUsername: String) : SearchFragmentEvent()
     object ReadySearchUser : SearchFragmentEvent()
     object StopSearchUser : SearchFragmentEvent()

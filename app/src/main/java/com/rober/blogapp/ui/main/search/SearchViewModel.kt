@@ -23,8 +23,12 @@ class SearchViewModel @ViewModelInject constructor(
     val searchState : LiveData<SearchState>
         get() = _searchState
 
+    var user : User? = null
+
     fun setIntention(event: SearchFragmentEvent){
         when(event){
+            is SearchFragmentEvent.LoadUserDetails -> getCurrentUser()
+
             is SearchFragmentEvent.RetrieveUserByUsername -> {
                 searchUsersByUsername(event.searchUsername)
             }
@@ -36,6 +40,14 @@ class SearchViewModel @ViewModelInject constructor(
             is SearchFragmentEvent.StopSearchUser -> {
                 _searchState.value = SearchState.StopSearchUser
             }
+        }
+    }
+
+    private fun getCurrentUser(){
+        user = firebaseRepository.getCurrentUser()
+
+        user?.run {
+            _searchState.value = SearchState.SetUserDetails(this)
         }
     }
 

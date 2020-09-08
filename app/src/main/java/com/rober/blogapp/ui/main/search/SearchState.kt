@@ -4,6 +4,7 @@ import com.rober.blogapp.entity.User
 import java.lang.Exception
 
 sealed class SearchState {
+    data class SetUserDetails(val user: User): SearchState()
     data class ShowResultSearch(val listUsers: List<User>): SearchState()
     data class EmptyResultsSearch(val searchUsername: String): SearchState()
 

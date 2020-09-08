@@ -24,58 +24,86 @@
             app:menu="@menu/settings"
             app:contentInsetStart="2dp"
             >
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/search_toolbar_profile_image"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/outline_account_circle_black_24dp"
-                app:civ_border_color="@color/colorWhite"
-                app:civ_border_width="2dp"
-                />
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/search_toolbar_profile_image"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/search_toolbar_space"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/outline_account_circle_black_24dp"
+                    app:civ_border_color="@color/blueTwitter"
+                    app:civ_border_width="2dp"
+                    android:visibility="gone"
+                    app:layout_constraintWidth_percent="0.2"
+                    />
 
-            <ImageView
-                android:id="@+id/search_arrow_back"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="15dp"
-                android:background="@drawable/ic_arrow_back_black_24dp"
-                android:visibility="gone"/>
+                <ImageView
+                    android:id="@+id/search_arrow_back"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/search_toolbar_space"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/ic_arrow_back_black_24dp"
+                    app:layout_constraintWidth_percent="0.2"
+                    android:visibility="visible"
+                    />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/search_user_text"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:drawableStart="@drawable/ic_search_black_18dp"
-                android:layout_width="290dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/search_user_selector"
-                android:textSize="14dp"
-                android:drawablePadding="10dp"
-                android:lines="1"
-                android:hint="Search an user"
-                />
+                <Space
+                    android:id="@+id/search_toolbar_space"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/search_user_text"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
+                <com.google.android.material.textfield.TextInputEditText
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/search_toolbar_space"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/search_user_text"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:drawableStart="@drawable/ic_search_black_18dp"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    app:layout_constraintWidth_percent="0.80"
+                    android:background="@drawable/search_user_selector"
+                    android:textSize="14dp"
+                    android:drawablePadding="10dp"
+                    android:lines="1"
+                    android:hint="Search an user"
+                    />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/search_text_cant_find_user"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="30dp"
+        app:layout_constraintWidth_percent="0.49"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/recycler_user_search"
-        android:layout_marginStart="100dp"
         android:textStyle="bold"
         android:textSize="14sp"
         android:visibility="gone"/>
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_user_search"
