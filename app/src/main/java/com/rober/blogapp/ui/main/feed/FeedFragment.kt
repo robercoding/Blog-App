@@ -15,9 +15,11 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.MainActivity
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -57,7 +59,8 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         subscribeObservers()
-        viewModel.setIntention(FeedFragmentEvent.RetrieveInitPosts)
+        viewModel.setIntention(FeedFragmentEvent.GetUserPicture)
+
         postAdapter = PostAdapter(requireView(), resource, this)
     }
 
@@ -74,6 +77,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     private fun render(feedState: FeedState) {
         Log.i("States", "State = ${feedState}")
         when (feedState) {
+            is FeedState.SetUserDetails -> {
+                setUserDetails(feedState.user)
+                viewModel.setIntention(FeedFragmentEvent.RetrieveInitPosts)
+            }
             is FeedState.SetListPosts -> {
                 displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
@@ -156,7 +163,13 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
         }
     }
+    private fun setUserDetails(user: User){
+        Log.i(TAG, "Setting user")
 
+        Glide.with(requireView())
+            .load(user.profileImageUrl)
+            .into(feed_toolbar_image_profile)
+    }
     private fun displayProgressBarInitialPosts(isDisplayed: Boolean) {
         feed_progress_bar_init.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
@@ -253,6 +266,8 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 }
 
 sealed class FeedFragmentEvent {
+    object GetUserPicture: FeedFragmentEvent()
+
     object RetrieveInitPosts : FeedFragmentEvent()
     object RetrieveNewFeedPosts : FeedFragmentEvent()
     data class RetrieveOldFeedPosts(val actualRecyclerViewPosition: Int) : FeedFragmentEvent()

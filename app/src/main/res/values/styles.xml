@@ -21,12 +21,8 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
-<!--    <style name="BottomNavigation">-->
-<!--        <item name="android:backgroundTint">@color/background</item>-->
-<!--    </style>-->
     <style name="PostBackground">
         <item name="android:background"> @color/background </item>
-
     </style>
 
     <style name="PostUserName">

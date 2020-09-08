@@ -108,47 +108,13 @@ class ProfileDetailViewModel
     private fun getCurrentUser() {
         _profileDetailState.value = ProfileDetailState.LoadingUser
         PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
-        viewModelScope.launch {
-            delay(200)
-            firebaseRepository.getCurrentUser()
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultData.Success -> {
-                            resultData.data?.let { resultDataUser ->
-                                user = resultDataUser
-                                Log.i("ProfileDetailFreeze", "${user?.username}")
-//                                if(bitmap == null){
-////                                    bitmap = getBitmapFromUrl(imageUrl)
-//                                    bitmap = getBitmapLightWeight(imageUrl)
-//                                }
+        user = firebaseRepository.getCurrentUser()
 
-                                Log.i("ProfileDetailFreeze", "after bitmap")
-
-
-                            } ?: kotlin.run {
-                                _profileDetailState.value =
-                                    ProfileDetailState.Error(Exception("We couldn't provide the user"))
-                            }
-                        }
-                    }
-                }
-
-            user?.let {
-                getBitmapFromUrl(it.backgroundImageUrl)
-//                firebaseRepository.getBitmap(it)
-//                    .collect {resultData ->
-//                        when(resultData){
-//                            is ResultData.Success ->{
-//                                bitmap = resultData.data
-//
-//                                bitmap?.run {
-//                                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(it,this)
-//                                }
-//                            }
-//                        }
-//                    }
-            }
-
+        user?.let {
+            getBitmapFromUrl(it.backgroundImageUrl)
+        }?: kotlin.run {
+            _profileDetailState.value =
+                ProfileDetailState.Error(Exception("We couldn't provide the user"))
         }
     }
 

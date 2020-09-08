@@ -23,22 +23,35 @@
                 android:layout_height="match_parent"
                 app:contentInsetStart="0dp">
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/feed_toolbar_image_profile"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/outline_account_circle_black_24dp"
-                    android:layout_marginStart="5dp"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/ic_event_note_black_18dp"
-                    android:foregroundGravity="center"
-                    android:layout_marginStart="140dp"
-                    android:backgroundTint="@color/blueTwitter"
-                    android:contentDescription="feed_user_profile"
-                    />
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/feed_toolbar_image_profile"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:background="@drawable/outline_account_circle_black_24dp"
+                        android:layout_marginStart="15dp"/>
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="@drawable/ic_event_note_black_18dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:backgroundTint="@color/blueTwitter"
+                        android:contentDescription="feed_user_profile"
+                        />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
             </com.google.android.material.appbar.MaterialToolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
