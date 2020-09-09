@@ -88,7 +88,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
             Log.i(TAG, "SaveImages = False")
             return false
         }
-        if(!saveUserDetailChanges(username, biography, location)){
+        if (!saveUserDetailChanges(username, biography, location)) {
             Log.i(TAG, "SaveUserDetails = False")
             return false
         }
@@ -96,18 +96,30 @@ class ProfileEditViewModel @ViewModelInject constructor(
         return true
     }
 
-    private suspend fun saveUserDetailChanges(username: String, biography: String, location: String): Boolean{
+    private suspend fun saveUserDetailChanges(
+        username: String,
+        biography: String,
+        location: String
+    ): Boolean {
+
+        if(profileImageDownloadUrl.isEmpty())
+            profileImageDownloadUrl = user.profileImageUrl
+
+        if(backgroundImageDownloadUrl.isEmpty())
+            backgroundImageDownloadUrl = user.backgroundImageUrl
 
         val newUser = user.copy().apply {
             this.username = username
             this.biography = biography
             this.location = location
+            this.profileImageUrl = profileImageDownloadUrl
+            this.backgroundImageUrl = backgroundImageDownloadUrl
         }
 
         val job = viewModelScope.launch {
             firebaseRepository.updateUser(user, newUser)
-                .collect {resultData ->
-                    when(resultData){
+                .collect { resultData ->
+                    when (resultData) {
                         is ResultData.Success -> {
                             Log.i(TAG, "Success")
                             successSaveUserDetails = true
