@@ -5,7 +5,9 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.search.SearchFragment"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:background="@color/background"
@@ -40,7 +42,7 @@
                     android:background="@drawable/outline_account_circle_black_24dp"
                     app:civ_border_color="@color/blueTwitter"
                     app:civ_border_width="2dp"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:layout_constraintWidth_percent="0.2"
                     />
 
@@ -55,7 +57,7 @@
                     android:layout_marginStart="10dp"
                     android:background="@drawable/ic_arrow_back_black_24dp"
                     app:layout_constraintWidth_percent="0.2"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     />
 
                 <Space

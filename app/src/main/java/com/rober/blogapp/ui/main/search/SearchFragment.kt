@@ -34,7 +34,6 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     lateinit var userSearchAdapter: UserSearchAdapter
     private var textSearch = ""
     private var alreadyFocusOnSearchText = false
-    private var didUserJustEnterInFragment = true
 
     private var listUsers = mutableListOf<User>()
 
@@ -69,11 +68,11 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is SearchState.ReadySearchUser -> {
-                ReadySearchUser()
+                readySearchUser()
             }
 
             is SearchState.StopSearchUser -> {
-                StopSearchUser()
+                stopSearchUser()
             }
 
             is SearchState.ShowResultSearch -> {
@@ -116,28 +115,23 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
     private fun setupListeners(){
         search_user_text.setOnClickListener {
-            if(!alreadyFocusOnSearchText && !didUserJustEnterInFragment)
+            if(!alreadyFocusOnSearchText)
                 viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
         }
 
-        search_user_text.setOnFocusChangeListener(object: View.OnFocusChangeListener {
-            override fun onFocusChange(v: View?, hasFocus: Boolean) {
-                if(hasFocus){
-                    Log.i(TAG, "Focused")
-                    viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
-                    alreadyFocusOnSearchText = true
-                }
+        search_user_text.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            if(hasFocus){
+                viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
+                alreadyFocusOnSearchText = true
             }
-        })
+        }
 
         search_user_text.addTextChangedListener {
             val textToSearch = search_user_text.text.toString()
-            didUserJustEnterInFragment = false
             viewModel.setIntention(SearchFragmentEvent.RetrieveUserByUsername(textToSearch))
         }
 
         search_arrow_back.setOnClickListener {
-
             viewModel.setIntention(SearchFragmentEvent.StopSearchUser)
         }
 
@@ -154,38 +148,41 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun ReadySearchUser(){
-        Log.i(TAG, "Recover text= ${textSearch}")
+    private fun readySearchUser(){
         search_toolbar_profile_image.visibility = View.GONE
-        search_arrow_back.visibility = View.VISIBLE
         search_top_app_bar.menu.findItem(R.id.icon_settings).isVisible = false
 
-        enableSearchUserEditText(true)
-
-        displayBottomNavigation(false)
+        search_arrow_back.visibility = View.VISIBLE
         recycler_user_search.visibility = View.VISIBLE
+
+        enableSearchUserEditText(true)
+        displayBottomNavigation(false)
     }
 
-    private fun StopSearchUser(){
-        alreadyFocusOnSearchText = false
+    private fun stopSearchUser(){
         textSearch = search_user_text.text.toString()
+        alreadyFocusOnSearchText = false
 
-        search_arrow_back.visibility = View.GONE
+        displayBottomNavigation(true)
         search_toolbar_profile_image.visibility = View.VISIBLE
         search_top_app_bar.menu.findItem(R.id.icon_settings).isVisible = true
 
-        enableSearchUserEditText(false)
-        displayBottomNavigation(true)
+
         hideKeyBoard()
+        enableSearchUserEditText(false)
         recycler_user_search.visibility = View.GONE
+        search_arrow_back.visibility = View.GONE
     }
 
     private fun enableSearchUserEditText(enabled: Boolean){
         if (enabled){
+            search_user_text.requestFocus()
+            Log.i(TAG, "Request Focus")
             search_user_text.setText(textSearch)
             search_user_text.setSelection(textSearch.length)
         }else{
             search_user_text.setText("")
+            Log.i(TAG, "Clear focus")
             search_user_text.clearFocus()
         }
     }
@@ -212,14 +209,6 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
-
-    override fun onResume() {
-        super.onResume()
-        Log.i(TAG, "Resume")
-        didUserJustEnterInFragment = true
-    }
-
-
 }
 
 sealed class SearchFragmentEvent(){
