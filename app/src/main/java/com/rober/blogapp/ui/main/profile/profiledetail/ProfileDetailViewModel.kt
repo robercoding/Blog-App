@@ -38,6 +38,8 @@ class ProfileDetailViewModel
         get() = _profileDetailState
 
     var user: User? = null
+    var previousBackgroundImageUrl = ""
+    var bitmap : Bitmap? = null
 
     private var currentUserFollowsOtherUser = false
     private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
@@ -172,72 +174,32 @@ class ProfileDetailViewModel
         val imageBitmapFromUrlAsyncTask = GetImageBitmapFromUrlAsyncTask()
         imageBitmapFromUrlAsyncTask.delegate = this
         imageBitmapFromUrlAsyncTask.execute(urlImage)
-
-//        while (!imageBitmapFromUrlAsyncTask.success) {
-//        }
-//
-//        if (!imageBitmapFromUrlAsyncTask.success) {
-//            return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
-//        }
-//        Log.i("CurrentBitmap", "Returning bitmap ${imageBitmapFromUrlAsyncTask.get()}")
-//
-//        return imageBitmapFromUrlAsyncTask.get()
     }
 
-    override fun processFinish(bitmap: Bitmap) {
-        Log.i("BackgroundBitmap", "Received on processfinish")
+    override fun processFinish(processedBitmap : Bitmap) {
+        bitmap = processedBitmap
+
         user?.run {
             if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(this, bitmap)
+                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(this, processedBitmap)
             } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
                 _profileDetailState.value =
-                    ProfileDetailState.SetOtherUserProfile(this, currentUserFollowsOtherUser, bitmap)
+                    ProfileDetailState.SetOtherUserProfile(this, currentUserFollowsOtherUser, processedBitmap)
             }
         }
     }
 
-//    private fun getBitmapLightWeight(urlImage: String): Bitmap {
-//        var bitmap: Bitmap? = null
+//    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
 //
-//        try {
-//            val url = URL(imageUrl)
-//            val options = BitmapFactory.Options()
-//            options.inSampleSize = 8
-//            bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream(), null, options)
-//        } catch (e: Exception) {
-//            System.out.println(e)
-//        }
-//
-//        bitmap?.run {
-//            return this
-//        }
-//        return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
-//    }
-
-    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
-        Log.i("CurrentColor", "Inside lets get the color")
 //        Palette.Builder(bitmap).generate { palette ->
-//            if(palette == null)
-//                Log.i("CurrentColor", "Palette null wtf")
-//            else{
-//                Log.i("CurrentColor", "Not null wtf")
-//            }
-//
-//            palette?.let {
-//                Log.i("CurrentColor", "$colorUrl")
-//                colorUrl = it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
-//                Log.i("CurrentColor", "$colorUrl")
+//            colorUrl = palette?.let {
+//                it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
+//            } ?: kotlin.run {
+//                Log.i("Palette", "Not work")
 //            }
 //        }
-        Palette.Builder(bitmap).generate { palette ->
-            colorUrl = palette?.let {
-                it.getDominantColor(ContextCompat.getColor(application.applicationContext, R.color.colorBlack))
-            } ?: kotlin.run {
-                Log.i("Palette", "Not work")
-            }
-        }
-        Log.i("CurrentColor", "We are outside woah")
-    }
+//        Log.i("CurrentColor", "We are outside woah")
+//    }
 
     private fun getUserPosts() {
 //        _profileDetailState.value = ProfileDetailState.LoadingPosts
@@ -246,7 +208,6 @@ class ProfileDetailViewModel
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            Log.i("RequestPosts", " Success ${resultData.data}")
                             _profileDetailState.value =
                                 ProfileDetailState.SetUserPosts(resultData.data!!)
                         }
@@ -264,6 +225,19 @@ class ProfileDetailViewModel
 
     private fun getNewerPosts() {
         viewModelScope.launch {
+
+            user = firebaseRepository.getCurrentUserRefreshed()
+
+            user?.also {tempUser ->
+                if(tempUser.backgroundImageUrl != previousBackgroundImageUrl){
+                    getBitmapFromUrl(tempUser.backgroundImageUrl)
+                }else{
+                    bitmap?.let {tempBitmap ->
+                        _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
+                    }
+                }
+            }
+
             firebaseRepository.retrieveNewerPostsUserProfile(user!!.username)
                 .collect { resultData ->
                     when (resultData) {
@@ -300,7 +274,6 @@ class ProfileDetailViewModel
                     when (resultData) {
                         is ResultData.Success -> {
                             if (resultData.data!!) {
-                                Log.i("UserFollower", "Before Plus ${user?.follower}")
                                 user?.let {
                                     user?.follower = it.follower.plus(1)
                                 }

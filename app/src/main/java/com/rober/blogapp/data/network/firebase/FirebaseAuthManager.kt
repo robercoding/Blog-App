@@ -27,7 +27,6 @@ class FirebaseAuthManager @Inject constructor(
     private val authErrors = firebaseErrors.authErrors
 
     suspend fun setCurrentUser() {
-        Log.i("User", "AuthManager = Setting ")
         firebaseSource.setCurrentUser()
         firebaseSource.setCurrentUserDocumentsUID()
         firebaseSource.setCurrentFollowing()

@@ -8,6 +8,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.util.AsyncResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -27,6 +28,8 @@ constructor(
 
     //Global
     fun getCurrentUser() = firebaseSource.getCurrentUser()
+
+    suspend fun getCurrentUserRefreshed() = firebaseSource.getCurrentUserRefreshed()
 
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
@@ -70,8 +73,6 @@ constructor(
     suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
 
     suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.unfollowOtherUser(user)
-
-    suspend fun getBitmap(user: User): Flow<ResultData<Bitmap>> = firebaseProfileDetailManager.getBitmapLightWeight(user)
 
     //ProfileEdit
     suspend fun updateUser(previousUser: User, newUser: User): Flow<ResultData<Boolean>> = firebaseProfileEditManager.updateUser(previousUser, newUser)

@@ -64,7 +64,8 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
 
                 if (!tempUsername.isEmpty()) {
                     tempUser =
-                        db.collection(firebasePath.users_col).document(tempUsername.username).get().await().toObject(User::class.java)!!
+                        db.collection(firebasePath.users_col).document(tempUsername.username).get().await()
+                            .toObject(User::class.java)!!
                 }
 
             } catch (e: Exception) {
@@ -82,7 +83,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     }
 
     suspend fun setCurrentUserDocumentsUID() {
-        if(user == null)
+        if (user == null)
             return
 
         try {
@@ -142,11 +143,40 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
+    suspend fun getUserDocumentUID(userID: String): UserDocumentUID? {
+        var userDocumentUID: UserDocumentUID? = null
+        val userIDUserDocumentUID =
+            db.collection(firebasePath.user_documents_uid).whereEqualTo("username", userID)
+
+        userIDUserDocumentUID
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty)
+                    return@addOnSuccessListener
+
+                val listUserDocumentUID = querySnapshot.toObjects(UserDocumentUID::class.java)
+                if (listUserDocumentUID.isEmpty())
+                    return@addOnSuccessListener
+
+                when (listUserDocumentUID.size) {
+                    1 -> userDocumentUID = listUserDocumentUID[0]
+                    else -> return@addOnSuccessListener
+                }
+            }.await()
+
+        return userDocumentUID
+    }
+
     fun getCurrentUser(): User {
         user?.let {
             return it
-        }?: kotlin.run {
+        } ?: kotlin.run {
             return User()
         }
+    }
+
+    suspend fun getCurrentUserRefreshed(): User {
+        setCurrentUser()
+        return getCurrentUser()
     }
 }

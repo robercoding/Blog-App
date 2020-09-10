@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
@@ -35,7 +36,7 @@ import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(), RecyclerViewActionInterface{
+class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
     private val TAG = "ProfileDetailFragment"
 
@@ -81,7 +82,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
     }
 
     private fun render(profileDetailState: ProfileDetailState) {
-        Log.i(TAG, "State: ${profileDetailState}")
+        Log.i(TAG, "State: $profileDetailState")
         when (profileDetailState) {
             is ProfileDetailState.SetCurrentUserProfile -> {
                 Log.i("ProfileDetailFreeze", "SetCurrentUserProfile")
@@ -89,7 +90,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
                 val user = profileDetailState.user
 
-                setViewForCurrentUser(user,  profileDetailState.bitmap)
+                setViewForCurrentUser(user, profileDetailState.bitmap)
                 setUserProfileData(user)
 
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
@@ -148,7 +149,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
             is ProfileDetailState.Unfollowed -> {
                 val follower = profileDetailState.user.follower
-                Log.i("UserFollower", "Get ${follower}")
+                Log.i("UserFollower", "Get $follower")
                 Toast.makeText(
                     requireContext(),
                     "You stopped following ${profileDetailState.user.username}",
@@ -194,18 +195,31 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
             profile_detail_background_progress_bar.visibility = View.VISIBLE
             profile_detail_motion_layout.visibility = View.GONE
         }
+
+        profile_detail_swipe_refresh_layout.setProgressBackgroundColorSchemeColor(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.background
+            )
+        )
+        profile_detail_swipe_refresh_layout.setColorSchemeColors(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.blueTwitter
+            )
+        )
     }
 
     private fun setUserProfileData(user: User) {
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
-        uid_following.text = "${user.following} Following"
+        profile_detail_user_following.text = "${user.following} Following"
 
         setFollowerText(user.follower)
     }
 
-    private fun setViewForCurrentUser(user:User, bitmap: Bitmap) {
+    private fun setViewForCurrentUser(user: User, bitmap: Bitmap) {
         Log.i("SetView", "Setting current User!")
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
@@ -246,7 +260,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         setPaletteWithMotionLayoutListener(user.backgroundImageUrl, bitmap)
 
         profile_detail_motion_layout.apply {
-            this.getConstraintSet(R.id.start)?.let {constraintSet ->
+            this.getConstraintSet(R.id.start)?.let { constraintSet ->
                 constraintSet.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
                 constraintSet.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
             }
@@ -271,7 +285,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         Palette.Builder(bitmap).generate { palette ->
             palette?.let {
                 val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
-                val motionLayoutTransitionListener = MotionLayoutTransitionListener(requireView(), imageFromUrlToolbarStart, color)
+                val motionLayoutTransitionListener =
+                    MotionLayoutTransitionListener(requireView(), imageFromUrlToolbarStart, color)
                 profile_detail_motion_layout.apply {
                     setTransitionListener(motionLayoutTransitionListener)
                 }
@@ -285,16 +300,16 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
 
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
-        uid_following.text = "${user.following} Following"
+        profile_detail_user_following.text = "${user.following} Following"
 
         setFollowerText(user.follower)
     }
 
     private fun setFollowerText(follower: Int) {
-        uid_followers.text = "${follower} Follower"
+        profile_detail_user_followers.text = "${follower} Follower"
 
         if (follower > 1)
-            uid_followers.append("s")
+            profile_detail_user_followers.append("s")
     }
 
 
@@ -382,7 +397,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface{
         navController.findNavController().popBackStack()
     }
 
-    private fun navigateToProfileEdit(user: User){
+    private fun navigateToProfileEdit(user: User) {
         Toast.makeText(requireContext(), "We are going to profile edit", Toast.LENGTH_SHORT).show()
         val navController = findNavController()
         val userBundle = bundleOf("user" to user)
@@ -414,6 +429,6 @@ sealed class ProfileDetailFragmentEvent {
     object Unfollow : ProfileDetailFragmentEvent()
     object Follow : ProfileDetailFragmentEvent()
 
-    object NavigateToProfileEdit: ProfileDetailFragmentEvent()
+    object NavigateToProfileEdit : ProfileDetailFragmentEvent()
     object Idle : ProfileDetailFragmentEvent()
 }

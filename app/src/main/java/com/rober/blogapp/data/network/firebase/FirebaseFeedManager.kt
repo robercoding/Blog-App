@@ -453,27 +453,7 @@ constructor
     }
 
     private suspend fun getUserDocumentUID(userID: String): UserDocumentUID? {
-        var userDocumentUID : UserDocumentUID? = null
-        val userIDUserDocumentUID =
-            firebaseSource.db.collection(firebasePath.user_documents_uid).whereEqualTo("username", userID)
-
-        userIDUserDocumentUID
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty)
-                    return@addOnSuccessListener
-
-                val listUserDocumentUID = querySnapshot.toObjects(UserDocumentUID::class.java)
-                if (listUserDocumentUID.isEmpty())
-                    return@addOnSuccessListener
-
-                when (listUserDocumentUID.size) {
-                    1 -> userDocumentUID = listUserDocumentUID[0]
-                    else -> return@addOnSuccessListener
-                }
-            }.await()
-
-        return userDocumentUID
+        return firebaseSource.getUserDocumentUID(userID)
     }
 
     //When username change it updates local saved posts

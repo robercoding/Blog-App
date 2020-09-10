@@ -1,19 +1,17 @@
 package com.rober.blogapp.data.network.firebase
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
-import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import org.joda.time.DateTime
-import java.net.URL
+import org.threeten.bp.Instant
+import org.threeten.bp.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -22,33 +20,29 @@ import kotlin.Exception
 
 class FirebaseProfileDetailManager @Inject constructor(
     private val firebaseSource: FirebaseSource,
-    private val firebasePath: FirebasePath,
-    private val application: Application
+    private val firebasePath: FirebasePath
 ) {
     private val TAG = "FirebaseProfileManager"
 
     private var savedUserHashMapPost = hashMapOf<String, MutableList<Post>>()
-    private var savedUserHashMapDates = hashMapOf<String, MutableList<Date>>()
-    private var savedUserHashMapMinusDays = hashMapOf<String, Int>()
-    private var savedUserHashMapRetrieveNewerPostsDate = hashMapOf<String, Date>()
+    private var savedUserHashMapDatesEpochSecond =
+        hashMapOf<String, MutableList<Long>>() //0:DateLessThanEpochSeconds and 1:DateGreaterThanEpochSeconds
+    private var savedUserHashMapMinusDays = hashMapOf<String, Long>()
+    private var savedUserHashMapRetrieveNewerPostsDateEpochSecond = hashMapOf<String, Long>()
 
     private var hashMapCurrentUserFollowsOtherUser = hashMapOf<String, Boolean>()
     private var hashMapOthersUsersFollowings = hashMapOf<String, MutableList<Following>>()
 
-    private var savedUsersBitmaps = hashMapOf<String, Bitmap>()
-    private var savedUsersBackgroundImageUrl = hashMapOf<String, String>()
-
     private var userDocumentUID: UserDocumentUID? = null
-    private var bitmap: Bitmap? = null
 
     suspend fun retrieveUserPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
-        Log.i("UserRequestPosts", "UserRequestPosts = ${userID}")
+        Log.i("UserRequestPosts", "UserRequestPosts = $userID")
 
         //Initialize variable
-        var minusDays = 0
-        var dateLessThan = DateTime.now().minusDays(minusDays).toDate()
-        var dateGreaterThan = DateTime.now().minusDays(minusDays + 1).toDate()
+        var minusDays: Long = 0
+        var dateLessThanEpochSeconds = Instant.now().minus(minusDays, ChronoUnit.DAYS).epochSecond
+        var dateGreaterThanEpochSeconds = Instant.now().minus(minusDays + 1, ChronoUnit.DAYS).epochSecond
 
         var userContainsSavedPosts = savedUserHashMapPost[userID]
 
@@ -57,15 +51,16 @@ class FirebaseProfileDetailManager @Inject constructor(
 
         userContainsSavedPosts?.let {
             Log.i("RequestPosts", " UserContainsSavedPosts TRUE")
-            dateLessThan = savedUserHashMapDates[userID]?.get(0)
-            dateGreaterThan = savedUserHashMapDates[userID]?.get(1)
-            minusDays = savedUserHashMapMinusDays[userID]!!
-//            dateRetrieveNewerPosts = savedUserHashMapRetrieveNewerPostsDate[userID]!!
+            val datesThanEpochSeconds = savedUserHashMapDatesEpochSecond.getValue(userID)
+            dateLessThanEpochSeconds = datesThanEpochSeconds[0]
+            dateGreaterThanEpochSeconds = datesThanEpochSeconds[1]
+            minusDays = savedUserHashMapMinusDays.getValue(userID)
             Log.i("MinusDays", "Minus days enter = $minusDays")
             userContainsSavedPostsSize = it.size
         } ?: run {
-            savedUserHashMapRetrieveNewerPostsDate[userID] = Date()
-            Log.i(TAG, "Save retrieve = ${savedUserHashMapRetrieveNewerPostsDate[userID]}")
+            Log.i("RetrievePostsProfile", "Is new")
+            savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID] = Instant.now().epochSecond
+            Log.i(TAG, "Save retrieve = ${savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID]}")
             userContainsSavedPosts = mutableListOf()
             userContainsSavedPostsSize = 0
         }
@@ -79,17 +74,19 @@ class FirebaseProfileDetailManager @Inject constructor(
 //
 //            if (listNewerPosts.isNotEmpty()) {
 //                newUserMutableListPosts.addAll(listNewerPosts)
-//                savedUserHashMapRetrieveNewerPostsDate[userID] =
+//                savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID] =
 //                    Date() //Save new date to retrieve newer posts
 //            }
 //        }
 
-        while (newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts) {
-            val listPosts = getUserPostsByDateLessAndGreater(userID, dateLessThan, dateGreaterThan)
-
+        Log.i(TAG, "Before enter: newListPosts = ${newUserMutableListPosts.size} and countPosts = $countPosts")
+        var tries = 0
+        while (newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts && tries < 10) {
+            val listPosts = getUserPostsByDateLessAndGreater(userID, dateLessThanEpochSeconds, dateGreaterThanEpochSeconds)
+            Log.i(TAG, "While: User has got this posts $listPosts")
             Log.i(
                 TAG,
-                "We got these dates: DatesLess $dateLessThan and DateGreater = $dateGreaterThan"
+                "We got these dates: DatesLess $dateLessThanEpochSeconds and DateGreater = $dateGreaterThanEpochSeconds and already saved $userContainsSavedPostsSize"
             )
 
             listPosts.let {
@@ -100,45 +97,55 @@ class FirebaseProfileDetailManager @Inject constructor(
             }
 
             minusDays += 1
-            dateLessThan = DateTime.now().minusDays(minusDays).toDate()
-            dateGreaterThan = DateTime.now().minusDays(minusDays + 1).toDate()
+            dateLessThanEpochSeconds =
+                Instant.ofEpochSecond(dateLessThanEpochSeconds).minus(minusDays, ChronoUnit.DAYS).epochSecond
+            dateGreaterThanEpochSeconds =
+                Instant.ofEpochSecond(dateLessThanEpochSeconds).minus(minusDays + 1, ChronoUnit.DAYS).epochSecond
+
+            tries += 1
         }
 
         //Save dates on local
         savedUserHashMapMinusDays[userID] = minusDays
-        savedUserHashMapDates[userID] = mutableListOf(dateLessThan, dateGreaterThan)
+        savedUserHashMapDatesEpochSecond[userID] = mutableListOf(dateLessThanEpochSeconds, dateGreaterThanEpochSeconds)
 
         for (userPosts in newUserMutableListPosts) {
             userContainsSavedPosts?.add(userPosts)
         }
 
+        var tempUserContainsSavedPosts: List<Post> = emptyList()
+
         userContainsSavedPosts?.let {
+            tempUserContainsSavedPosts = it.toList()
+        }
+
+        if (userContainsSavedPosts != null) {
             val userContainedSavedPostsSortedByDescending =
-                it.sortedByDescending { post -> post.created_at }.toMutableList()
+                tempUserContainsSavedPosts.sortedByDescending { post -> post.created_at }.toMutableList()
             savedUserHashMapPost[userID] = userContainedSavedPostsSortedByDescending
             Log.i("UserRequestPosts", "UserRequestPosts = ${savedUserHashMapPost[userID]}")
             emit(ResultData.Success(userContainedSavedPostsSortedByDescending))
-        } ?: kotlin.run {
+
+        } else {
             savedUserHashMapPost.remove(userID)
             savedUserHashMapMinusDays.remove(userID)
-            savedUserHashMapDates.remove(userID)
-            emit(com.rober.blogapp.data.ResultData.Error(kotlin.Exception("Sorry we couldn't load user posts, try again later")))
+            savedUserHashMapDatesEpochSecond.remove(userID)
+            emit(ResultData.Error(Exception("Sorry we couldn't load user posts, try again later")))
         }
     }
 
     suspend fun retrieveUserNewerPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
-        val dateUserRetrieveNewerPosts = savedUserHashMapRetrieveNewerPostsDate[userID]
+        val dateUserRetrieveNewerPosts = savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID]
 
         val listNewerPosts: MutableList<Post>
 
         if (dateUserRetrieveNewerPosts == null) {
-            Log.i(TAG, "Is null")
-            savedUserHashMapRetrieveNewerPostsDate[userID] = Date()
+            savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID] = Instant.now().epochSecond
             emit(ResultData.Success(savedUserHashMapPost[userID]))
         } else {
             Log.i(TAG, "Date to retrieve: $dateUserRetrieveNewerPosts")
             listNewerPosts = getNewerPosts(userID, dateUserRetrieveNewerPosts).toMutableList()
-            Log.i(TAG, "Save again = ${savedUserHashMapRetrieveNewerPostsDate[userID]}")
+            Log.i(TAG, "Save again = ${savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID]}")
 
             if (listNewerPosts.isEmpty()) {
                 emit(ResultData.Success(savedUserHashMapPost[userID]))
@@ -152,41 +159,48 @@ class FirebaseProfileDetailManager @Inject constructor(
                 val newUserListPostsSortedByDescending =
                     newUserListPosts?.sortedByDescending { post -> post.created_at }?.toMutableList()
 
-                newUserListPostsSortedByDescending?.let { list ->
-                    savedUserHashMapPost[userID] = list
+                if (newUserListPostsSortedByDescending != null) {
+                    savedUserHashMapPost[userID] = newUserListPostsSortedByDescending
                     emit(ResultData.Success(savedUserHashMapPost[userID]))
-                } ?: kotlin.run {
-                    emit(com.rober.blogapp.data.ResultData.Success(savedUserHashMapPost[userID]))
+                } else {
+                    emit(ResultData.Success(savedUserHashMapPost[userID]))
+
                 }
             }
         }
     }
 
-    private suspend fun getNewerPosts(userID: String, dateRetrieveNewerPosts: Date): List<Post> {
-        return getUserPostsByDateLessAndGreater(userID, Date(), dateRetrieveNewerPosts)
+    private suspend fun getNewerPosts(userID: String, dateRetrieveNewerPostsEpochSeconds: Long): List<Post> {
+        return getUserPostsByDateLessAndGreater(userID, Instant.now().epochSecond, dateRetrieveNewerPostsEpochSeconds)
     }
 
     private suspend fun getUserPostsByDateLessAndGreater(
         userID: String,
-        dateLessThan: Date,
-        dateGreaterThan: Date
+        dateLessThanEpochSeconds: Long,
+        dateGreaterThanEpochSeconds: Long
     ): List<Post> {
+        val userDocumentUID = getUserDocumentUID(userID)
 
-        return firebaseSource.db
-            .collection("posts")
-            .document(userID)
-            .collection(firebasePath.user_posts)
-            .whereLessThan("created_at", dateLessThan)
-            .whereGreaterThan("created_at", dateGreaterThan)
-            .get()
-            .await()
-            .toObjects(Post::class.java)
+        userDocumentUID?.run {
+            return firebaseSource.db
+                .collection("posts")
+                .document(this.postsDocumentUid)
+                .collection(firebasePath.user_posts)
+                .whereLessThan("created_at", dateLessThanEpochSeconds)
+                .whereGreaterThan("created_at", dateGreaterThanEpochSeconds)
+                .get()
+                .await()
+                .toObjects(Post::class.java)
+        } ?: kotlin.run {
+            return emptyList()
+        }
     }
 
+    //TODO, SET COOLDOWN 1 MINUTE
     private fun returnMinutesDifference(dateRetrieveNewerPostsTime: Long): Long {
-        val diffInMillisec = Date().time - dateRetrieveNewerPostsTime
+        val diffInMillisecond = Date().time - dateRetrieveNewerPostsTime
 
-        return TimeUnit.MILLISECONDS.toMinutes(diffInMillisec)
+        return TimeUnit.MILLISECONDS.toMinutes(diffInMillisecond)
     }
 
 //Without date by
@@ -204,17 +218,25 @@ class FirebaseProfileDetailManager @Inject constructor(
 //    }
 
     private suspend fun getCountPostsFromOtherUser(userID: String): Int {
-        val countPostsDocRef = firebaseSource.db.collection(firebasePath.posts_col).document(userID)
-            .collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+        val userDocumentUID = getUserDocumentUID(userID)
 
-        Log.i("CountPosts", "Path =${countPostsDocRef.path}")
+        var countPostsDocRef: DocumentReference? = null
+        userDocumentUID?.run {
+            countPostsDocRef = firebaseSource.db.collection(firebasePath.posts_col).document(postsDocumentUid)
+                .collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
+        } ?: kotlin.run {
+            return 0
+        }
 
-        val countPosts = countPostsDocRef
-            .get()
-            .await()
-            .toObject(CountsPosts::class.java)
+        var countPosts: CountsPosts? = null
+        countPostsDocRef?.let {
+            countPosts = it
+                .get()
+                .await()
+                .toObject(CountsPosts::class.java)
+        }
 
-        Log.i("CountPosts", "CountPosts =$countPosts")
+        Log.i("CountPosts", "CountPosts =${countPosts?.countPosts}")
 
         countPosts?.let { it ->
             return it.countPosts
@@ -289,23 +311,12 @@ class FirebaseProfileDetailManager @Inject constructor(
             }
         }
 
-    private fun getOtherUserFollowingSize(otherUsername: String): Flow<ResultData<Int>> = flow {
-        emit(ResultData.Loading)
-
-//        val otherUserFollowingRef = firebaseSource.db.collection("following/$otherUsername/user_following")
-    }
-
-
     private fun checkIfNewFollowingHasBeenUnfollowedBefore(followingId: String): Boolean {
         return firebaseSource.listNewUnfollowingsUsername.contains(followingId)
     }
 
     private fun removeNewFollowingFromUnfollowing(followingId: String) {
         firebaseSource.listNewUnfollowingsUsername.remove(followingId)
-    }
-
-    private fun checkIfNewFollowerHasBeenFollowedBefore(followerId: String) {
-
     }
 
     suspend fun followOtherUser(otherUser: User): Flow<ResultData<Boolean>> = flow {
@@ -421,7 +432,7 @@ class FirebaseProfileDetailManager @Inject constructor(
         }
     }
 
-    suspend fun removeFollowing(otherUser: User): Boolean {
+    private suspend fun removeFollowing(otherUser: User): Boolean {
         if (isUserDocumentUidNull())
             return false
 
@@ -448,7 +459,7 @@ class FirebaseProfileDetailManager @Inject constructor(
 
         if (removedFollowing) {
             //Update local lists unfollowing
-            if(hashMapCurrentUserFollowsOtherUser.containsKey(otherUser.username))
+            if (hashMapCurrentUserFollowsOtherUser.containsKey(otherUser.username))
                 hashMapCurrentUserFollowsOtherUser.remove(otherUser.username)
 
             if (checkIfNewUnfollowingHasBeenFollowedBefore(otherUser.username))
@@ -463,7 +474,7 @@ class FirebaseProfileDetailManager @Inject constructor(
         return removedFollowing
     }
 
-    suspend fun removeFollower(otherUser: User): Boolean {
+    private suspend fun removeFollower(otherUser: User): Boolean {
         if (isUserDocumentUidNull())
             return false
 
@@ -513,21 +524,25 @@ class FirebaseProfileDetailManager @Inject constructor(
         return false
     }
 
-    suspend fun updateFollowingCount(didCurrentUserFollowOtherUser: Boolean) {
+    private suspend fun updateFollowingCount(didCurrentUserFollowOtherUser: Boolean) {
         val userDocumentRef =
             firebaseSource.db.collection(firebasePath.users_col).document(firebaseSource.username)
         try {
             if (didCurrentUserFollowOtherUser) {
                 userDocumentRef.update("following", FieldValue.increment(1))
                     .addOnSuccessListener {
-
+                        firebaseSource.user?.run {
+                            following += 1
+                        }
                     }.addOnFailureListener {
 
                     }.await()
             } else {
                 userDocumentRef.update("following", FieldValue.increment(-1))
                     .addOnSuccessListener {
-
+                        firebaseSource.user?.run {
+                            following -= 1
+                        }
                     }.addOnFailureListener {
 
                     }.await()
@@ -537,7 +552,7 @@ class FirebaseProfileDetailManager @Inject constructor(
         }
     }
 
-    suspend fun updateFollowerCount(userID: String, didOtherUserGetFollowed: Boolean) {
+    private suspend fun updateFollowerCount(userID: String, didOtherUserGetFollowed: Boolean) {
         val userDocumentRef = firebaseSource.db.collection("users").document(userID)
 
         try {
@@ -562,27 +577,7 @@ class FirebaseProfileDetailManager @Inject constructor(
     }
 
     private suspend fun getUserDocumentUID(userID: String): UserDocumentUID? {
-        var userDocumentUID: UserDocumentUID? = null
-
-        val userDocumentUIDQuery =
-            firebaseSource.db.collection(firebasePath.user_documents_uid).whereEqualTo("username", userID)
-
-        userDocumentUIDQuery
-            .get()
-            .addOnSuccessListener {
-                if (it.isEmpty)
-                    return@addOnSuccessListener
-
-                val listUserDocumentUID = it.toObjects(UserDocumentUID::class.java)
-                if (listUserDocumentUID.isEmpty())
-                    return@addOnSuccessListener
-
-                when (listUserDocumentUID.size) {
-                    1 -> userDocumentUID = listUserDocumentUID[0]
-                    else -> return@addOnSuccessListener
-                }
-            }.await()
-        return userDocumentUID
+        return firebaseSource.getUserDocumentUID(userID)
     }
 
     suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
@@ -594,56 +589,5 @@ class FirebaseProfileDetailManager @Inject constructor(
         } else {
             emit(ResultData.Success(user))
         }
-    }
-
-    suspend fun getBitmapLightWeight(user: User): Flow<ResultData<Bitmap>> = flow {
-
-
-
-        if(bitmap != null){
-            bitmap?.recycle()
-            bitmap = null
-        }
-
-        bitmap = createBitmap(user.backgroundImageUrl)
-        emit(ResultData.Success(bitmap))
-    }
-
-    suspend fun getBitmap(user: User): Flow<ResultData<Bitmap>> = flow {
-
-        Log.i("BackgroundBitmap", "Contains? ${savedUsersBitmaps.containsKey(user.username)}")
-        if (savedUsersBackgroundImageUrl.containsKey(user.username) && savedUsersBitmaps.containsKey(user.username)) {
-            if (user.backgroundImageUrl != savedUsersBackgroundImageUrl.get(user.username)) {
-                Log.i("BackgroundBitmap", "DifferentbackgroundUrl lets create")
-
-                savedUsersBitmaps[user.username] = createBitmap(user.backgroundImageUrl)
-                savedUsersBackgroundImageUrl[user.username] = user.backgroundImageUrl
-            }
-        } else {
-            Log.i("BackgroundBitmap", "No contains, lets create")
-            savedUsersBitmaps[user.username] = createBitmap(user.backgroundImageUrl)
-            savedUsersBackgroundImageUrl[user.username] = user.backgroundImageUrl
-            Log.i("BackgroundBitmap", "Now contains? ${savedUsersBitmaps.containsKey(user.username)}")
-        }
-
-        Log.i("BackgroundBitmap", "Send")
-        emit(ResultData.Success(savedUsersBitmaps[user.username]))
-    }
-
-    private fun createBitmap(newBackgroundImageUrl: String): Bitmap {
-        var bitmapTemp: Bitmap? = null
-
-        Thread(Runnable {
-            try {
-                val url = URL(newBackgroundImageUrl)
-                val options = BitmapFactory.Options()
-                options.inSampleSize = 8
-                bitmapTemp = BitmapFactory.decodeStream(url.openConnection().getInputStream(), null, options)
-            } catch (e: Exception) {
-                System.out.println(e)
-            }
-        }).start()
-
-        return bitmapTemp ?: return BitmapFactory.decodeResource(application.resources, R.drawable.black_screen)
     }
 }
