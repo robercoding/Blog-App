@@ -101,6 +101,8 @@ class ProfileDetailViewModel
                 }
             }
 
+            is ProfileDetailFragmentEvent.PopBackStack -> _profileDetailState.value = ProfileDetailState.PopBackStack
+
             is ProfileDetailFragmentEvent.Idle -> {
                 _profileDetailState.value = ProfileDetailState.Idle
             }

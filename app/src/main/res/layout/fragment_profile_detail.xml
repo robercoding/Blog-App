@@ -72,6 +72,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:background="@drawable/ic_arrow_left"
+                    android:elevation="7dp"
                     android:backgroundTint="@color/colorGray2TextSpotify" />
 
                 <ImageView

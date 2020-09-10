@@ -172,6 +172,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                 navigateToProfileEdit(profileDetailState.user)
             }
 
+            is ProfileDetailState.PopBackStack -> {
+                backToPreviousFragment()
+            }
+
             is ProfileDetailState.Error -> {
                 Toast.makeText(
                     requireContext(),
@@ -372,6 +376,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_swipe_refresh_layout.setOnRefreshListener {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadNewerPosts)
         }
+
+        profile_detail_arrow_back.setOnClickListener {
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.PopBackStack)
+        }
     }
 
     private fun stopSwipeRefresh() {
@@ -393,8 +401,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun backToPreviousFragment() {
-        val navController = activity?.bottom_navigation ?: return
-        navController.findNavController().popBackStack()
+//        val navController = activity?.bottom_navigation ?: return
+        val navController = findNavController()
+            navController.popBackStack()
     }
 
     private fun navigateToProfileEdit(user: User) {
@@ -430,5 +439,6 @@ sealed class ProfileDetailFragmentEvent {
     object Follow : ProfileDetailFragmentEvent()
 
     object NavigateToProfileEdit : ProfileDetailFragmentEvent()
+    object PopBackStack: ProfileDetailFragmentEvent()
     object Idle : ProfileDetailFragmentEvent()
 }
