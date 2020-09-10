@@ -35,7 +35,8 @@ constructor(
             "postText" to post.text,
             "postLikes" to post.likes,
             "postCreated_at" to post.created_at,
-            "postUser_creator_id" to firebaseSource.username,
+            "postUserCreatorId" to firebaseSource.username,
+            "postUserCreatorProfileImageUrl" to post.userCreatorProfileImageUrl,
             "userPostsDocUid" to userPostsDocumentUID
         )
 

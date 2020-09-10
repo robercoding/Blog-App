@@ -103,7 +103,7 @@ constructor(
                                 _feedState.value =
                                     FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))
                             } else {
-                                sendNewFeedPosts(resultData.data!!)
+                                sendNewFeedPosts(resultData.data)
                             }
                         }
                         is ResultData.Error -> {
@@ -177,7 +177,7 @@ constructor(
     }
 
     private fun addEndOfTimelineToMutableListPosts() {
-        mutableListPosts.add(Post(0, "no_more_posts", "", "", "", 0, 0))
+        mutableListPosts.add(Post(0, "no_more_posts", "", "", "", "", 0, 0))
     }
 
     private fun goToPostDetails(positionAdapter: Int) {
@@ -186,7 +186,7 @@ constructor(
     }
 
     private fun goToProfileDetailsFragment(positionAdapter: Int) {
-        val user_id = mutableListPosts[positionAdapter].user_creator_id
+        val user_id = mutableListPosts[positionAdapter].userCreatorId
         _feedState.value = FeedState.GoToProfileDetailsFragment(user_id)
     }
 }

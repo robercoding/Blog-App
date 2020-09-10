@@ -46,7 +46,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         Log.i("User:", "First time user -> $user and $username")
         var tempUsername = Username()
         var tempUser = User()
-        Log.i(TAG, "${userAuth.toString()}")
+        Log.i(TAG, userAuth.toString())
         if (userAuth != null) {
             try {
                 Log.i("User:", "FirebaseSource: uid ${userAuth!!.uid}")
@@ -111,7 +111,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
             return
 
         try {
-            val followingRef = db.collection(firebasePath.following_col).document(userDocumentUID!!.followerDocumentUid)
+            val followingRef = db.collection(firebasePath.following_col).document(userDocumentUID!!.followingDocumentUid)
                 .collection(firebasePath.user_following)
 
             followingList = followingRef

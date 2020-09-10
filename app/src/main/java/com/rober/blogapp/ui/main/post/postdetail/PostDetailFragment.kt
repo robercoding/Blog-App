@@ -69,7 +69,7 @@ class PostDetailFragment : Fragment() {
         post_detail_heart.text = "${post.likes.toString()} Likes"
         post_detail_text.text = post.text
         post_detail_title.text = post.title
-        post_detail_username.text = post.user_creator_id
+        post_detail_username.text = post.userCreatorId
     }
 
     private fun moveToFeedFragment(){

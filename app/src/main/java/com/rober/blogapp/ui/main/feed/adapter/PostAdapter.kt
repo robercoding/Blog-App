@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -28,7 +29,7 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
 
     private val differCallback = object: DiffUtil.ItemCallback<Post>(){
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
-            return oldItem.post_id == newItem.post_id
+            return oldItem.postId == newItem.postId
         }
 
         override fun getChangePayload(oldItem: Post, newItem: Post): Any? {
@@ -85,12 +86,18 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
         }
 
         fun bind(post: Post){
-            Log.i("bind", post.user_creator_id)
-            if(post.post_id == "no_more_posts"){
+            Log.i("bind", post.userCreatorId)
+            if(post.postId == "no_more_posts"){
                 container_no_more_posts?.visibility = View.VISIBLE
                 container_post?.visibility = View.GONE
             }else{
-                uid_name?.text = "@${post.user_creator_id}"
+                uid_image?.let {
+                    Glide.with(itemView)
+                        .load(post.userCreatorProfileImageUrl)
+                        .into(it)
+                }
+
+                uid_name?.text = "@${post.userCreatorId}"
                 title?.text = post.title
                 text?.text = post.text
                 container_no_more_posts?.visibility = View.GONE

@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
+import org.threeten.bp.temporal.ChronoUnit
 import java.util.*
 
 
@@ -148,7 +149,7 @@ class PostAddFragment : Fragment() {
             Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
         }
 
-        val post = Post(0, "", title, text, "", Instant.now().epochSecond , 0)
+        val post = Post(0, "", title, text, "", "", Instant.now().minus(2, ChronoUnit.MINUTES).epochSecond , 0)
 
         viewModel.setIntention(PostAddEvent.SavePost(post))
     }

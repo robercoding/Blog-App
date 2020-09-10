@@ -14,8 +14,8 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/uid_image"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="10dp"
@@ -25,13 +25,13 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/uid_name"
-            android:layout_width="100dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:maxWidth="150dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="@id/uid_image"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="18dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="15dp"
             android:padding="5dp"
             style="@style/PostUserName"
             android:text="User"

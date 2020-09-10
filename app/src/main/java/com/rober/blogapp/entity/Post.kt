@@ -14,13 +14,14 @@ import java.util.*
 data class Post (
     @PrimaryKey(autoGenerate = true)
     @get:Exclude var id: Long,
-    var post_id: String,
+    var postId: String,
     var title: String,
     var text: String,
-    var user_creator_id: String,
+    var userCreatorId: String,
+    var userCreatorProfileImageUrl: String,
     val created_at: Long,
     var likes: Int
 ) : Parcelable {
 
-    constructor() : this(0, "","", "", "", 0, 0)
+    constructor() : this(0, "","", "", "", "", 0, 0)
 }
