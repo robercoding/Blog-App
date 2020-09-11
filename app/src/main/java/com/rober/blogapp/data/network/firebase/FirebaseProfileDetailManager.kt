@@ -322,6 +322,11 @@ class FirebaseProfileDetailManager @Inject constructor(
     suspend fun followOtherUser(otherUser: User): Flow<ResultData<Boolean>> = flow {
         val successAddFollowing = addCurrentUserFollowingOtherUser(otherUser)
 
+        if(!successAddFollowing){
+            emit(ResultData.Error(Exception("Sorry, there was an error in our servers, try again later")))
+            return@flow
+        }
+
         val successAddFollower = addOtherUserFollower(otherUser)
 
         if (successAddFollowing && successAddFollower) {
@@ -346,7 +351,7 @@ class FirebaseProfileDetailManager @Inject constructor(
             val followingUser = Following(otherUser.username)
 
             followingRef
-                .document(followingUser.following_id)
+                .document()
                 .set(followingUser)
                 .addOnSuccessListener {
                     hasUserBeenFollowed = true
@@ -384,7 +389,7 @@ class FirebaseProfileDetailManager @Inject constructor(
             val followingUser = Follower(firebaseSource.username)
 
             followingRef
-                .document(firebaseSource.username)
+                .document()
                 .set(followingUser)
                 .addOnSuccessListener {
                     otherUserHasFollower = true
@@ -439,12 +444,30 @@ class FirebaseProfileDetailManager @Inject constructor(
         val userFollowingDocumentUID = userDocumentUID!!.followingDocumentUid
         var removedFollowing = false
 
+        var documentID = ""
+        val followingCollectionRef =
+            firebaseSource.db.collection(firebasePath.following_col).document(userFollowingDocumentUID)
+                .collection(firebasePath.user_following)
         try {
-            val followingRef =
-                firebaseSource.db.collection("${firebasePath.following_col}/$userFollowingDocumentUID/${firebasePath.user_following}")
 
-            followingRef
-                .document(otherUser.username)
+            followingCollectionRef
+                .whereEqualTo("following_id", otherUser.username)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        return@addOnSuccessListener
+                    }
+
+                    for (document in documents) {
+                        documentID = document.id
+                    }
+                }
+            if (documentID.isEmpty()) {
+                return false
+            }
+
+            followingCollectionRef
+                .document(documentID)
                 .delete()
                 .addOnSuccessListener {
                     removedFollowing = true
@@ -478,15 +501,34 @@ class FirebaseProfileDetailManager @Inject constructor(
         if (isUserDocumentUidNull())
             return false
 
-        val userFollowerDocumentUID = getUserDocumentUID(otherUser.username) ?: return false
+        val userFollowerDocumentUID = getUserDocumentUID(otherUser.username)?.followerDocumentUid ?: return false
 
         var hasUserBeenUnfollowed = false
-        try {
-            val followerRef =
-                firebaseSource.db.collection("${firebasePath.follower_col}/${userFollowerDocumentUID}/${firebasePath.user_followers}")
+        var documentID = ""
 
-            followerRef
-                .document(firebaseSource.username)
+        val followerCollectionRef =
+            firebaseSource.db.collection(firebasePath.following_col).document(userFollowerDocumentUID)
+                .collection(firebasePath.user_following)
+        try {
+
+            followerCollectionRef.whereEqualTo("follower_id", firebaseSource.username)
+                .get()
+                .addOnSuccessListener {documents->
+                    if(documents.isEmpty){
+                        return@addOnSuccessListener
+                    }
+
+                    for(document in documents){
+                        documentID = document.id
+                    }
+                }
+
+            if(documentID.isEmpty()){
+                return false
+            }
+
+            followerCollectionRef
+                .document(documentID)
                 .delete()
                 .addOnSuccessListener {
                     hasUserBeenUnfollowed = true
