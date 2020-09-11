@@ -32,7 +32,7 @@ constructor
     private var dateToRetrieveNewerPostsEpochSeconds: Long? = null //
     private var dateLessThanEpochSeconds: Long? = null
     private var dateGreaterThanEpochSeconds: Long? = null
-    
+
     private var restDays : Long = 0
     private var currentIntervalHoursIndex = 0
     private var listIntervalEightHours = listOf(0, 8, 16, 24) //For people with less following
@@ -134,7 +134,7 @@ constructor
                     restDays += 1
                     if (countTotalPosts < 10) {
                         dateLessThanInitEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
-                        dateGreaterThanEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
+                        dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 1, ChronoUnit.DAYS).epochSecond
                     }
                 }
 
@@ -152,6 +152,7 @@ constructor
                         .toMutableList()
 
                 savedFeedListPosts = feedPostsOrdered
+                Log.i(TAG, "saved feed list = $savedFeedListPosts")
                 emit(ResultData.Success(savedFeedListPosts))
             } catch (exception: Exception) {
                 emit(ResultData.Error<List<Post>>(exception, null))
