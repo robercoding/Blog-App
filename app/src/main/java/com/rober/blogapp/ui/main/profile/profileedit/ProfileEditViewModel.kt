@@ -12,6 +12,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.profile.profileedit.util.IntentImageCodes
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
     private var backgroundImageDownloadUrl: String = ""
 
     private var successSaveUserDetails = false
-
+    private var job: Job? = null
 
     fun setIntention(event: ProfileEditFragmentEvent) {
         when (event) {
@@ -48,6 +49,8 @@ class ProfileEditViewModel @ViewModelInject constructor(
                 user = event.user
                 _profileEditState.value = ProfileEditState.LoadUser(user)
             }
+
+            is ProfileEditFragmentEvent.CheckIfUsernameAvailable -> checkIfUsernameIsAvailable(event.username)
 
             is ProfileEditFragmentEvent.GetImageFromGalleryForProfile -> _profileEditState.value =
                 ProfileEditState.GetImageFromGallery(IntentImageCodes.PROFILE_IMAGE_CODE)
@@ -67,6 +70,15 @@ class ProfileEditViewModel @ViewModelInject constructor(
 
             is ProfileEditFragmentEvent.ValidateChanges -> _profileEditState.value = ProfileEditState.ValidateChanges
 
+            is ProfileEditFragmentEvent.NotifyErrorValidate -> {
+                _profileEditState.value = ProfileEditState.NotifyErrorValidate(
+                    event.isUsernameAvailable,
+                    event.isUsernameLengthOk,
+                    event.isBiographyOk,
+                    event.isLocationOk
+                )
+            }
+
             is ProfileEditFragmentEvent.SaveChanges -> {
                 _profileEditState.value = ProfileEditState.SavingChanges
 
@@ -78,6 +90,30 @@ class ProfileEditViewModel @ViewModelInject constructor(
                         _profileEditState.value = ProfileEditState.ErrorSave
                 }
             }
+        }
+    }
+
+    private fun checkIfUsernameIsAvailable(username: String) {
+
+        if (user.username != username) {
+            job?.run {
+                cancel()
+            }
+
+            job = viewModelScope.launch {
+                firebaseRepository.checkIfUsernameAvailable(username)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                _profileEditState.value = ProfileEditState.NotifyUsernameAvailable(resultData.data!!)
+                                Log.i("NotifyUsername", "$username available = ${resultData.data}")
+                            }
+                            is ResultData.Error -> _profileEditState.value = ProfileEditState.Idle
+                        }
+                    }
+            }
+        } else {
+            _profileEditState.value = ProfileEditState.Idle
         }
     }
 
@@ -102,10 +138,10 @@ class ProfileEditViewModel @ViewModelInject constructor(
         location: String
     ): Boolean {
 
-        if(profileImageDownloadUrl.isEmpty())
+        if (profileImageDownloadUrl.isEmpty())
             profileImageDownloadUrl = user.profileImageUrl
 
-        if(backgroundImageDownloadUrl.isEmpty())
+        if (backgroundImageDownloadUrl.isEmpty())
             backgroundImageDownloadUrl = user.backgroundImageUrl
 
         val newUser = user.copy().apply {

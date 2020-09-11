@@ -10,15 +10,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.textfield.TextInputLayout
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.profile.profileedit.util.IntentImageCodes
+import com.rober.blogapp.util.ColorUtils
 import com.theartofdev.edmodo.cropper.CropImage
-import com.theartofdev.edmodo.cropper.CropImageView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_profile_edit.*
 
@@ -62,7 +65,6 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
-    //Create 2 fujnctions = Observe the changes and render
     private fun observeViewModel() {
         profileEditViewModel.profileEditState.observe(viewLifecycleOwner, Observer { profileEditState ->
             render(profileEditState)
@@ -75,6 +77,8 @@ class ProfileEditFragment : Fragment() {
                 setUserDetailsView(profileEditState.user)
                 loadingUserView(false)
             }
+
+            is ProfileEditState.NotifyUsernameAvailable -> isUsernameAvailable(profileEditState.isUsernameAvailable)
 
             is ProfileEditState.NavigateToProfileDetail -> navigateToProfileDetail()
 
@@ -89,9 +93,19 @@ class ProfileEditFragment : Fragment() {
 
             is ProfileEditState.ValidateChanges -> {
                 val saveChanges = validateChanges()
-                if(saveChanges){
+                Log.i("SaveChanges", "SaveChanges = ${saveChanges}")
+                if (saveChanges) {
                     saveActualChanges()
                 }
+            }
+
+            is ProfileEditState.NotifyErrorValidate -> {
+                setErrors(
+                    profileEditState.isUsernameAvailable,
+                    profileEditState.isUsernameLengthOk,
+                    profileEditState.isBiographyOk,
+                    profileEditState.isLocationOk
+                )
             }
 
             is ProfileEditState.SavingChanges -> {
@@ -100,19 +114,22 @@ class ProfileEditFragment : Fragment() {
 
             is ProfileEditState.ErrorSave -> {
                 displayProgressBarSaveChanges(false)
-                Toast.makeText(requireContext(), "There were some errors, try again later", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Sorry there was an error when trying to save the new information.", Toast.LENGTH_SHORT).show()
             }
             is ProfileEditState.SuccessSave -> {
                 Toast.makeText(requireContext(), "Successfully updated!", Toast.LENGTH_SHORT).show()
                 navigateToProfileDetail()
             }
+
+            is ProfileEditState.Idle -> profile_text_layout_username.isEndIconVisible = false
         }
     }
 
     private fun setUserDetailsView(user: User) {
-        profile_edit_username.setText(user.username)
-        profile_edit_biography.setText(user.biography)
-        profile_edit_location.setText(user.location)
+        profile_text_edit_username.setText(user.username)
+
+        profile_text_edit_biography.setText(user.biography)
+        profile_text_edit_location.setText(user.location)
         Glide.with(requireView())
             .load(user.profileImageUrl)
             .into(profile_edit_image_profile)
@@ -132,8 +149,50 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
+    private fun isUsernameAvailable(isUsernameAvailable: Boolean) {
+        if (isUsernameAvailable) {
+            profile_text_layout_username.isEndIconVisible = true
+            profile_text_layout_username.isErrorEnabled = false
+            profile_text_layout_username.isHelperTextEnabled = false
+
+            val drawable = resources.getDrawable(R.drawable.ic_tick_mark_circle, null)
+            context?.run {
+                profile_text_layout_username.setEndIconTintList(ColorUtils(this).profileEditColorStateListGreen)
+            }
+
+            profile_text_layout_username.endIconDrawable = drawable
+            profile_text_layout_username.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.blueTwitter)
+
+            usernameAvailable = true
+        } else {
+            setErrorInEditText(profile_text_layout_username, "Sorry, username is not available")
+            usernameAvailable = false
+        }
+    }
+
+    private fun setErrorInEditText(textInputLayout: TextInputLayout, message: String = "") {
+
+        if (!textInputLayout.isErrorEnabled) {
+            textInputLayout.isEndIconVisible = true
+            textInputLayout.isErrorEnabled = true
+            textInputLayout.isHelperTextEnabled = false
+
+            val drawable = resources.getDrawable(R.drawable.ic_error_outline_24px, null)
+
+            context?.run {
+                textInputLayout.setHelperTextColor(ColorUtils(this).profileEditColorStateListRed)
+                textInputLayout.setEndIconTintList(ColorUtils(this).profileEditColorStateListRed)
+            }
+
+            textInputLayout.helperText = message
+            textInputLayout.endIconDrawable = drawable
+            textInputLayout.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.red)
+        }
+    }
+
     private fun displayProgressBar(display: Boolean) {
-        if (display) profile_edit_progress_bar_loading_user_details.visibility = View.VISIBLE else profile_edit_progress_bar_loading_user_details.visibility =
+        if (display) profile_edit_progress_bar_loading_user_details.visibility =
+            View.VISIBLE else profile_edit_progress_bar_loading_user_details.visibility =
             View.GONE
     }
 
@@ -163,6 +222,19 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun setupListeners() {
+        profile_text_edit_username.addTextChangedListener {
+            val usernameText = profile_text_edit_username.text.toString()
+            if (usernameText.length < 5 || usernameText.length > 15) {
+                profileEditViewModel.setIntention(ProfileEditFragmentEvent.NotifyErrorValidate(false, false, true, true))
+            } else {
+                profileEditViewModel.setIntention(
+                    ProfileEditFragmentEvent.CheckIfUsernameAvailable(
+                        profile_text_edit_username.text.toString()
+                    )
+                )
+            }
+        }
+
         profile_edit_material_toolbar.setNavigationOnClickListener {
             profileEditViewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
         }
@@ -176,9 +248,9 @@ class ProfileEditFragment : Fragment() {
             profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
         }
 
-        profile_edit_material_toolbar.setOnMenuItemClickListener {menuItem ->
-            when(menuItem.itemId){
-                R.id.toolbar_profile_edit_save ->{
+        profile_edit_material_toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.toolbar_profile_edit_save -> {
                     profileEditViewModel.setIntention(ProfileEditFragmentEvent.ValidateChanges)
                     true
                 }
@@ -187,26 +259,65 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
-    private fun saveActualChanges(){
+    private fun saveActualChanges() {
         displayProgressBarSaveChanges(true)
-        val username = profile_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
-        val biography = profile_edit_biography.text.toString()
-        val location = profile_edit_location.text.toString()
+        val username = profile_text_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
+        val biography = profile_text_edit_biography.text.toString()
+        val location = profile_text_edit_location.text.toString()
 
         profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveChanges(username, biography, location))
     }
 
-    private fun validateChanges(): Boolean{
-        if(profile_edit_biography.lineCount >= 4){
-            return false
+    private fun validateChanges(): Boolean {
+        val usernameText = profile_text_edit_username.text.toString()
+        val biographyText = profile_text_edit_biography.text.toString()
+        val locationText = profile_text_edit_location.text.toString()
+
+        val notifyErrorEvent = ProfileEditFragmentEvent.NotifyErrorValidate()
+        if (biographyText.length <= 150) {
+            notifyErrorEvent.isBiographyOk = true
         }
-        if(profile_edit_location.text.toString().length > 20){
-            return false
+        if (locationText.length <= 25) {
+            notifyErrorEvent.isLocationOk = true
         }
-        if(!usernameAvailable || profile_edit_username.text.toString().isEmpty()){
-            return false
+        if (usernameAvailable) {
+            notifyErrorEvent.isUsernameAvailable = usernameAvailable
         }
-        return true
+        if (usernameText.isNotEmpty() && usernameText.length < 15) {
+            notifyErrorEvent.isUsernameLengthOk = true
+        }
+
+        return if (!notifyErrorEvent.isBiographyOk || !notifyErrorEvent.isLocationOk || !notifyErrorEvent.isUsernameAvailable || !notifyErrorEvent.isUsernameLengthOk) {
+            profileEditViewModel.setIntention(notifyErrorEvent)
+            false
+        } else {
+            true
+        }
+    }
+
+    private fun setErrors(
+        isUsernameAvailable: Boolean,
+        isUsernameLengthOk: Boolean,
+        isBiographyOk: Boolean,
+        isLocationOk: Boolean
+    ) {
+        if (isUsernameLengthOk) {
+            if (!isUsernameAvailable) {
+                setErrorInEditText(profile_text_layout_username, "Sorry, username is not available")
+            }
+        } else {
+            setErrorInEditText(
+                profile_text_layout_username,
+                "Your username must be 15 characters or less and contain only letter, numbers, underscores and no spaces"
+            )
+        }
+
+        if (!isBiographyOk) {
+            setErrorInEditText(profile_text_layout_biography, "Biography can't be more than 150 characters ")
+        }
+        if (!isLocationOk) {
+            setErrorInEditText(profile_text_layout_location, "Location can't be more than 25 characters ")
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -221,7 +332,7 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
-    private fun saveUri(uri: Uri){
+    private fun saveUri(uri: Uri) {
         profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveUriAndPreviewNewImage(uri, INTENT_IMAGE_CODE))
     }
 
@@ -233,8 +344,9 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
-    private fun displayProgressBarSaveChanges(display: Boolean){
-        if(display) profile_edit_progress_bar_save_changes.visibility = View.VISIBLE else profile_edit_progress_bar_save_changes.visibility = View.GONE
+    private fun displayProgressBarSaveChanges(display: Boolean) {
+        if (display) profile_edit_progress_bar_save_changes.visibility =
+            View.VISIBLE else profile_edit_progress_bar_save_changes.visibility = View.GONE
     }
 }
 
@@ -242,16 +354,22 @@ sealed class ProfileEditFragmentEvent {
 
     data class LoadUser(val user: User) : ProfileEditFragmentEvent()
     data class CheckIfUsernameAvailable(val username: String) : ProfileEditFragmentEvent()
+    data class NotifyErrorValidate(
+        var isUsernameAvailable: Boolean = false,
+        var isUsernameLengthOk: Boolean = false,
+        var isBiographyOk: Boolean = false,
+        var isLocationOk: Boolean = false
+    ) : ProfileEditFragmentEvent()
 
     object NavigateToProfileDetail : ProfileEditFragmentEvent()
 
     object GetImageFromGalleryForProfile : ProfileEditFragmentEvent()
     object GetImageFromGalleryForBackground : ProfileEditFragmentEvent()
 
-    data class SaveUriAndPreviewNewImage(val uri:Uri, val IntentImageCode: Int): ProfileEditFragmentEvent()
+    data class SaveUriAndPreviewNewImage(val uri: Uri, val IntentImageCode: Int) : ProfileEditFragmentEvent()
 
     object ValidateChanges : ProfileEditFragmentEvent()
-    data class SaveChanges(val username: String, val biography: String, val location: String): ProfileEditFragmentEvent()
+    data class SaveChanges(val username: String, val biography: String, val location: String) : ProfileEditFragmentEvent()
 
     object LoadingUser : ProfileEditFragmentEvent()
 }

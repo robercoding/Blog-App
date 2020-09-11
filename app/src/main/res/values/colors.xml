@@ -19,7 +19,9 @@
 
     <color name="background">#14242c</color>
 
+    <color name="red">#DC143C</color>
     <color name="yellow">#FFFF00</color>
+    <color name="green">#a4c639</color>
 
     <!-- Monochromatic blues color-->
     <color name="blueDiamond">#BBDFFA</color>
