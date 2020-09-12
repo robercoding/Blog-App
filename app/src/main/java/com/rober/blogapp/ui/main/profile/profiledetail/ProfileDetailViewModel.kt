@@ -39,7 +39,7 @@ class ProfileDetailViewModel
 
     var user: User? = null
     var previousBackgroundImageUrl = ""
-    var bitmap : Bitmap? = null
+    var bitmap: Bitmap? = null
 
     private var currentUserFollowsOtherUser = false
     private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
@@ -116,7 +116,7 @@ class ProfileDetailViewModel
 
         user?.let {
             getBitmapFromUrl(it.backgroundImageUrl)
-        }?: kotlin.run {
+        } ?: kotlin.run {
             _profileDetailState.value =
                 ProfileDetailState.Error(Exception("We couldn't provide the user"))
         }
@@ -178,17 +178,25 @@ class ProfileDetailViewModel
         imageBitmapFromUrlAsyncTask.execute(urlImage)
     }
 
-    override fun processFinish(processedBitmap : Bitmap) {
-        bitmap = processedBitmap
+    override fun processFinish(processedBitmap: Bitmap?) {
+        user?.also {tempUser->
+            processedBitmap?.also { tempProcessedBitmap ->
+                bitmap = tempProcessedBitmap
 
-        user?.run {
-            if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(this, processedBitmap)
-            } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
-                _profileDetailState.value =
-                    ProfileDetailState.SetOtherUserProfile(this, currentUserFollowsOtherUser, processedBitmap)
+
+                if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
+                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, processedBitmap)
+                } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
+                    _profileDetailState.value =
+                        ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, processedBitmap)
+                }
+
+            } ?: kotlin.run {
+                val bitmapBlackScreen = BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.black_screen)
+                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapBlackScreen)
             }
         }
+
     }
 
 //    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
@@ -230,11 +238,11 @@ class ProfileDetailViewModel
 
             user = firebaseRepository.getCurrentUserRefreshed()
 
-            user?.also {tempUser ->
-                if(tempUser.backgroundImageUrl != previousBackgroundImageUrl){
+            user?.also { tempUser ->
+                if (tempUser.backgroundImageUrl != previousBackgroundImageUrl) {
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
-                }else{
-                    bitmap?.let {tempBitmap ->
+                } else {
+                    bitmap?.let { tempBitmap ->
                         _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
