@@ -24,7 +24,7 @@ sealed class ProfileEditState {
     object NavigateToProfileDetail : ProfileEditState()
 
     object SuccessSave : ProfileEditState()
-    object ErrorSave : ProfileEditState()
+    data class ErrorSave(var messageError: String? = null) : ProfileEditState()
 
     object Idle : ProfileEditState()
 }

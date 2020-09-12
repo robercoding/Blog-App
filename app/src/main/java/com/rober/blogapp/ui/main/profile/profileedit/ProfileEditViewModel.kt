@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.threeten.bp.Instant
 
 class ProfileEditViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository
@@ -36,6 +37,8 @@ class ProfileEditViewModel @ViewModelInject constructor(
 
     private var successSaveUserDetails = false
     private var job: Job? = null
+
+    private var messageError = ""
 
     fun setIntention(event: ProfileEditFragmentEvent) {
         when (event) {
@@ -68,7 +71,12 @@ class ProfileEditViewModel @ViewModelInject constructor(
                 _profileEditState.value = ProfileEditState.PreviewImage(event.uri)
             }
 
-            is ProfileEditFragmentEvent.ValidateChanges -> _profileEditState.value = ProfileEditState.ValidateChanges
+            is ProfileEditFragmentEvent.ValidateChanges -> {
+                if (event.username == user.username && event.biography == user.biography && event.location == user.location && profileImageUri == null && backgroundImageUri == null) {
+                    _profileEditState.value = ProfileEditState.NavigateToProfileDetail
+                } else
+                    _profileEditState.value = ProfileEditState.ValidateChanges
+            }
 
             is ProfileEditFragmentEvent.NotifyErrorValidate -> {
                 _profileEditState.value = ProfileEditState.NotifyErrorValidate(
@@ -81,13 +89,14 @@ class ProfileEditViewModel @ViewModelInject constructor(
 
             is ProfileEditFragmentEvent.SaveChanges -> {
                 _profileEditState.value = ProfileEditState.SavingChanges
+                Log.i("NextTimeChangeUsername", "wtf lets save")
 
                 viewModelScope.launch {
                     val success = saveChanges(event.username, event.biography, event.location)
                     if (success)
                         _profileEditState.value = ProfileEditState.SuccessSave
                     else
-                        _profileEditState.value = ProfileEditState.ErrorSave
+                        _profileEditState.value = ProfileEditState.ErrorSave(messageError)
                 }
             }
         }
@@ -144,12 +153,14 @@ class ProfileEditViewModel @ViewModelInject constructor(
         if (backgroundImageDownloadUrl.isEmpty())
             backgroundImageDownloadUrl = user.backgroundImageUrl
 
+        val lastDateUsernameChange = Instant.now().epochSecond
         val newUser = user.copy().apply {
             this.username = username
             this.biography = biography
             this.location = location
             this.profileImageUrl = profileImageDownloadUrl
             this.backgroundImageUrl = backgroundImageDownloadUrl
+            this.lastDateUsernameChange = lastDateUsernameChange
         }
 
         val job = viewModelScope.launch {
@@ -161,7 +172,9 @@ class ProfileEditViewModel @ViewModelInject constructor(
                             successSaveUserDetails = true
                         }
                         is ResultData.Error -> {
-                            Log.i(TAG, "Error")
+                            resultData.exception.message?.also { message ->
+                                messageError = message
+                            }
                             successSaveUserDetails = false
                         }
                     }

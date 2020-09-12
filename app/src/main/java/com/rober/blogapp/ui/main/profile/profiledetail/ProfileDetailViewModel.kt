@@ -183,7 +183,6 @@ class ProfileDetailViewModel
             processedBitmap?.also { tempProcessedBitmap ->
                 bitmap = tempProcessedBitmap
 
-
                 if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
                     _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, processedBitmap)
                 } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
@@ -196,7 +195,6 @@ class ProfileDetailViewModel
                 _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapBlackScreen)
             }
         }
-
     }
 
 //    private fun getDominantColorFromBitmap(bitmap: Bitmap) {

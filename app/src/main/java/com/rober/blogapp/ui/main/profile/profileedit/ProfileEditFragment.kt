@@ -114,7 +114,15 @@ class ProfileEditFragment : Fragment() {
 
             is ProfileEditState.ErrorSave -> {
                 displayProgressBarSaveChanges(false)
-                Toast.makeText(requireContext(), "Sorry there was an error when trying to save the new information.", Toast.LENGTH_SHORT).show()
+                profileEditState.messageError?.also { messageError ->
+                    Toast.makeText(requireContext(), messageError, Toast.LENGTH_SHORT).show()
+                } ?: kotlin.run {
+                    Toast.makeText(
+                        requireContext(),
+                        "Sorry there was an error when trying to save the new information.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
             is ProfileEditState.SuccessSave -> {
                 Toast.makeText(requireContext(), "Successfully updated!", Toast.LENGTH_SHORT).show()
@@ -221,44 +229,6 @@ class ProfileEditFragment : Fragment() {
 
     }
 
-    private fun setupListeners() {
-        profile_text_edit_username.addTextChangedListener {
-            val usernameText = profile_text_edit_username.text.toString()
-            if (usernameText.length < 5 || usernameText.length > 15) {
-                profileEditViewModel.setIntention(ProfileEditFragmentEvent.NotifyErrorValidate(false, false, true, true))
-            } else {
-                profileEditViewModel.setIntention(
-                    ProfileEditFragmentEvent.CheckIfUsernameAvailable(
-                        profile_text_edit_username.text.toString()
-                    )
-                )
-            }
-        }
-
-        profile_edit_material_toolbar.setNavigationOnClickListener {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
-        }
-
-        profile_edit_image_profile_add.setOnClickListener {
-            Toast.makeText(requireContext(), "Clicked on add", Toast.LENGTH_SHORT).show()
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForProfile)
-        }
-
-        profile_edit_image_background_add.setOnClickListener {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
-        }
-
-        profile_edit_material_toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.toolbar_profile_edit_save -> {
-                    profileEditViewModel.setIntention(ProfileEditFragmentEvent.ValidateChanges)
-                    true
-                }
-                else -> true
-            }
-        }
-    }
-
     private fun saveActualChanges() {
         displayProgressBarSaveChanges(true)
         val username = profile_text_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
@@ -320,18 +290,6 @@ class ProfileEditFragment : Fragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            val result = CropImage.getActivityResult(data)
-            if (resultCode == RESULT_OK) {
-                saveUri(result.uri)
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Log.i(TAG, "${result.error.message}")
-            }
-        }
-    }
-
     private fun saveUri(uri: Uri) {
         profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveUriAndPreviewNewImage(uri, INTENT_IMAGE_CODE))
     }
@@ -347,6 +305,62 @@ class ProfileEditFragment : Fragment() {
     private fun displayProgressBarSaveChanges(display: Boolean) {
         if (display) profile_edit_progress_bar_save_changes.visibility =
             View.VISIBLE else profile_edit_progress_bar_save_changes.visibility = View.GONE
+    }
+
+    private fun setupListeners() {
+        profile_text_edit_username.addTextChangedListener {
+            val usernameText = profile_text_edit_username.text.toString()
+            if (usernameText.length < 5 || usernameText.length > 15) {
+                profileEditViewModel.setIntention(ProfileEditFragmentEvent.NotifyErrorValidate(false, false, true, true))
+            } else {
+                profileEditViewModel.setIntention(
+                    ProfileEditFragmentEvent.CheckIfUsernameAvailable(
+                        profile_text_edit_username.text.toString()
+                    )
+                )
+            }
+        }
+
+        profile_edit_material_toolbar.setNavigationOnClickListener {
+            profileEditViewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
+        }
+
+        profile_edit_image_profile_add.setOnClickListener {
+            Toast.makeText(requireContext(), "Clicked on add", Toast.LENGTH_SHORT).show()
+            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForProfile)
+        }
+
+        profile_edit_image_background_add.setOnClickListener {
+            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
+        }
+
+        profile_edit_material_toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.toolbar_profile_edit_save -> {
+                    profileEditViewModel.setIntention(
+                        ProfileEditFragmentEvent.ValidateChanges(
+                            profile_text_edit_username.text.toString(),
+                            profile_text_edit_biography.text.toString(),
+                            profile_text_edit_location.text.toString()
+                        )
+                    )
+                    true
+                }
+                else -> true
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            val result = CropImage.getActivityResult(data)
+            if (resultCode == RESULT_OK) {
+                saveUri(result.uri)
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Log.i(TAG, "${result.error.message}")
+            }
+        }
     }
 }
 
@@ -368,7 +382,9 @@ sealed class ProfileEditFragmentEvent {
 
     data class SaveUriAndPreviewNewImage(val uri: Uri, val IntentImageCode: Int) : ProfileEditFragmentEvent()
 
-    object ValidateChanges : ProfileEditFragmentEvent()
+    data class ValidateChanges(val username: String, val biography: String, val location: String) :
+        ProfileEditFragmentEvent()
+
     data class SaveChanges(val username: String, val biography: String, val location: String) : ProfileEditFragmentEvent()
 
     object LoadingUser : ProfileEditFragmentEvent()

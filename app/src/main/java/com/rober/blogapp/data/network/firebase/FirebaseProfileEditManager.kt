@@ -9,9 +9,11 @@ import com.rober.blogapp.ui.main.profile.profileedit.util.IntentImageCodes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
+import org.threeten.bp.Instant
+import org.threeten.bp.temporal.ChronoUnit
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
-import kotlin.Exception
 
 class FirebaseProfileEditManager @Inject constructor(
     private val firebaseSource: FirebaseSource
@@ -28,6 +30,23 @@ class FirebaseProfileEditManager @Inject constructor(
         try {
             //Check if they are different names
             successUpdateUser = if (differentUsernames) {
+                firebaseSource.user?.also {tempUser->
+
+                    if(tempUser.lastDateUsernameChange == 0.toLong()){
+                        return@also
+                    }
+
+                    val dateMonthAgoEpochSecond = Instant.now().minus(31, ChronoUnit.DAYS).epochSecond
+                    if(tempUser.lastDateUsernameChange > dateMonthAgoEpochSecond){
+                        val formatter = SimpleDateFormat.getDateInstance()
+                        val dateMonthPlusEpochSecond = Instant.now().plus(31, ChronoUnit.DAYS).epochSecond
+                        val date = formatter.format(Date(dateMonthPlusEpochSecond*1000))
+
+                        emit(ResultData.Error(Exception("Sorry, you can't change the username until date: $date")))
+                        return@flow
+                    }
+                }
+
                 //Find the  document that contains username
                 val usernameDocumentID = findDocumentIDByField("username", previousUser.username)
 
@@ -81,7 +100,8 @@ class FirebaseProfileEditManager @Inject constructor(
             "biography" to newUser.biography,
             "location" to newUser.location,
             "profileImageUrl" to newUser.profileImageUrl,
-            "backgroundImageUrl" to newUser.backgroundImageUrl
+            "backgroundImageUrl" to newUser.backgroundImageUrl,
+            "lastDateUsernameChange" to newUser.lastDateUsernameChange
         )
 
         //Change it on server-side
@@ -114,7 +134,6 @@ class FirebaseProfileEditManager @Inject constructor(
             .getHttpsCallable("changeUserDetails")
             .call(updateUserMap)
             .addOnCompleteListener {
-                Log.i("ChangeUsername", "SuccessSmallDetails = ${it.isSuccessful}")
                 successUpdateUser = it.isSuccessful
             }.await()
 

@@ -1,6 +1,5 @@
 package com.rober.blogapp.data.network.firebase
 
-import android.app.Application
 import android.util.Log
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -37,7 +36,6 @@ class FirebaseProfileDetailManager @Inject constructor(
 
     suspend fun retrieveUserPosts(userID: String): Flow<ResultData<List<Post>>> = flow {
         emit(ResultData.Loading)
-        Log.i("UserRequestPosts", "UserRequestPosts = $userID")
 
         //Initialize variable
         var minusDays: Long = 0
@@ -50,7 +48,6 @@ class FirebaseProfileDetailManager @Inject constructor(
         var userContainsSavedPostsSize = 0
 
         userContainsSavedPosts?.let {
-            Log.i("RequestPosts", " UserContainsSavedPosts TRUE")
             val datesThanEpochSeconds = savedUserHashMapDatesEpochSecond.getValue(userID)
             dateLessThanEpochSeconds = datesThanEpochSeconds[0]
             dateGreaterThanEpochSeconds = datesThanEpochSeconds[1]
@@ -236,8 +233,6 @@ class FirebaseProfileDetailManager @Inject constructor(
                 .toObject(CountsPosts::class.java)
         }
 
-        Log.i("CountPosts", "CountPosts =${countPosts?.countPosts}")
-
         countPosts?.let { it ->
             return it.countPosts
         } ?: kotlin.run {
@@ -294,12 +289,10 @@ class FirebaseProfileDetailManager @Inject constructor(
 
                     when {
                         followingUser.isEmpty() -> {
-                            Log.i(TAG, "Is empty")
                             emit(ResultData.Success(false))
                         }
 
                         followingUser.size >= 2 -> {
-                            Log.i(TAG, "Is 2 or more")
                             emit(ResultData.Success(false))
                         }
 
@@ -457,11 +450,10 @@ class FirebaseProfileDetailManager @Inject constructor(
                     if (documents.isEmpty) {
                         return@addOnSuccessListener
                     }
-
                     for (document in documents) {
                         documentID = document.id
                     }
-                }
+                }.await()
             if (documentID.isEmpty()) {
                 return false
             }
@@ -507,13 +499,16 @@ class FirebaseProfileDetailManager @Inject constructor(
         var documentID = ""
 
         val followerCollectionRef =
-            firebaseSource.db.collection(firebasePath.following_col).document(userFollowerDocumentUID)
-                .collection(firebasePath.user_following)
+            firebaseSource.db.collection(firebasePath.follower_col).document(userFollowerDocumentUID)
+                .collection(firebasePath.user_followers)
         try {
 
             followerCollectionRef.whereEqualTo("follower_id", firebaseSource.username)
                 .get()
                 .addOnSuccessListener {documents->
+                    for (document in documents) {
+                        documentID = document.id
+                    }
                     if(documents.isEmpty){
                         return@addOnSuccessListener
                     }
@@ -521,7 +516,7 @@ class FirebaseProfileDetailManager @Inject constructor(
                     for(document in documents){
                         documentID = document.id
                     }
-                }
+                }.await()
 
             if(documentID.isEmpty()){
                 return false
@@ -590,7 +585,7 @@ class FirebaseProfileDetailManager @Inject constructor(
                     }.await()
             }
         } catch (e: Exception) {
-            Log.i("CheckUpdate", "Exception")
+            Log.i("CheckUpdate", "$e")
         }
     }
 
@@ -603,14 +598,14 @@ class FirebaseProfileDetailManager @Inject constructor(
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
                     }.addOnFailureListener {
-                        Log.i("CheckUpdate", "NOT UPDATED")
+                        Log.i("CheckUpdate", "Not updated")
                     }.await()
             } else {
                 userDocumentRef.update("follower", FieldValue.increment(-1))
                     .addOnSuccessListener {
                         Log.i("CheckUpdate", "Updated")
                     }.addOnFailureListener {
-                        Log.i("CheckUpdate", "NOT UPDATED")
+                        Log.i("CheckUpdate", "Not updated")
                     }.await()
             }
         } catch (e: Exception) {

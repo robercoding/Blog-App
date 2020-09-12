@@ -19,13 +19,14 @@ data class User(
     var location: String = "",
     var following: Int = 0,
     var follower: Int = 0,
-    var backgroundImageUrl :String = "",
-    var profileImageUrl :String = ""
+    var backgroundImageUrl: String = "",
+    var profileImageUrl: String = "",
+    var lastDateUsernameChange: Long = 0
 ) : Parcelable {
-    constructor() : this(0, "", "", "", "", 0, 0, "", "")
+    constructor() : this(0, "", "", "", "", 0, 0, "", "", 0)
 
-    fun isEmpty(): Boolean{
-        if(this.username.isEmpty() || this.username.equals("")){
+    fun isEmpty(): Boolean {
+        if (this.username.isEmpty() || this.username.equals("")) {
             return true
         }
         return false

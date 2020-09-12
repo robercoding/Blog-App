@@ -158,7 +158,7 @@ class FirebaseAuthManager @Inject constructor(
     private suspend fun saveUser(uid: String, name: String): Boolean {
         var success = false
 
-        val userToSave = User(0, uid, name, "", "", 0, 0)
+        val userToSave = User(0, uid, name, "", "", 0, 0, "", "", 0)
 
         val usersCollection = firebaseSource.db.collection("users").document(name)
 

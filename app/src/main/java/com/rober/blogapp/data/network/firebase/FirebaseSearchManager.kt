@@ -20,7 +20,6 @@ class FirebaseSearchManager constructor(
         val isKeyOnCache = mapUsersCache.containsKey(searchUsername)
 
         if (!isKeyOnCache) {
-            Log.i(TAG, "Getting from firebase")
             val listUsers = firebaseSource.db.collection("users")
                 .whereGreaterThanOrEqualTo("username", searchUsername)
                 .whereLessThanOrEqualTo("username", "$searchUsername~")
