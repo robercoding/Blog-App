@@ -149,7 +149,7 @@ class PostAddFragment : Fragment() {
             Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
         }
 
-        val post = Post(0, "", title, text, "", "", Instant.now().minus(2, ChronoUnit.MINUTES).epochSecond , 0)
+        val post = Post(0, "", title, text, "", Instant.now().minus(2, ChronoUnit.MINUTES).epochSecond , 0)
 
         viewModel.setIntention(PostAddEvent.SavePost(post))
     }

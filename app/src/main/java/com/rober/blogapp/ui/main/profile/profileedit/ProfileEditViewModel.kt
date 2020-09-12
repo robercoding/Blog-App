@@ -127,14 +127,11 @@ class ProfileEditViewModel @ViewModelInject constructor(
     }
 
     private suspend fun saveChanges(username: String, biography: String, location: String): Boolean {
-        Log.i(TAG, "Save changes enter!")
 
         if (!saveImages()) {
-            Log.i(TAG, "SaveImages = False")
             return false
         }
         if (!saveUserDetailChanges(username, biography, location)) {
-            Log.i(TAG, "SaveUserDetails = False")
             return false
         }
 
@@ -168,7 +165,6 @@ class ProfileEditViewModel @ViewModelInject constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            Log.i(TAG, "Success")
                             successSaveUserDetails = true
                         }
                         is ResultData.Error -> {
@@ -202,8 +198,6 @@ class ProfileEditViewModel @ViewModelInject constructor(
     }
 
     private suspend fun saveImageProfile(profileImageUri: Uri): Boolean {
-        Log.i(TAG, "Save Images profile enter!")
-
         val job = viewModelScope.launch {
             firebaseRepository.saveImage(profileImageUri, IntentImageCodes.PROFILE_IMAGE_CODE)
                 .collect { resultData ->

@@ -127,7 +127,6 @@ class FirebaseProfileEditManager @Inject constructor(
             "profileImageUrl" to newUser.profileImageUrl,
             "backgroundImageUrl" to newUser.backgroundImageUrl
         )
-        Log.i("ChangeUsername", "Change bio and loc = $updateUserMap")
 
         //Proceed to change it on server-side
         firebaseSource.functions

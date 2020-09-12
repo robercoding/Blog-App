@@ -85,6 +85,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                 displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
 
+                postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
 
                 val linearLayoutManager = LinearLayoutManager(requireContext())
@@ -96,6 +97,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             is FeedState.LoadNewPosts -> {
                 stopSwipeRefresh()
 
+                postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
 
                 recycler_feed.apply {
@@ -122,6 +124,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                 displayProgressBarMorePosts(false)
                 loadOldPosts(
                     feedState.listFeedPosts,
+                    feedState.listFeedUsers,
                     feedState.scrollToPosition,
                     feedState.endOfTimeline
                 )
@@ -194,7 +197,8 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun loadOldPosts(listPosts: List<Post>, scrollToPosition: Int, endOfTimeline: Boolean) {
+    private fun loadOldPosts(listPosts: List<Post>, listUsers: List<User>, scrollToPosition: Int, endOfTimeline: Boolean) {
+        postAdapter.setUsers(listUsers.toMutableList())
         postAdapter.setPosts(listPosts.toMutableList())
         onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = endOfTimeline
 

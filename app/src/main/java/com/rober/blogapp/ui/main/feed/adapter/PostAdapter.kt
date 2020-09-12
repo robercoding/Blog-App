@@ -13,21 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.RecyclerViewActionInterface
 
 
 class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActionInterface: RecyclerViewActionInterface) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
-    private var TAG = "PostAdapter"
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         //return PostViewHolder()
         val view = LayoutInflater.from(itemView.context).inflate(viewHolder, parent, false)
-        return PostViewHolder(view, recyclerViewActionInterface)
+        return PostViewHolder(view, recyclerViewActionInterface, differUser)
     }
 
-    private val differCallback = object: DiffUtil.ItemCallback<Post>(){
+    private val differPostCallback = object: DiffUtil.ItemCallback<Post>(){
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
             return oldItem.postId == newItem.postId
         }
@@ -41,32 +39,44 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
         }
     }
 
-    val differ = AsyncListDiffer(this, differCallback)
+    private val differUserCallback = object: DiffUtil.ItemCallback<User>(){
+        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem.user_id == newItem.user_id
+        }
+
+        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem == newItem
+        }
+    }
+
+    private val differPost = AsyncListDiffer(this, differPostCallback)
+    val differUser = AsyncListDiffer(this, differUserCallback)
+
 
     override fun getItemCount(): Int {
-        return differ.currentList.size
+        return differPost.currentList.size
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = differ.currentList[position]
+        val post = differPost.currentList[position]
         holder.bind(post)
 
-//        if(position == differ.currentList.size -1){
+//        if(position == differPost.currentList.size -1){
 //            recyclerViewActionInterface.loadOldFeedPosts()
 //        }
     }
 
     fun setPosts(newListPost: MutableList<Post>){
-        differ.submitList(newListPost)
+        differPost.submitList(newListPost)
         notifyDataSetChanged()
     }
 
-    fun clear(){
-        differ.currentList.clear()
+    fun setUsers(newListUsers: MutableList<User>){
+        differUser.submitList(newListUsers)
         notifyDataSetChanged()
     }
 
-    class PostViewHolder(itemView: View, val recyclerViewActionInterface: RecyclerViewActionInterface): RecyclerView.ViewHolder(itemView) {
+    class PostViewHolder(itemView: View, val recyclerViewActionInterface: RecyclerViewActionInterface, val differUser:AsyncListDiffer<User>): RecyclerView.ViewHolder(itemView) {
 
         var uid_image : ImageView? = null
         var uid_name : TextView? = null
@@ -86,24 +96,30 @@ class PostAdapter (val itemView: View, val viewHolder: Int, val recyclerViewActi
         }
 
         fun bind(post: Post){
-            Log.i("bind", post.userCreatorId)
-            if(post.postId == "no_more_posts"){
+            Log.i("PostAdapter", post.userCreatorId)
+            Log.i("PostAdapter", "${differUser.currentList}")
+            if(post.created_at == 0.toLong()){
                 container_no_more_posts?.visibility = View.VISIBLE
                 container_post?.visibility = View.GONE
             }else{
-                uid_image?.let {
-                    Glide.with(itemView)
-                        .load(post.userCreatorProfileImageUrl)
-                        .into(it)
-                }
+                val user = differUser.currentList.find { user-> user.user_id == post.userCreatorId }
+                user?.let {tempUser ->
+                    uid_image?.let {
+                        Glide.with(itemView)
+                            .load(tempUser.profileImageUrl)
+                            .into(it)
+                    }
 
-                uid_name?.text = "@${post.userCreatorId}"
+                    uid_name?.text = "@${tempUser.username}"
+                    setupClickListeners()
+                }?: kotlin.run {
+                    uid_name?.text = "@Unknown user"
+                }
                 title?.text = post.title
                 text?.text = post.text
                 container_no_more_posts?.visibility = View.GONE
                 container_post?.visibility = View.VISIBLE
             }
-            setupClickListeners()
         }
 
         private fun setupClickListeners(){

@@ -50,10 +50,6 @@ class PostAddViewModel @ViewModelInject constructor(
     }
 
     private fun savePost(post: Post){
-        user?.also {
-            post.userCreatorProfileImageUrl = it.profileImageUrl
-        }
-
         viewModelScope.launch {
             firebaseRepository.savePost(post)
                 .collect {resultData ->

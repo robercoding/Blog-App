@@ -18,10 +18,9 @@ data class Post (
     var title: String,
     var text: String,
     var userCreatorId: String,
-    var userCreatorProfileImageUrl: String,
     val created_at: Long,
     var likes: Int
 ) : Parcelable {
 
-    constructor() : this(0, "","", "", "", "", 0, 0)
+    constructor() : this(0, "","", "", "", 0, 0)
 }

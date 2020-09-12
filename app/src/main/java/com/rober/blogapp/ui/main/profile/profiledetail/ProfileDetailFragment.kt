@@ -73,7 +73,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     private fun getUserArgumentAndSetIntention() {
         val userName = arguments?.getString("user_id")
 
-        Log.i("ProfileDetailFreeze", "Username is blank? ${userName.isNullOrBlank()}")
+        Log.i("ProfileDetailFreeze", "UID is blank? ${userName.isNullOrBlank()}")
         if (userName.isNullOrBlank()) {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(null))
         } else {
@@ -113,7 +113,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
             is ProfileDetailState.SetUserPosts -> {
                 val listUserPosts = profileDetailState.listUserPosts
-                setUserPosts(listUserPosts.toMutableList())
+                setUserPosts(listUserPosts.toMutableList(), profileDetailState.user)
                 displayProgressBar(false)
                 stopSwipeRefresh()
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Idle)
@@ -317,8 +317,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     }
 
 
-    private fun setUserPosts(listUserPosts: MutableList<Post>) {
+    private fun setUserPosts(listUserPosts: MutableList<Post>, user: User) {
         postAdapter.setPosts(listUserPosts)
+        postAdapter.setUsers(listOf(user).toMutableList())
 
         recycler_profile_detail_posts.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -431,7 +432,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 }
 
 sealed class ProfileDetailFragmentEvent {
-    data class LoadUserDetails(val name: String? = null) : ProfileDetailFragmentEvent()
+    data class LoadUserDetails(val userUID: String? = null) : ProfileDetailFragmentEvent()
     object LoadUserPosts : ProfileDetailFragmentEvent()
     object LoadNewerPosts : ProfileDetailFragmentEvent()
 

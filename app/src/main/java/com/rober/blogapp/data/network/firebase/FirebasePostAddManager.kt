@@ -6,6 +6,7 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.CountsPosts
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.User
 import com.rober.blogapp.entity.UserDocumentUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -30,13 +31,19 @@ constructor(
 
         val userPostsDocumentUID = userDocumentUID!!.postsDocumentUid
 
+        val user: User = firebaseSource.getCurrentUser()
+
+        if(user.user_id == ""){
+            emit(ResultData.Error(Exception("Sorry, we had a problem with your user account"), null))
+            return@flow
+        }
+
         val postHashMap = hashMapOf<String, Any>(
             "postTitle" to post.title,
             "postText" to post.text,
             "postLikes" to post.likes,
             "postCreated_at" to post.created_at,
-            "postUserCreatorId" to firebaseSource.username,
-            "postUserCreatorProfileImageUrl" to post.userCreatorProfileImageUrl,
+            "postUserCreatorId" to user.user_id,
             "userPostsDocUid" to userPostsDocumentUID
         )
 

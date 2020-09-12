@@ -200,7 +200,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     override fun clickListenerOnPost(positionAdapter: Int) {}
 
     override fun clickListenerOnUser(positionAdapter: Int) {
-        val user_id = listUsers[positionAdapter].username
+        val user_id = listUsers[positionAdapter].user_id
 
         val navController = findNavController()
         val bundle_user_id = bundleOf("user_id" to user_id)

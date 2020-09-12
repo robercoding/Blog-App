@@ -33,17 +33,6 @@ class FirebaseAuthManager @Inject constructor(
         firebaseSource.setCurrentFollower()
     }
 
-    suspend fun getCurrentUser(): Flow<ResultData<User>> = flow {
-        val user = firebaseSource.getCurrentUser()
-
-        if (user.isEmpty()) {
-            firebaseSource.setCurrentUser()
-            emit(ResultData.Error(Exception("Sorry, user is empty"), null))
-        } else {
-            emit(ResultData.Success(user))
-        }
-    }
-
     suspend fun login(email: String, password: String): Flow<ResultAuth> = flow {
         emit(ResultAuth.Loading)
         var loggedIn = false
@@ -52,7 +41,6 @@ class FirebaseAuthManager @Inject constructor(
                 .addOnSuccessListener {
                     firebaseSource.userAuth = it.user
                     loggedIn = true
-                    Log.i(TAG, "$loggedIn")
                 }
                 .addOnFailureListener {
                     exception = Exception(it.message)
@@ -64,11 +52,8 @@ class FirebaseAuthManager @Inject constructor(
 
             if (error != null) {
                 exception = Exception(error[1])
-                Log.i(TAG, "Error found: $error")
             } else {
                 exception = Exception(firebaseErrors.generalError)
-                Log.i(TAG, "Error NOT found: $e")
-                Log.i(TAG, "Error NOT found: ${e.errorCode}")
             }
         }
 
@@ -81,7 +66,6 @@ class FirebaseAuthManager @Inject constructor(
             while (firebaseSource.username.isEmpty() && tries < 20) {
                 kotlinx.coroutines.delay(200)
                 tries += 1
-                Log.i("User:", "$tries and username= ${firebaseSource.username}")
             }
         }
 
@@ -104,7 +88,6 @@ class FirebaseAuthManager @Inject constructor(
         var savedInDatabase = false
 
         if (checkIfNameIsAlreadyPicked(name)) {
-            Log.i(TAG, "Name has been found")
             emit(ResultAuth.Error(Exception("Name is already in use, try other name")))
             return@flow
         }
@@ -136,7 +119,7 @@ class FirebaseAuthManager @Inject constructor(
 
         if (!saveUser(uid, username)) return false
 
-        if (!createUserDocumentsUID(username)) return false
+        if (!createUserDocumentsUID(username, uid)) return false
 
         return true
     }
@@ -175,7 +158,7 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-    private suspend fun createUserDocumentsUID(username: String): Boolean {
+    private suspend fun createUserDocumentsUID(username: String, uid:String): Boolean {
         val usernameHashMap = hashMapOf("username" to username)
         //Create document for the new user
         val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
@@ -188,7 +171,7 @@ class FirebaseAuthManager @Inject constructor(
 
         //Create object with the ID generated and store them
         val userDocumentUID =
-            UserDocumentUID(username, postDocumentUidDocRef.id, followingDocumentUidDocRef.id, followerDocumentUidDocRef.id)
+            UserDocumentUID(username, postDocumentUidDocRef.id, followingDocumentUidDocRef.id, followerDocumentUidDocRef.id, uid)
         val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
 
         var success = false

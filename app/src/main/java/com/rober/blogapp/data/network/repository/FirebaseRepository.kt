@@ -51,6 +51,8 @@ constructor(
 
     fun getEndOfTimeline(): Boolean = firebaseFeedManager.getEndOfTimeline()
 
+    suspend fun getUsersFromCurrentFollowings(listUsers: MutableList<User>): Flow<ResultData<List<User>>> = firebaseFeedManager.getUsersFromCurrentFollowings(listUsers)
+
     //suspend fun retrieveSavedLocalPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getSavedLocalPosts()
 
     //PostAdd
@@ -66,9 +68,9 @@ constructor(
 
     suspend fun getCurrentUserProfileDetail() = firebaseProfileDetailManager.getCurrentUser()
 
-    suspend fun getUserProfile(username: String): Flow<ResultData<User>> = firebaseProfileDetailManager.getUserProfile(username)
+    suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> = firebaseProfileDetailManager.getUserProfile(userUID)
 
-    suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(otherUsername)
+    suspend fun checkIfCurrentUserFollowsOtherUser(userID: String): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(userID)
 
     suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
 

@@ -49,21 +49,20 @@ class ProfileDetailViewModel
     fun setIntention(event: ProfileDetailFragmentEvent) {
         when (event) {
             is ProfileDetailFragmentEvent.LoadUserDetails -> {
-                if (event.name.isNullOrBlank()) {
+                if (event.userUID.isNullOrBlank()) {
                     getCurrentUser()
                     //getCurrentUserPosts()
                 } else {
-                    val isUserCurrentUser = checkIfUserIsCurrentUser(event.name)
+                    val isUserCurrentUser = checkIfUserIsCurrentUser(event.userUID)
 
                     if (isUserCurrentUser)
                         getCurrentUser()
                     else
-                        getUserProfile(event.name)
+                        getUserProfile(event.userUID)
                 }
             }
 
             is ProfileDetailFragmentEvent.LoadUserPosts -> {
-                Log.i("RequestPosts", "RequestsPosts Before choice")
                 user?.let {
                     getUserPosts()
                 }
@@ -122,7 +121,7 @@ class ProfileDetailViewModel
         }
     }
 
-    private fun checkIfUserIsCurrentUser(username: String): Boolean {
+    private fun checkIfUserIsCurrentUser(userUID: String): Boolean {
         var isUserCurrentUser = false
 
         viewModelScope.launch {
@@ -130,7 +129,7 @@ class ProfileDetailViewModel
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            if (username == resultData.data?.username)
+                            if (userUID == resultData.data?.user_id)
                                 isUserCurrentUser = true
                         }
                         is ResultData.Error -> {
@@ -142,18 +141,18 @@ class ProfileDetailViewModel
         return isUserCurrentUser
     }
 
-    private fun getUserProfile(username: String) {
+    private fun getUserProfile(userUID: String) {
         _profileDetailState.value = ProfileDetailState.LoadingUser
         PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         viewModelScope.launch {
             delay(200)
-            firebaseRepository.getUserProfile(username)
+            firebaseRepository.getUserProfile(userUID)
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(username)
+                                currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
 //                                val bitmap = getBitmapFromUrl(imageUrl)
 //                                val bitmap = getBitmapLightWeight(imageUrl)
                             }
@@ -179,7 +178,7 @@ class ProfileDetailViewModel
     }
 
     override fun processFinish(processedBitmap: Bitmap?) {
-        user?.also {tempUser->
+        user?.also { tempUser ->
             processedBitmap?.also { tempProcessedBitmap ->
                 bitmap = tempProcessedBitmap
 
@@ -191,7 +190,8 @@ class ProfileDetailViewModel
                 }
 
             } ?: kotlin.run {
-                val bitmapBlackScreen = BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.black_screen)
+                val bitmapBlackScreen =
+                    BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.black_screen)
                 _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapBlackScreen)
             }
         }
@@ -211,23 +211,25 @@ class ProfileDetailViewModel
 
     private fun getUserPosts() {
 //        _profileDetailState.value = ProfileDetailState.LoadingPosts
-        viewModelScope.launch {
-            firebaseRepository.retrieveProfileUsersPosts(user!!.username)
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultData.Success -> {
-                            _profileDetailState.value =
-                                ProfileDetailState.SetUserPosts(resultData.data!!)
-                        }
-                        is ResultData.Error -> {
-                            _profileDetailState.value =
-                                ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
-                        }
-                        is ResultData.Loading -> {
-                            _profileDetailState.value = ProfileDetailState.LoadingPosts
+        user?.let { tempUser ->
+            viewModelScope.launch {
+                firebaseRepository.retrieveProfileUsersPosts(tempUser.user_id)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                _profileDetailState.value =
+                                    ProfileDetailState.SetUserPosts(resultData.data!!, tempUser)
+                            }
+                            is ResultData.Error -> {
+                                _profileDetailState.value =
+                                    ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
+                            }
+                            is ResultData.Loading -> {
+                                _profileDetailState.value = ProfileDetailState.LoadingPosts
+                            }
                         }
                     }
-                }
+            }
         }
     }
 
@@ -244,24 +246,23 @@ class ProfileDetailViewModel
                         _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
-            }
-
-            firebaseRepository.retrieveNewerPostsUserProfile(user!!.username)
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultData.Success -> {
-                            _profileDetailState.value =
-                                ProfileDetailState.SetUserPosts(resultData.data!!)
+                firebaseRepository.retrieveNewerPostsUserProfile(tempUser.username)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                _profileDetailState.value =
+                                    ProfileDetailState.SetUserPosts(resultData.data!!, tempUser)
+                            }
                         }
                     }
-                }
+            }
         }
     }
 
-    private suspend fun checkIfCurrentUserFollowsOtherUser(otherUsername: String): Boolean {
+    private suspend fun checkIfCurrentUserFollowsOtherUser(userID: String): Boolean {
         var currentUserFollowsOtherUser = false
 
-        firebaseRepository.checkIfCurrentUserFollowsOtherUser(otherUsername)
+        firebaseRepository.checkIfCurrentUserFollowsOtherUser(userID)
             .collect { resultData ->
                 when (resultData) {
                     is ResultData.Success -> {
@@ -285,7 +286,6 @@ class ProfileDetailViewModel
                                 user?.let {
                                     user?.follower = it.follower.plus(1)
                                 }
-                                Log.i("UserFollower", "After Plus ${user?.follower}")
                                 _profileDetailState.value = ProfileDetailState.Followed(user!!)
                             } else
                                 _profileDetailState.value = ProfileDetailState.FollowError
@@ -305,11 +305,9 @@ class ProfileDetailViewModel
                     when (resultData) {
                         is ResultData.Success -> {
                             if (resultData.data!!) {
-                                Log.i("UserFollower", "Before resting wtf ${user?.follower}")
                                 user?.let {
                                     user?.follower = it.follower.minus(1)
                                 }
-                                Log.i("UserFollower", "After resting wtf ${user?.follower}")
 
                                 _profileDetailState.value = ProfileDetailState.Unfollowed(user!!)
                             } else {

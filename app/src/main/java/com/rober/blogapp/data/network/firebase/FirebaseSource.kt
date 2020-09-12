@@ -36,7 +36,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     var profileDetailCheckedUserChangedUsername = false
 
     //When user goes back to FeedFragment check if there's a new activity on following to retrieve or not the their feeds
-    val listNewFollowingsUsername = HashSet<String>()
+    val listNewFollowingsUserID = HashSet<String>()
     val listNewUnfollowingsUsername = HashSet<String>()
 
     val listNewFollowersUsername = HashSet<String>()
@@ -143,24 +143,16 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
-    suspend fun getUserDocumentUID(userID: String): UserDocumentUID? {
+    suspend fun getUserDocumentUID(userUID: String): UserDocumentUID? {
         var userDocumentUID: UserDocumentUID? = null
         val userIDUserDocumentUID =
-            db.collection(firebasePath.user_documents_uid).whereEqualTo("username", userID)
+            db.collection(firebasePath.user_documents_uid).whereEqualTo("userUid", userUID)
 
         userIDUserDocumentUID
             .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty)
-                    return@addOnSuccessListener
-
-                val listUserDocumentUID = querySnapshot.toObjects(UserDocumentUID::class.java)
-                if (listUserDocumentUID.isEmpty())
-                    return@addOnSuccessListener
-
-                when (listUserDocumentUID.size) {
-                    1 -> userDocumentUID = listUserDocumentUID[0]
-                    else -> return@addOnSuccessListener
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    userDocumentUID = document.toObject(UserDocumentUID::class.java)
                 }
             }.await()
 
