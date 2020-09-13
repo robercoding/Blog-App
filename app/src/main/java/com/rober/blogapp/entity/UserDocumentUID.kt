@@ -5,7 +5,7 @@ data class UserDocumentUID(
     val postsDocumentUid: String,
     val followingDocumentUid: String,
     val followerDocumentUid: String,
-    val userUid: String
+    var userUid: String
 ) {
     constructor() : this("", "", "", "", "")
 }

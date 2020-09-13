@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -75,6 +76,12 @@ class UserSearchAdapter (val itemView: View, val viewHolder: Int, val recyclerVi
         fun bind(user: User){
 
             uid_name?.text = user.username
+            uid_image?.run {
+                Glide.with(itemView)
+                    .load(user.profileImageUrl)
+                    .into(this)
+            }
+
             if(!user.biography.isEmpty())
                 uid_biography?.text = user.biography
             else

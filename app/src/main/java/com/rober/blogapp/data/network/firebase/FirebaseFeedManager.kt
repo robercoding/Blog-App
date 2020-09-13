@@ -112,7 +112,7 @@ constructor
 
                     //Get User Logged In posts
                     val listUserLoggedInNewPosts = getFollowingPostsByLessAndGreaterThan(
-                        firebaseSource.user?.user_id!!,
+                        user.user_id,
                         dateLessThanInitEpochSeconds,
                         dateGreaterThanEpochSeconds
                     )
@@ -158,7 +158,14 @@ constructor
         dateGreaterThanInit: Long?
     ): List<Post> {
         Log.i("CheckFollowing", "DateLess = $dateLessThanInit and $dateGreaterThanInit")
-        val followingDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
+        var followingDocumentUID = UserDocumentUID()
+        if(followingId == user.user_id)
+            firebaseSource.userDocumentUID?.run {followingDocumentUID=this }!!
+        else
+            followingDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
+
+        if(followingDocumentUID.userUid == "")
+            return emptyList()
 
         return if (dateLessThanInit != null && dateGreaterThanInit != null)
             firebaseSource.db.collection("${firebasePath.posts_col}/${followingDocumentUID.postsDocumentUid}/${firebasePath.user_posts}")
