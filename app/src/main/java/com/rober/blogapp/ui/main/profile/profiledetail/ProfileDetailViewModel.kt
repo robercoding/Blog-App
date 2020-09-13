@@ -113,8 +113,13 @@ class ProfileDetailViewModel
         PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
         user = firebaseRepository.getCurrentUser()
 
-        user?.let {
-            getBitmapFromUrl(it.backgroundImageUrl)
+        user?.let {tempUser->
+            if (tempUser.backgroundImageUrl.isEmpty()) {
+                val bitmapOrangeScreen = createBitmapOrangeScreen()
+                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+            } else {
+                getBitmapFromUrl(tempUser.backgroundImageUrl)
+            }
         } ?: kotlin.run {
             _profileDetailState.value =
                 ProfileDetailState.Error(Exception("We couldn't provide the user"))
@@ -165,8 +170,14 @@ class ProfileDetailViewModel
                     }
                 }
 
-            user?.let {
-                getBitmapFromUrl(it.backgroundImageUrl)
+            user?.let { tempUser ->
+                if (tempUser.backgroundImageUrl.isEmpty()) {
+                    val bitmapOrangeScreen = createBitmapOrangeScreen()
+                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+                } else {
+                    getBitmapFromUrl(tempUser.backgroundImageUrl)
+                }
+
             }
         }
     }
@@ -190,12 +201,14 @@ class ProfileDetailViewModel
                 }
 
             } ?: kotlin.run {
-                val bitmapBlackScreen =
-                    BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.black_screen)
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapBlackScreen)
+                val bitmapOrangeScreen = createBitmapOrangeScreen()
+                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
             }
         }
     }
+
+    private fun createBitmapOrangeScreen(): Bitmap =
+        BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.blue_screen)
 
 //    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
 //

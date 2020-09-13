@@ -134,17 +134,38 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun setUserDetailsView(user: User) {
+        Log.i(TAG, "Load")
         profile_text_edit_username.setText(user.username)
 
         profile_text_edit_biography.setText(user.biography)
         profile_text_edit_location.setText(user.location)
-        Glide.with(requireView())
-            .load(user.profileImageUrl)
-            .into(profile_edit_image_profile)
 
-        Glide.with(requireView())
-            .load(user.backgroundImageUrl)
-            .into(profile_edit_image_background)
+        if(user.profileImageUrl.isEmpty()){
+            Log.i(TAG, "Load default profile")
+            Glide.with(requireView())
+                .load(R.drawable.outline_account_circle_black_24dp)
+                .into(profile_edit_image_profile)
+        }else{
+            Log.i(TAG, "Load user profile")
+            Glide.with(requireView())
+                .load(user.profileImageUrl)
+                .into(profile_edit_image_profile)
+        }
+
+        if(user.backgroundImageUrl.isEmpty()){
+            Log.i(TAG, "Load default background")
+            Glide.with(requireView())
+                .load(R.drawable.blue_screen)
+                .fitCenter()
+                .into(profile_edit_image_background)
+        }else{
+            Log.i(TAG, "Load user background")
+            Glide.with(requireView())
+                .load(user.backgroundImageUrl)
+                .fitCenter()
+                .into(profile_edit_image_background)
+        }
+
     }
 
     private fun loadingUserView(display: Boolean) {

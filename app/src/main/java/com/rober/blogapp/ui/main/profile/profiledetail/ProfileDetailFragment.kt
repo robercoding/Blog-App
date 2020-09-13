@@ -228,7 +228,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
-        setPaletteWithMotionLayoutListener(user.backgroundImageUrl, bitmap)
+        val colorPalette = if(user.backgroundImageUrl.isEmpty())
+            R.drawable.blue_screen
+        else
+            user.backgroundImageUrl
+
+        setPaletteWithMotionLayoutListener(colorPalette, bitmap)
 
         profile_detail_motion_layout.apply {
             this.getConstraintSet(R.id.start)?.let {
@@ -244,16 +249,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                     View.GONE
             }
         }
-
-        //Load user images: profileImage hardcoded url
-        Glide.with(requireView())
-            .load(user.profileImageUrl)
-            .into(uid_image)
-
-        Glide.with(requireView())
-            .load(user.backgroundImageUrl)
-            .into(profile_detail_image_background_clear)
-
+        setImages(user)
     }
 
     private fun setViewForOtherUser(bitmap: Bitmap, user: User) {
@@ -261,7 +257,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_button_follow.visibility = View.VISIBLE
         profile_detail_button_edit.visibility = View.GONE
 
-        setPaletteWithMotionLayoutListener(user.backgroundImageUrl, bitmap)
+        val colorPalette = if(user.backgroundImageUrl.isEmpty())
+            R.drawable.blue_screen
+        else
+            user.backgroundImageUrl
+
+        setPaletteWithMotionLayoutListener(colorPalette, bitmap)
 
         profile_detail_motion_layout.apply {
             this.getConstraintSet(R.id.start)?.let { constraintSet ->
@@ -273,19 +274,30 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
                 it.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
             }
         }
+        setImages(user)
+    }
 
-        //Load user images: profileImage hardcoded url
+    private fun setImages(user: User){
+        val profileImageToLoad : Any = if(user.profileImageUrl.isEmpty())
+            R.drawable.outline_account_circle_black_24dp
+        else
+            user.profileImageUrl
+
+        val backgroundImageToLoad = if(user.backgroundImageUrl.isEmpty())
+            R.drawable.blue_screen
+        else
+            user.backgroundImageUrl
+
         Glide.with(requireView())
-            .load(user.profileImageUrl)
+            .load(profileImageToLoad)
             .into(uid_image)
 
         Glide.with(requireView())
-            .load(user.backgroundImageUrl)
+            .load(backgroundImageToLoad)
             .into(profile_detail_image_background_clear)
-
     }
 
-    private fun setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart: String, bitmap: Bitmap) {
+    private fun setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart: Any, bitmap: Bitmap) {
         Palette.Builder(bitmap).generate { palette ->
             palette?.let {
                 val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))

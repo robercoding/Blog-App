@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.fragment_profile_detail.view.*
 
 class MotionLayoutTransitionListener constructor(
     private val view: View,
-    private val imageFromUrl: String,
+    private val imageFromUrl: Any,
     private val dominantColorFromImageUrl: Int
 ) : MotionLayout.TransitionListener {
 
