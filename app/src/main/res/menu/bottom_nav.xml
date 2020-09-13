@@ -3,14 +3,16 @@
 
     <item
         android:id="@+id/feedFragment"
-        android:title="Feed"/>
+        android:icon="@drawable/ic_feed"
+        android:title="Feed" />
 
     <item
         android:id="@+id/searchFragment"
-        android:title="Search"
-        />
+        android:icon="@drawable/ic_search_black_18dp"
+        android:title="Search"/>
     <item
         android:id="@+id/profileDetailFragment"
+        android:icon="@drawable/ic_profile"
         android:title="Profile"
         />
 </menu>

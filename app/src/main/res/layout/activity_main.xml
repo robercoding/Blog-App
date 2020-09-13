@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity"
-    android:background="@color/background">
+    android:background="@color/background"
+    tools:context=".ui.MainActivity">
 
     <fragment
         android:id="@+id/container_fragment"
@@ -26,19 +26,18 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         tools:ignore="MissingConstraints" />
 
-
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/container_fragment"
+        android:background="@color/white"
+        android:textAlignment="center"
+        app:backgroundTint="@color/background"
+        app:itemIconTint="@color/bottom_navigation_color"
+        app:itemTextColor="@color/bottom_navigation_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:background="@color/white"
-        app:menu="@menu/bottom_nav"
-        app:backgroundTint="@color/background"
-        app:itemTextColor="@color/bottom_navigation_color"
-        app:itemIconTint="@color/bottom_navigation_color"/>
+        app:layout_constraintTop_toBottomOf="@id/container_fragment"
+        app:menu="@menu/bottom_nav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

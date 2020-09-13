@@ -195,7 +195,7 @@
                     android:singleLine="true"
                     android:hint="Location"
                     android:textColor="@color/white"
-                    android:textColorHint="@color/colorGray2TextSpotify"/>
+                    android:textColorHint="@color/grayLight"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 

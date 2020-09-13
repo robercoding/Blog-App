@@ -300,7 +300,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     private fun setPaletteWithMotionLayoutListener(imageFromUrlToolbarStart: Any, bitmap: Bitmap) {
         Palette.Builder(bitmap).generate { palette ->
             palette?.let {
-                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.colorBlack))
+                val color = it.getDominantColor(ContextCompat.getColor(requireContext(), R.color.black))
                 val motionLayoutTransitionListener =
                     MotionLayoutTransitionListener(requireView(), imageFromUrlToolbarStart, color)
                 profile_detail_motion_layout.apply {

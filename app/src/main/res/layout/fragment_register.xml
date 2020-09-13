@@ -2,84 +2,92 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background"
     android:gravity="center"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_margin="10dp"
-        android:padding="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/layout_bg_login_register"
         android:orientation="vertical"
-        android:background="@drawable/layout_bg_login_register">
+        android:padding="20dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etName"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AuthTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etName"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/name" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AuthTextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:hint="@string/name"
-            android:backgroundTint="@color/colorBlueLight"
-            android:textColorHint="@color/colorGray2TextSpotify"
-            android:textColor="@color/colorWhite"
-            />
+            android:layout_marginTop="20dp">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/email" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AuthTextInputLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="20dp"
-            android:hint="@string/email"
-            android:backgroundTint="@color/colorBlueLight"
-            android:textColorHint="@color/colorGray2TextSpotify"
-            android:textColor="@color/colorWhite"
-            />
+            android:layout_marginBottom="5dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="5dp"
-            android:inputType="textPassword"
-            android:hint="@string/password"
-            android:backgroundTint="@color/colorBlueLight"
-            android:textColorHint="@color/colorGray2TextSpotify"
-            android:textColor="@color/colorWhite"
-            />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/password"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPasswordRepeat"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AuthTextInputLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:inputType="textPassword"
-            android:hint="@string/password"
-            android:backgroundTint="@color/colorBlueLight"
-            android:textColorHint="@color/colorGray2TextSpotify"
-            android:textColor="@color/colorWhite"
-            />
+            android:layout_marginBottom="5dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPasswordRepeat"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:hint="@string/password" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/btnSignUp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/sign_up"
             android:backgroundTint="@color/blueTwitter"
-            android:background="@drawable/layout_btn_login_register"
-            />
+            android:fontFamily="@font/roboto_bold"
+            android:text="@string/sign_up" />
 
         <ProgressBar
             android:id="@+id/progress_bar"
-            android:layout_marginTop="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:layout_marginTop="15dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

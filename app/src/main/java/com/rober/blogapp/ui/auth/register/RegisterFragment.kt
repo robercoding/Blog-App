@@ -73,7 +73,7 @@ class RegisterFragment : Fragment() {
         }
 
         if(password.length <= 6){
-            Toast.makeText(activity, "Password must be > 6 characters", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Password must contain at least 7 characters", Toast.LENGTH_SHORT).show()
             return
         }
         if(!passwordRepeat.equals(password)){

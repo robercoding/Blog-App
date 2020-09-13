@@ -104,7 +104,7 @@ class LoginFragment : Fragment() {
             }
             is AuthState.Idle -> {
                 displayProgressBar(false)
-                Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
+//                Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
             }
         }
     }
@@ -118,9 +118,8 @@ class LoginFragment : Fragment() {
     private fun goToRegisterFragment(){
         val navController: NavController = findNavController()
 
-        navController.navigate(R.id.registerFragment)
+        navController.navigate(R.id.action_loginFragment_to_registerFragment)
     }
-
 
     fun errorMessage(message: String?){
         if(message != null)
@@ -128,7 +127,6 @@ class LoginFragment : Fragment() {
         else
             Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
     }
-
 
     fun displayProgressBar(isDisplayed: Boolean){
         progress_bar.visibility = if(isDisplayed) View.VISIBLE else View.GONE

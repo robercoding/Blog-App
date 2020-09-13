@@ -50,11 +50,11 @@
     </style>
 
     <style name="ProfileDetailEditButtonEditProfile" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/colorGray2TextSpotify</item>
+        <item name="android:textColor">@color/grayLight</item>
         <item name="android:textSize">14sp</item>
         <item name="backgroundTint">@color/background</item>
         <item name="cornerRadius">20dp</item>
-        <item name="strokeColor">@color/colorGray2TextSpotify</item>
+        <item name="strokeColor">@color/grayLight</item>
         <item name="strokeWidth">1dp</item>
         <item name="android:textStyle">normal</item>
     </style>
@@ -62,6 +62,13 @@
     <style name="ProfileDetailEditButtonFollow" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/blueGray</item>
         <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="AuthTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="boxStrokeColor">@color/text_input_box_stroke</item>
+        <item name="hintTextColor">@color/text_input_text_hint</item>
+        <item name="android:textColorHint">@color/text_input_text_hint</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
 </resources>
