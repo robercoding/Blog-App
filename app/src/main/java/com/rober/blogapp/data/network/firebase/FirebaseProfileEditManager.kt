@@ -163,26 +163,6 @@ class FirebaseProfileEditManager @Inject constructor(
         return usernameDocumentID
     }
 
-    suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = flow {
-        var nameAvailable = false
-
-        try {
-            val userDocumentRef = firebaseSource.db.collection("users").document(username)
-            userDocumentRef
-                .get()
-                .addOnSuccessListener {
-                    val user = it.toObject(User::class.java)
-                    nameAvailable = user == null
-                }.addOnFailureListener {
-                    nameAvailable = false
-                }.await()
-        } catch (e: Exception) {
-            Log.i(TAG, "${e.message}")
-        }
-
-        emit(ResultData.Success(nameAvailable))
-    }
-
     suspend fun saveImage(uri: Uri, intentImageCode: Int): Flow<ResultData<String>> = flow {
         val storageReference: StorageReference?
         var returnImageUrl = ""

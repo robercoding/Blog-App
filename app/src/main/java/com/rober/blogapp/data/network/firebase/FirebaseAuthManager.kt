@@ -112,6 +112,24 @@ class FirebaseAuthManager @Inject constructor(
             emit(ResultAuth.Error(exception))
     }
 
+    suspend fun checkIfEmailAlreadyExists(email: String): Flow<ResultAuth> = flow {
+        var isNewUser = false
+
+        firebaseSource.auth.fetchSignInMethodsForEmail(email)
+            .addOnCompleteListener {task->
+                task.result?.signInMethods?.run {
+                    isNewUser = isEmpty()
+                }
+            }.await()
+
+
+        if(isNewUser){
+            emit(ResultAuth.Success)
+        }else{
+            emit(ResultAuth.Error(Exception("Email already exists")))
+        }
+    }
+
     private suspend fun saveNewUserInDatabase(userAuthResult: AuthResult, username: String): Boolean {
         val uid = userAuthResult.user!!.uid
 

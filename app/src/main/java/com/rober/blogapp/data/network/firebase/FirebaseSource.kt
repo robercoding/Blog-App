@@ -7,9 +7,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import kotlin.Exception
@@ -159,6 +162,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         return userDocumentUID
     }
 
+
     fun getCurrentUser(): User {
         user?.let {
             return it
@@ -171,4 +175,24 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         setCurrentUser()
         return getCurrentUser()
     }
+    suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = flow {
+        var nameAvailable = false
+
+        try {
+            val userDocumentRef = db.collection("users").document(username)
+            userDocumentRef
+                .get()
+                .addOnSuccessListener {
+                    val user = it.toObject(User::class.java)
+                    nameAvailable = user == null
+                }.addOnFailureListener {
+                    nameAvailable = false
+                }.await()
+        } catch (e: Exception) {
+            Log.i(TAG, "${e.message}")
+        }
+
+        emit(ResultData.Success(nameAvailable))
+    }
+
 }
