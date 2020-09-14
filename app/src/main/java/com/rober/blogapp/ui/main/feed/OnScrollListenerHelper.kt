@@ -64,7 +64,7 @@ class OnScrollListenerHelper(val context: Context, val recyclerViewClickInterfac
         Log.i("OnScrollListener", "Has user reached bottom?? ${hasUserReachedBottom}")
         if(hasUserReachedBottom && isUserDragging){
             if(!hasUserReachedBottomAndDraggingBefore){
-                Toast.makeText(context, "Request", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Request", Toast.LENGTH_SHORT).show()
                 //Log.i("OnScrollListener", "Request")
                 hasUserReachedBottomAndDraggingBefore = true
 

@@ -84,6 +84,7 @@ class RegisterFragment : Fragment() {
             }
 
             is AuthState.SetErrorFields -> {
+                displayProgressBar(false)
                 cleanErrorFields()
                 setErrorFields(
                     authState.usernameError,

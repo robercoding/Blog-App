@@ -10,7 +10,8 @@ sealed class FeedState {
     data class LoadNewPosts(val listFeedPosts: List<Post>, val listFeedUsers: List<User>, val scrollToPosition: Int): FeedState()
     data class LoadOldPosts(val listFeedPosts: List<Post>,  val listFeedUsers: List<User>, val scrollToPosition: Int, val endOfTimeline: Boolean): FeedState()
     object StopRequestOldPosts: FeedState()
-    data class StopRequestNewPosts(val messageUtil: MessageUtil): FeedState()
+    data class StopRequestNewPosts(var messageUtil: MessageUtil? = null): FeedState()
+    object LoadMessageZeroPosts: FeedState()
 
     data class GoToPostDetailsFragment(val post: Post): FeedState()
     data class GoToProfileDetailsFragment(val user_id: String): FeedState()

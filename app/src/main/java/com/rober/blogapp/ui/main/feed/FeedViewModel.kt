@@ -31,8 +31,6 @@ constructor(
     private var feedListPosts = mutableListOf<Post>()
     private var feedListUsers = mutableListOf<User>()
 
-    private var job: Job = Job()
-
     fun setIntention(event: FeedFragmentEvent) {
         when (event) {
             is FeedFragmentEvent.GetUserPicture -> getUserPicture()
@@ -41,7 +39,9 @@ constructor(
                 retrieveInitPosts()
             }
             is FeedFragmentEvent.RetrieveOldFeedPosts -> {
-                retrieveOldFeedPosts(event.actualRecyclerViewPosition)
+                if(feedListPosts.size > 30){
+                    retrieveOldFeedPosts(event.actualRecyclerViewPosition)
+                }
             }
             is FeedFragmentEvent.RetrieveNewFeedPosts -> {
                 retrieveNewFeedPosts()
@@ -83,14 +83,18 @@ constructor(
                     when (resultData) {
                         is ResultData.Success -> {
                             feedListPosts = resultData.data!!.toMutableList()
-                            if (endOfTimeline)
-                                addEndOfTimelineToMutableListPosts()
+
                         }
                         is ResultData.Error -> {
                             _feedState.value = FeedState.Error(resultData.exception.message)
                         }
                     }
                 }
+
+            if(feedListPosts.size == 0){
+                _feedState.value = FeedState.LoadMessageZeroPosts
+                return@launch
+            }
 
             firebaseRepository.getUsersFromCurrentFollowings(feedListUsers)
                 .collect { resultData ->
@@ -99,6 +103,7 @@ constructor(
                             resultData.data?.let { newListUsers ->
                                 feedListUsers.addAll(newListUsers)
                                 user?.let { feedListUsers.add(it) }
+                                addEndOfTimelineToMutableListPosts()
 
                                 _feedState.value = FeedState.SetListPosts(feedListPosts, feedListUsers)
                             }
@@ -117,23 +122,24 @@ constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            if (resultData.data!! == feedListPosts) {
-                                _feedState.value =
-                                    FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))
-                            } else {
-                                newListPosts = resultData.data
-                            }
+                            newListPosts = resultData.data!!
                         }
                         is ResultData.Error -> {
                             _feedState.value = FeedState.Error(resultData.exception.message!!)
                         }
                     }
                 }
+
+            if(newListPosts.isEmpty()){
+                _feedState.value =
+                    FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))
+                return@launch
+            }
+
             if (isNewUserInListPosts(newListPosts)) {
                 firebaseRepository.getUsersFromCurrentFollowings(feedListUsers)
                     .collect { resultData ->
                         when (resultData) {
-
                             is ResultData.Success -> {
                                 resultData.data?.run {
                                     newListUsers = this
@@ -150,17 +156,31 @@ constructor(
     }
 
     private fun sendNewFeedPosts(newListPosts: List<Post>, newListUsers: List<User>) {
-        val firstPostBeforeLoadingNewPosts = feedListPosts[0]
 
-        feedListPosts.addAll(newListPosts.toMutableList()) //Is already ordered
+        if(feedListPosts.size == 0 && newListPosts.size == 0){
+            _feedState.value = FeedState.LoadMessageZeroPosts
+            return
+        }
+
+//        for (post in newListPosts){
+//            feedListPosts.add(0, post)
+//        }
+
+
+        var firstPostBeforeLoadingNewPosts: Post? = null
+        if(feedListPosts.isNotEmpty())
+            firstPostBeforeLoadingNewPosts = feedListPosts[0]
+
+        feedListPosts.addAll(newListPosts.toMutableList())
+        feedListPosts = feedListPosts.sortedByDescending { post-> post.created_at }.toMutableList() //Is already ordered
         feedListUsers.addAll(newListUsers.toMutableList())
 
-        val positionOfTheFirstPost = feedListPosts.indexOf(firstPostBeforeLoadingNewPosts)
-        //Where's user now?
-        val endOfTimeLine = firebaseRepository.getEndOfTimeline()
-        if (endOfTimeLine)
-            addEndOfTimelineToMutableListPosts()
+        var positionOfTheFirstPost = 1
+        firstPostBeforeLoadingNewPosts?.also {tempFirstPostBeforeLoadingNewPosts->
+             positionOfTheFirstPost = feedListPosts.indexOf(tempFirstPostBeforeLoadingNewPosts)
+        }
 
+        //Where's user now?
         _feedState.value = FeedState.LoadNewPosts(feedListPosts, feedListUsers, positionOfTheFirstPost - 1)
     }
 
@@ -176,7 +196,7 @@ constructor(
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                resultData.data?.run {
+                                 resultData.data?.run {
                                     newOldListPosts = this
                                 }
                             }

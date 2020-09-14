@@ -32,8 +32,8 @@ constructor
 
     //Time
     private var dateToRetrieveNewerPostsEpochSeconds: Long? = null //
-    private var dateLessThanEpochSeconds: Long? = null
-    private var dateGreaterThanEpochSeconds: Long? = null
+    private var dateLessThanEpochSeconds: Long = 0
+    private var dateGreaterThanEpochSeconds: Long = 0
 
     private var restDays: Long = 0
     private var currentIntervalHoursIndex = 0
@@ -68,11 +68,11 @@ constructor
 
         if (!savedFeedListPosts.isNullOrEmpty()) { //Send listPosts if there's already posts saved in cache
             emit(ResultData.Success(savedFeedListPosts))
-        } else { //Get posts
+        } else { //Get posts every 30 days
             dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
 
-            var dateLessThanInitEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
-            dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 1, ChronoUnit.DAYS).epochSecond
+            dateLessThanEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
+            dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 30, ChronoUnit.DAYS).epochSecond
 
             try {
                 //Get all user followings
@@ -86,7 +86,7 @@ constructor
 
                 var countTotalPosts = 0
                 var getPostsTries = 0
-                while (countTotalPosts < 10 && getPostsTries < 10) {
+                while (getPostsTries < 5) {
                     getPostsTries += 1
 
                     if (!newListFollowing.isNullOrEmpty()) {
@@ -98,7 +98,7 @@ constructor
 
                             val listFollowingNewPosts = getFollowingPostsByLessAndGreaterThan(
                                 following.following_id,
-                                dateLessThanInitEpochSeconds,
+                                dateLessThanEpochSeconds,
                                 dateGreaterThanEpochSeconds
                             )
 
@@ -113,7 +113,7 @@ constructor
                     //Get User Logged In posts
                     val listUserLoggedInNewPosts = getFollowingPostsByLessAndGreaterThan(
                         user.user_id,
-                        dateLessThanInitEpochSeconds,
+                        dateLessThanEpochSeconds,
                         dateGreaterThanEpochSeconds
                     )
 
@@ -128,22 +128,28 @@ constructor
                         savedFeedHashMapPosts[user.user_id] = listPostsCurrentUserFromHashMap
                     }
 
-                    restDays += 1
+                    restDays += 30
                     if (countTotalPosts < 10) {
-                        dateLessThanInitEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
-                        dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 1, ChronoUnit.DAYS).epochSecond
+                        dateLessThanEpochSeconds = dateGreaterThanEpochSeconds
+                        Log.i("DateLess", "before $dateLessThanEpochSeconds")
+//                        dateLessThanInitEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
+                        dateGreaterThanEpochSeconds = Instant.ofEpochSecond(dateGreaterThanEpochSeconds + 30).minus(restDays, ChronoUnit.DAYS).epochSecond
+                        Log.i("DateLess", "after $dateLessThanEpochSeconds")
                     }
                 }
 
                 val allPosts = mutableListOf<Post>()
+                //get all actual values from Map
                 savedFeedHashMapPosts.mapKeys { mapEntry ->
                     allPosts.addAll(mapEntry.value)
                 }
 
+                //Order values
                 val feedPostsOrdered =
                     allPosts.sortedByDescending { post -> post.created_at }
                         .toMutableList()
 
+                //Send them
                 savedFeedListPosts = feedPostsOrdered
                 emit(ResultData.Success(savedFeedListPosts))
             } catch (exception: Exception) {
@@ -228,15 +234,11 @@ constructor
 
             if (newListPosts.size > 0) {
                 newListPosts.sortedByDescending { post -> post.created_at }
-                for (post in newListPosts)
-                    savedFeedListPosts.add(0, post)
-
+//                for (post in newListPosts)
+//                    savedFeedListPosts.add(0, post)
                 //Add the newest posts the first and the next posts follow the queue
-                emit(ResultData.Success(savedFeedListPosts))
-            } else {
-                emit(ResultData.Success(savedFeedListPosts))
-
             }
+            emit(ResultData.Success(newListPosts))
 
         } catch (e: Exception) {
             emit(ResultData.Error(e))
@@ -247,7 +249,13 @@ constructor
         followingId: String,
         dateGreater: Long?
     ): List<Post> {
-        val followingUserDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
+        val followingUserDocumentUID : UserDocumentUID?
+
+        if(followingId != user.user_id){
+            followingUserDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
+        }else{
+            followingUserDocumentUID = firebaseSource.userDocumentUID?.run { this } ?: return emptyList()
+        }
 
         return if (dateGreater != null)
             firebaseSource.db.collection("${firebasePath.posts_col}/${followingUserDocumentUID.postsDocumentUid}/${firebasePath.user_posts}")
