@@ -103,6 +103,7 @@ class LoginFragment : Fragment() {
                 errorMessage(state.message)
             }
             is AuthState.Idle -> {
+
                 displayProgressBar(false)
 //                Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
             }

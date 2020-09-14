@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/email"
-                android:text="newrober@gmail.com" />
+                android:text="oldrober@gmail.com" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -38,7 +38,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/blueGray">
+            app:endIconTint="@color/grayLight">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
@@ -47,7 +47,7 @@
                 android:layout_height="match_parent"
                 android:hint="@string/password"
                 android:inputType="textPassword"
-                android:text="newrober" />
+                android:text="oldrober" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,14 +57,14 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:text="@string/forgot_password"
-            android:textColor="@color/blueLight" />
+            android:textColor="@color/grayLight" />
 
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/blueTwitter"
-            android:fontFamily="@font/roboto_bold"
+            android:backgroundTint="@color/blueGray"
+            android:textColor="@color/white"
             android:text="@string/login" />
     </LinearLayout>
 
@@ -80,11 +80,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:backgroundTint="@color/blueTwitter"
-        android:fontFamily="@font/roboto_bold"
+        android:backgroundTint="@color/blueGray"
+
         android:padding="10dp"
         android:text="@string/sign_up_with_email"
-        android:textColor="@color/black" />
+        android:textColor="@color/white" />
 
     <Button
         android:id="@+id/btnRegisterGoogle"
@@ -92,10 +92,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:backgroundTint="@color/blueTwitter"
-        android:fontFamily="@font/roboto_bold"
+        android:backgroundTint="@color/blueGray"
         android:padding="10dp"
         android:text="@string/sign_up_with_google"
-        android:textColor="@color/black" />
+        android:textColor="@color/white" />
 
 </LinearLayout>

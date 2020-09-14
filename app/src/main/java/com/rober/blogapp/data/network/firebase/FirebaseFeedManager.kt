@@ -362,6 +362,7 @@ constructor
 
         if (listUsersFollowingNotContain.isEmpty()) {
             emit(ResultData.Success(emptyList<User>()))
+            return@flow
         }
 
         val listNewUsersFollowingNotContain = mutableListOf<User>()

@@ -248,7 +248,9 @@ class ProfileDetailViewModel
 
     private fun getNewerPosts() {
         viewModelScope.launch {
-
+            user?.also {tempUser->
+                previousBackgroundImageUrl = tempUser.backgroundImageUrl
+            }
             user = firebaseRepository.getCurrentUserRefreshed()
 
             user?.also { tempUser ->
@@ -259,7 +261,7 @@ class ProfileDetailViewModel
                         _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
-                firebaseRepository.retrieveNewerPostsUserProfile(tempUser.username)
+                firebaseRepository.retrieveNewerPostsUserProfile(tempUser.user_id)
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {

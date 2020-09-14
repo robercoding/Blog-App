@@ -114,6 +114,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             is ProfileDetailState.SetUserPosts -> {
                 val listUserPosts = profileDetailState.listUserPosts
                 setUserPosts(listUserPosts.toMutableList(), profileDetailState.user)
+                Log.i("Refresh", "lets stop display etc")
                 displayProgressBar(false)
                 stopSwipeRefresh()
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Idle)
