@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -76,6 +77,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                 displayTextWelcomeMessage(false)
                 displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
+                Log.i("SetPosts", "here are ${feedState.listFeedPosts.size}")
 
                 postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
@@ -88,13 +90,18 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
             is FeedState.LoadNewPosts -> {
                 stopSwipeRefresh()
+                displayTextNotifyMorePosts(true)
+                val animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
+                feed_text_notify_new_posts.startAnimation(animation)
 
                 postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
+//                val scrollLinearLayoutManager = LinearLayoutManager(context)
+//                scrollLinearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+//                scrollLinearLayoutManager.scrollToPositionWithOffset(feedState.scrollToPosition, 30)
 
                 recycler_feed.apply {
                     adapter = postAdapter
-                    scrollToPosition(feedState.scrollToPosition)
                 }
                 mHasPullRefresh = false
                 viewModel.setIntention(FeedFragmentEvent.Idle)
@@ -183,6 +190,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
         feed_progress_bar_more_posts.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
 
+    private fun displayTextNotifyMorePosts(isDisplayed: Boolean){
+        feed_text_notify_new_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+
+    }
     private fun stopSwipeRefresh() {
         feed_swipe_refresh_layout.isRefreshing = false
     }
@@ -220,6 +231,14 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
                 mHasPullRefresh = true
                 viewModel.setIntention(FeedFragmentEvent.RetrieveNewFeedPosts)
             }
+        }
+
+        feed_text_notify_new_posts.setOnClickListener {
+            val animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
+            feed_text_notify_new_posts.startAnimation(animation)
+//            feed_text_notify_new_posts.clearAnimation()
+            recycler_feed.smoothScrollToPosition(0)
+            displayTextNotifyMorePosts(false)
         }
     }
 

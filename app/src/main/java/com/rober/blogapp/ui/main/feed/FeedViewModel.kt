@@ -83,6 +83,7 @@ constructor(
                     when (resultData) {
                         is ResultData.Success -> {
                             feedListPosts = resultData.data!!.toMutableList()
+                            Log.i("SetPosts", "ViewModel = here are ${feedListPosts.size}")
 
                         }
                         is ResultData.Error -> {

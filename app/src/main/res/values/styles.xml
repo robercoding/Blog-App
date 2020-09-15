@@ -64,4 +64,16 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="NotifyNewPosts" parent="Widget.AppCompat.TextView">
+        <item name="android:drawableLeft">@drawable/ic_arrow_up_thick</item>
+        <item name="drawableTint">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:background">@drawable/notify_corner_radius</item>
+        <item name="drawableSize">8dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:drawablePadding">5dp</item>
+    </style>
+
 </resources>

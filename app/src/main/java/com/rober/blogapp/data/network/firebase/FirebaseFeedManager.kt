@@ -129,20 +129,21 @@ constructor
                     }
 
                     restDays += 30
-                    if (countTotalPosts < 10) {
-                        dateLessThanEpochSeconds = dateGreaterThanEpochSeconds
-                        Log.i("DateLess", "before $dateLessThanEpochSeconds")
+                    dateLessThanEpochSeconds = dateGreaterThanEpochSeconds
+                    Log.i("DateLess", "before $dateLessThanEpochSeconds")
 //                        dateLessThanInitEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
-                        dateGreaterThanEpochSeconds = Instant.ofEpochSecond(dateGreaterThanEpochSeconds + 30).minus(restDays, ChronoUnit.DAYS).epochSecond
-                        Log.i("DateLess", "after $dateLessThanEpochSeconds")
-                    }
-                }
+                    dateGreaterThanEpochSeconds =
+                        Instant.ofEpochSecond(dateGreaterThanEpochSeconds).minus(restDays + 30, ChronoUnit.DAYS).epochSecond
+                    Log.i("DateLess", "after $dateLessThanEpochSeconds")
 
+                }
                 val allPosts = mutableListOf<Post>()
                 //get all actual values from Map
                 savedFeedHashMapPosts.mapKeys { mapEntry ->
                     allPosts.addAll(mapEntry.value)
                 }
+
+                Log.i("CheckPosts", "Final = ${allPosts.size}")
 
                 //Order values
                 val feedPostsOrdered =
@@ -163,14 +164,14 @@ constructor
         dateLessThanInit: Long?,
         dateGreaterThanInit: Long?
     ): List<Post> {
-        Log.i("CheckFollowing", "DateLess = $dateLessThanInit and $dateGreaterThanInit")
+//        Log.i("CheckFollowing", "DateLess = $dateLessThanInit and $dateGreaterThanInit")
         var followingDocumentUID = UserDocumentUID()
-        if(followingId == user.user_id)
-            firebaseSource.userDocumentUID?.run {followingDocumentUID=this }!!
+        if (followingId == user.user_id)
+            firebaseSource.userDocumentUID?.run { followingDocumentUID = this }!!
         else
             followingDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
 
-        if(followingDocumentUID.userUid == "")
+        if (followingDocumentUID.userUid == "")
             return emptyList()
 
         return if (dateLessThanInit != null && dateGreaterThanInit != null)
@@ -210,12 +211,9 @@ constructor
                     savedFeedHashMapPosts[following.following_id] = mapSavedPostsFromFollowing
 
                     newListPosts.addAll(tempListNewPostsFromFollowing)
+                    savedFeedListPosts.addAll(tempListNewPostsFromFollowing)
                 }
             }
-
-            //
-            val mapSavedPostsFromUserLoggedIn = mutableListOf<Post>()
-            savedFeedHashMapPosts[user.user_id] = mapSavedPostsFromUserLoggedIn
 
             val listUserPosts =
                 getListPostsFromIdByGreaterDate(
@@ -224,11 +222,18 @@ constructor
                 ).toMutableList()
 
             if (listUserPosts.isNotEmpty()) {
+                var mapSavedPostsFromUserLoggedIn = mutableListOf<Post>()
+                mapSavedPostsFromUserLoggedIn.addAll(savedFeedHashMapPosts.getValue(user.user_id))
                 mapSavedPostsFromUserLoggedIn.addAll(listUserPosts)
+                mapSavedPostsFromUserLoggedIn =
+                    mapSavedPostsFromUserLoggedIn.sortedByDescending { post -> post.created_at }.toMutableList()
                 savedFeedHashMapPosts[user.user_id] = mapSavedPostsFromUserLoggedIn
 
                 newListPosts.addAll(listUserPosts)
+                savedFeedListPosts.addAll(listUserPosts)
             }
+
+            savedFeedListPosts = savedFeedListPosts.sortedByDescending { post -> post.created_at }.toMutableList()
 
             dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
 
@@ -249,11 +254,11 @@ constructor
         followingId: String,
         dateGreater: Long?
     ): List<Post> {
-        val followingUserDocumentUID : UserDocumentUID?
+        val followingUserDocumentUID: UserDocumentUID?
 
-        if(followingId != user.user_id){
+        if (followingId != user.user_id) {
             followingUserDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
-        }else{
+        } else {
             followingUserDocumentUID = firebaseSource.userDocumentUID?.run { this } ?: return emptyList()
         }
 
