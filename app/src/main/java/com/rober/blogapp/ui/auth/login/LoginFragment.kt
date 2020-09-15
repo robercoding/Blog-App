@@ -1,10 +1,12 @@
 package com.rober.blogapp.ui.auth.login
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -59,31 +61,31 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun login(){
+    private fun login() {
         val email = etEmail.text.toString()
         val password = etPassword.text.toString()
 
-        if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(activity, "Email must be valid", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if(password.isEmpty()){
-           return
+        if (password.isEmpty()) {
+            return
         }
 
         viewModel.setLoginIntention(LoginFragmentEvent.Login(email, password))
     }
 
 
-    private fun observeViewModel(){
-        viewModel.authState.observe(viewLifecycleOwner, Observer {loginAuthState ->
+    private fun observeViewModel() {
+        viewModel.authState.observe(viewLifecycleOwner, Observer { loginAuthState ->
             render(loginAuthState)
         })
     }
 
-    private fun render(state: AuthState){
-        when(state) {
+    private fun render(state: AuthState) {
+        when (state) {
             is AuthState.CheckingUserLoggedIn -> {
                 displayProgressBar(true)
             }
@@ -92,6 +94,7 @@ class LoginFragment : Fragment() {
             }
             is AuthState.UserLoggedIn -> {
                 displayProgressBar(false)
+                hideKeyBoard()
                 goToMainFragments()
             }
             is AuthState.UserLogout -> {
@@ -110,30 +113,35 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun goToMainFragments(){
+    private fun goToMainFragments() {
         val navController: NavController = findNavController()
 
         navController.navigate(R.id.feedFragment)
     }
 
-    private fun goToRegisterFragment(){
+    private fun goToRegisterFragment() {
         val navController: NavController = findNavController()
 
         navController.navigate(R.id.action_loginFragment_to_registerFragment)
     }
 
-    fun errorMessage(message: String?){
-        if(message != null)
+    fun errorMessage(message: String?) {
+        if (message != null)
             Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
         else
             Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
     }
 
-    fun displayProgressBar(isDisplayed: Boolean){
-        progress_bar.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    fun displayProgressBar(isDisplayed: Boolean) {
+        progress_bar.visibility = if (isDisplayed) View.VISIBLE else View.GONE
+    }
+
+    private fun hideKeyBoard() {
+        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 }
 
-sealed class LoginFragmentEvent{
-    data class Login(val email: String, val password:String) : LoginFragmentEvent()
+sealed class LoginFragmentEvent {
+    data class Login(val email: String, val password: String) : LoginFragmentEvent()
 }

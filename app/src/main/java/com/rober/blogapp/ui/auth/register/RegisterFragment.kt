@@ -1,10 +1,12 @@
 package com.rober.blogapp.ui.auth.register
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -81,6 +83,7 @@ class RegisterFragment : Fragment() {
             is AuthState.UserLoggedIn -> {
                 Toast.makeText(activity, "LoggedIn", Toast.LENGTH_SHORT).show()
                 goToMainFragments()
+                hideKeyBoard()
             }
 
             is AuthState.SetErrorFields -> {
@@ -181,28 +184,33 @@ class RegisterFragment : Fragment() {
             Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
     }
 
+    private fun hideKeyBoard() {
+        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    }
+
     private fun setupListeners() {
         btnSignUp.setOnClickListener {
             viewModel.setRegisterIntention(RegisterFragmentEvent.CheckFields)
         }
 
         register_input_text_username.addTextChangedListener {
-            if(!register_input_layout_username.helperText.isNullOrEmpty())
+            if (!register_input_layout_username.helperText.isNullOrEmpty())
                 cleanErrorField(register_input_layout_username)
         }
         register_input_text_email.addTextChangedListener {
-            if(!register_input_layout_email.helperText.isNullOrEmpty())
+            if (!register_input_layout_email.helperText.isNullOrEmpty())
                 cleanErrorField(register_input_layout_email)
         }
 
         register_input_text_password.addTextChangedListener {
-            if(!register_input_layout_password.helperText.isNullOrEmpty()){
+            if (!register_input_layout_password.helperText.isNullOrEmpty()) {
                 cleanErrorField(register_input_layout_password)
                 cleanErrorField(register_input_layout_password_repeat)
             }
         }
         register_input_text_password_repeat.addTextChangedListener {
-            if(!register_input_layout_password_repeat.helperText.isNullOrEmpty()){
+            if (!register_input_layout_password_repeat.helperText.isNullOrEmpty()) {
                 cleanErrorField(register_input_layout_password)
                 cleanErrorField(register_input_layout_password_repeat)
             }
