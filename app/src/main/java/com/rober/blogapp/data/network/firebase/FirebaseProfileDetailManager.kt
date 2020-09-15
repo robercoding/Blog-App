@@ -40,24 +40,19 @@ class FirebaseProfileDetailManager @Inject constructor(
         //Initialize variable
         var minusDays: Long = 0
         var dateLessThanEpochSeconds = Instant.now().minus(minusDays, ChronoUnit.DAYS).epochSecond
-        var dateGreaterThanEpochSeconds = Instant.now().minus(minusDays + 1, ChronoUnit.DAYS).epochSecond
+        var dateGreaterThanEpochSeconds = Instant.now().minus(minusDays + 30, ChronoUnit.DAYS).epochSecond
 
         var userContainsSavedPosts = savedUserHashMapPost[userID]
-
-        val countPosts = getCountPostsFromOtherUser(userID)
-        var userContainsSavedPostsSize = 0
 
         userContainsSavedPosts?.let {
             val datesThanEpochSeconds = savedUserHashMapDatesEpochSecond.getValue(userID)
             dateLessThanEpochSeconds = datesThanEpochSeconds[0]
             dateGreaterThanEpochSeconds = datesThanEpochSeconds[1]
             minusDays = savedUserHashMapMinusDays.getValue(userID)
-            userContainsSavedPostsSize = it.size
 
         } ?: run {
             savedUserHashMapRetrieveNewerPostsDateEpochSecond[userID] = Instant.now().epochSecond
             userContainsSavedPosts = mutableListOf()
-            userContainsSavedPostsSize = 0
         }
 
         val newUserMutableListPosts = mutableListOf<Post>()
@@ -73,25 +68,17 @@ class FirebaseProfileDetailManager @Inject constructor(
 //                    Date() //Save new date to retrieve newer posts
 //            }
 //        }
+        for(x in 0 until 3){
 
-        var tries = 0
-        while (newUserMutableListPosts.size < 6 && userContainsSavedPostsSize < countPosts && tries < 10) {
             val listPosts = getUserPostsByDateLessAndGreater(userID, dateLessThanEpochSeconds, dateGreaterThanEpochSeconds)
 
-            listPosts.let {
-                for (post in listPosts) {
-                    newUserMutableListPosts.add(post)
-                    userContainsSavedPostsSize += 1
-                }
-            }
+            newUserMutableListPosts.addAll(listPosts)
 
-            minusDays += 1
+            minusDays += 30
             dateLessThanEpochSeconds =
-                Instant.ofEpochSecond(dateLessThanEpochSeconds).minus(minusDays, ChronoUnit.DAYS).epochSecond
+                Instant.ofEpochSecond(dateGreaterThanEpochSeconds).epochSecond
             dateGreaterThanEpochSeconds =
-                Instant.ofEpochSecond(dateLessThanEpochSeconds).minus(minusDays + 1, ChronoUnit.DAYS).epochSecond
-
-            tries += 1
+                Instant.ofEpochSecond(dateGreaterThanEpochSeconds).minus(minusDays, ChronoUnit.DAYS).epochSecond
         }
 
         //Save dates on local
