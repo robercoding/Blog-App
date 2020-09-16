@@ -65,24 +65,46 @@
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:contentInsetStart="0dp">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/profile_detail_arrow_back"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:background="@drawable/ic_arrow_left"
-                    android:elevation="7dp"
-                    android:backgroundTint="@color/grayLight" />
+                    <ImageView
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:id="@+id/profile_detail_arrow_back"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_arrow_left"
+                        android:tint="@color/grayLight"
+                        android:elevation="7dp"
+                        android:padding="10dp"
+                        android:cropToPadding="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        />
 
-                <ImageView
-                    android:id="@+id/profile_detail_settings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_settings_black_24dp"
-                    android:backgroundTint="@color/grayLight"
-                    android:layout_marginLeft="340dp"
-                    android:elevation="2dp"/>
+                    <ImageView
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:id="@+id/profile_detail_settings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_settings_black_24dp"
+                        android:tint="@color/grayLight"
+                        android:elevation="2dp"
+                        android:padding="10dp"
+                        android:cropToPadding="true"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
             </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.AppBarLayout>
@@ -238,7 +260,8 @@
             app:layout_constraintTop_toBottomOf="@id/container_user_tabs"
             app:layout_constraintBottom_toBottomOf="parent"
             android:scrollbarSize="2dp"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            android:scrollbarThumbVertical="@color/blueTwitter"/>
     </androidx.constraintlayout.motion.widget.MotionLayout>
 
     <ProgressBar

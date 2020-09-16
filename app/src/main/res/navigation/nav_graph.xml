@@ -34,7 +34,11 @@
             app:popExitAnim="@anim/to_bottom" />
         <action
             android:id="@+id/action_feedFragment_to_postDetailFragment"
-            app:destination="@id/postDetailFragment" />
+            app:destination="@id/postDetailFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:exitAnim="@anim/to_top"
+            app:popEnterAnim="@anim/from_top"
+            app:popExitAnim="@anim/to_bottom" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
@@ -81,6 +85,9 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_profileDetailFragment_to_postAddFragment"
+            app:destination="@id/postAddFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -118,6 +125,9 @@
         <action
             android:id="@+id/action_postAddFragment_to_feedFragment"
             app:destination="@id/feedFragment" />
+        <action
+            android:id="@+id/action_postAddFragment_to_profileDetailFragment"
+            app:destination="@id/profileDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/postDetailFragment"

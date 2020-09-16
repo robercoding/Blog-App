@@ -122,7 +122,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_feed"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:scrollbarThumbVertical="@color/blueTwitter"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 

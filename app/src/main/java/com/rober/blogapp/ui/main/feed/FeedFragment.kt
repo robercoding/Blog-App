@@ -271,7 +271,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     private fun goToPostDetailsFragment(post: Post) {
         val bundle = bundleOf("post" to post)
         val navController = findNavController()
-        navController.navigate(R.id.postDetailFragment, bundle)
+        navController.navigate(R.id.action_feedFragment_to_postDetailFragment, bundle)
         viewModel.setIntention(FeedFragmentEvent.Idle)
     }
 

@@ -34,6 +34,8 @@ constructor(
 
     suspend fun getCurrentUserRefreshed(): User = firebaseSource.getCurrentUserRefreshed()
 
+    suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> = firebaseSource.getUserProfile(userUID)
+
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
 
@@ -77,9 +79,6 @@ constructor(
         firebaseProfileDetailManager.retrieveUserNewerPosts(userID)
 
     suspend fun getCurrentUserProfileDetail() = firebaseProfileDetailManager.getCurrentUser()
-
-    suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> =
-        firebaseProfileDetailManager.getUserProfile(userUID)
 
     suspend fun checkIfCurrentUserFollowsOtherUser(userID: String): Flow<ResultData<Boolean>> =
         firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(userID)

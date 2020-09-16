@@ -3,7 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/background">
+
+    <com.andexert.library.RippleView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:rv_centered="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/adapter_search_container"
@@ -53,5 +62,6 @@
             app:layout_constraintTop_toBottomOf="@id/adapter_search_biography"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.andexert.library.RippleView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

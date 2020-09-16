@@ -33,7 +33,7 @@ constructor(
 
         val user: User = firebaseSource.getCurrentUser()
 
-        if(user.user_id == ""){
+        if (user.user_id == "") {
             emit(ResultData.Error(Exception("Sorry, we had a problem with your user account"), null))
             return@flow
         }

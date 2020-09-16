@@ -195,4 +195,48 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         emit(ResultData.Success(nameAvailable))
     }
 
+    fun getUserProfile(userUID: String): Flow<ResultData<User>> = flow {
+        emit(ResultData.Loading)
+        var tempUser: User? = null
+
+        var documentUID: String = ""
+
+        if (userUID == user?.user_id) {
+            tempUser = user
+        } else {
+            db.collection("users")
+                .whereEqualTo("user_id", userUID)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty)
+                        return@addOnSuccessListener
+                    for (document in documents) {
+                        documentUID = document.id
+                    }
+                }
+                .await()
+
+            if (documentUID.isEmpty()) {
+                emit(ResultData.Error(Exception("We couldn't find the user")))
+                return@flow
+            }
+
+            try {
+                user = db.collection("users").document(documentUID)
+                    .get()
+                    .await()
+                    .toObject(User::class.java)
+
+            } catch (e: Exception) {
+                emit(ResultData.Error(e, null))
+            }
+        }
+
+        if (tempUser == null) {
+            emit(ResultData.Error(Exception("We couldn't find the user")))
+        } else {
+            emit(ResultData.Success(tempUser))
+        }
+    }
+
 }

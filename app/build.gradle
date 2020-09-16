@@ -153,4 +153,7 @@ dependencies {
 
     //ImageCropper
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+    //RippleEffect
+    implementation 'com.patrickpissurno:ripple-effect:1.3.1'
 }
