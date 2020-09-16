@@ -1,6 +1,5 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,12 +20,20 @@ class PostDetailViewModel @ViewModelInject constructor(val firebaseRepository: F
     val postDetailState: LiveData<PostDetailState>
         get() = _postDetailState
 
+    var user: User? = null
+
     fun setIntention(event: PostDetailFragmentEvent) {
         when (event) {
             is PostDetailFragmentEvent.SetPost -> {
                 setPost(event.post, event.post.userCreatorId)
             }
             is PostDetailFragmentEvent.AddLike -> {
+            }
+
+            is PostDetailFragmentEvent.GoToProfileFragment -> {
+                user?.run {
+                    _postDetailState.value = PostDetailState.GoToProfileFragment(this)
+                } ?: kotlin.run { _postDetailState.value = PostDetailState.Idle }
             }
 
             is PostDetailFragmentEvent.GoBackToPreviousFragment -> {
@@ -37,10 +44,11 @@ class PostDetailViewModel @ViewModelInject constructor(val firebaseRepository: F
 
     private fun setPost(post: Post, userUID: String) {
         viewModelScope.launch {
-            val user = getUserProfile(userUID)
+            val userProfile = getUserProfile(userUID)
 
-            user?.also { tempUser ->
-                _postDetailState.value = PostDetailState.SetPostDetails(post, tempUser)
+            userProfile?.also { tempUserProfile ->
+                user = tempUserProfile
+                _postDetailState.value = PostDetailState.SetPostDetails(post, tempUserProfile)
             } ?: kotlin.run {
                 _postDetailState.value = PostDetailState.BackToPreviousFragment
             }

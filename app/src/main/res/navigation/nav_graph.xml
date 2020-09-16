@@ -85,9 +85,6 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
-        <action
-            android:id="@+id/action_profileDetailFragment_to_postAddFragment"
-            app:destination="@id/postAddFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -127,7 +124,11 @@
             app:destination="@id/feedFragment" />
         <action
             android:id="@+id/action_postAddFragment_to_profileDetailFragment"
-            app:destination="@id/profileDetailFragment" />
+            app:destination="@id/profileDetailFragment"
+            app:enterAnim="@anim/from_left"
+            app:exitAnim="@anim/to_right"
+            app:popEnterAnim="@anim/from_right"
+            app:popExitAnim="@anim/to_left" />
     </fragment>
     <fragment
         android:id="@+id/postDetailFragment"
@@ -140,7 +141,11 @@
             app:nullable="true" />
         <action
             android:id="@+id/action_postDetailFragment_to_profileDetailFragment"
-            app:destination="@id/profileDetailFragment" />
+            app:destination="@id/profileDetailFragment"
+            app:enterAnim="@anim/to_right"
+            app:exitAnim="@anim/from_left"
+            app:popEnterAnim="@anim/to_left"
+            app:popExitAnim="@anim/from_right" />
         <action
             android:id="@+id/action_postDetailFragment_to_feedFragment"
             app:destination="@id/feedFragment" />

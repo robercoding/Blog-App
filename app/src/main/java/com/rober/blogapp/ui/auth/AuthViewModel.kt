@@ -10,7 +10,7 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.ui.auth.login.LoginFragmentEvent
-import com.rober.blogapp.ui.auth.register.RegisterFragment.RegisterFragmentEvent
+import com.rober.blogapp.ui.auth.register.RegisterFragmentEvent
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 

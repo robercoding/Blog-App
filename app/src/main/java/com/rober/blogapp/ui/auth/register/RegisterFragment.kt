@@ -6,8 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -18,6 +20,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.auth.AuthViewModel
 import com.rober.blogapp.ui.auth.AuthState
+import com.rober.blogapp.util.ColorUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_register.*
 import kotlinx.android.synthetic.main.fragment_register.progress_bar
@@ -31,9 +34,9 @@ class RegisterFragment : Fragment() {
     private var email = ""
     private var password = ""
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
     override fun onCreateView(
@@ -104,7 +107,6 @@ class RegisterFragment : Fragment() {
         }
     }
 
-
     private fun validateFields(): Boolean {
         username = register_input_text_username.text.toString()
         email = register_input_text_email.text.toString()
@@ -138,6 +140,7 @@ class RegisterFragment : Fragment() {
     ) {
         if (usernameError.isNotEmpty()) {
             register_input_layout_username.helperText = usernameError
+
         }
 
         if (emailError.isNotEmpty()) {
@@ -152,13 +155,16 @@ class RegisterFragment : Fragment() {
         if (passwordRepeatError.isNotEmpty()) {
             register_input_layout_password.helperText = passwordRepeatError
             register_input_layout_password_repeat.helperText = passwordRepeatError
-//                register_input_layout_password_repeat.helperTextCurrentTextColor = colorRed
         }
     }
 
 
     private fun cleanErrorFields() {
         register_input_layout_username.helperText = ""
+//        register_input_layout_username.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.text_input_box_stroke)
+//        register_input_layout_email.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.text_input_box_stroke)
+//        register_input_layout_password.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.text_input_box_stroke)
+//        register_input_layout_password_repeat.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.text_input_box_stroke)
         register_input_layout_email.helperText = ""
         register_input_layout_password.helperText = ""
         register_input_layout_password_repeat.helperText = ""
@@ -216,18 +222,18 @@ class RegisterFragment : Fragment() {
             }
         }
     }
+}
 
-    sealed class RegisterFragmentEvent {
-        data class SignUp(val username: String, val email: String, val password: String) : RegisterFragmentEvent()
-        data class LogIn(val email: String, val password: String) : RegisterFragmentEvent()
-        data class SetErrorFields(
-            var isUsernameLengthOk: Boolean,
-            var isEmailOk: Boolean,
-            var isPasswordLengthOk: Boolean,
-            var isPasswordRepeatOk: Boolean
-        ) :
-            RegisterFragmentEvent()
+sealed class RegisterFragmentEvent {
+    data class SignUp(val username: String, val email: String, val password: String) : RegisterFragmentEvent()
+    data class LogIn(val email: String, val password: String) : RegisterFragmentEvent()
+    data class SetErrorFields(
+        var isUsernameLengthOk: Boolean,
+        var isEmailOk: Boolean,
+        var isPasswordLengthOk: Boolean,
+        var isPasswordRepeatOk: Boolean
+    ) :
+        RegisterFragmentEvent()
 
-        object CheckFields : RegisterFragmentEvent()
-    }
+    object CheckFields : RegisterFragmentEvent()
 }

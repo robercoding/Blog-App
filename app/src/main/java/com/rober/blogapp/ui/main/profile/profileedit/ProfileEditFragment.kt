@@ -152,7 +152,7 @@ class ProfileEditFragment : Fragment() {
         val backgroundImage: Any = if (user.backgroundImageUrl.isEmpty())
             R.drawable.blue_screen
         else
-            user.profileImageUrl
+            user.backgroundImageUrl
 
         Glide.with(requireView())
             .load(backgroundImage)

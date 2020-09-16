@@ -2,11 +2,11 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -38,21 +38,21 @@ class PostDetailFragment : Fragment() {
 
         val post = arguments?.getParcelable<Post>("post")
 
-        if(post == null){
+        if (post == null) {
             viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
-        }else{
+        } else {
             viewModel.setIntention(PostDetailFragmentEvent.SetPost(post))
         }
     }
 
-    private fun setupObservers(){
-        viewModel.postDetailState.observe(viewLifecycleOwner, Observer {postDetailState ->
+    private fun setupObservers() {
+        viewModel.postDetailState.observe(viewLifecycleOwner, Observer { postDetailState ->
             render(postDetailState)
         })
     }
 
-    private fun render(postDetailState: PostDetailState){
-        when(postDetailState){
+    private fun render(postDetailState: PostDetailState) {
+        when (postDetailState) {
             is PostDetailState.SetPostDetails -> {
                 setPostDetails(postDetailState.post)
                 setUserDetails(postDetailState.user)
@@ -60,28 +60,26 @@ class PostDetailFragment : Fragment() {
             is PostDetailState.BackToPreviousFragment -> {
                 moveToFeedFragment()
             }
+            is PostDetailState.GoToProfileFragment -> {
+                goToProfileFragment(postDetailState.user)
+            }
+
+            is PostDetailState.Idle -> {
+                //Nothing
+            }
         }
     }
 
-    private fun setupListeners(){
-        post_detail_toolbar.setNavigationOnClickListener {
-            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
-        }
-        post_detail_text.movementMethod = ScrollingMovementMethod()
-    }
-
-    private fun setPostDetails(post: Post){
-        //post_detail_image_profile.background = post.
+    private fun setPostDetails(post: Post) {
         post_detail_heart_number.text = "${post.likes}"
         post_detail_text.text = post.text
         post_detail_title.text = post.title
-//        post_detail_username.text = post.userCreatorId
     }
 
-    private fun setUserDetails(user: User){
+    private fun setUserDetails(user: User) {
         post_detail_username.text = "@${user.username}"
 
-        val imageProfile: Any = if(user.profileImageUrl.isEmpty())
+        val imageProfile: Any = if (user.profileImageUrl.isEmpty())
             R.drawable.user
         else
             user.profileImageUrl
@@ -91,9 +89,31 @@ class PostDetailFragment : Fragment() {
             .into(post_detail_image_profile)
     }
 
-    private fun moveToFeedFragment(){
+    private fun moveToFeedFragment() {
         val navController = findNavController()
         navController.popBackStack()
+    }
+
+    private fun goToProfileFragment(user: User){
+        val navController = findNavController()
+        val bundle = bundleOf("user" to user)
+        navController.navigate(R.id.profileDetailFragment, bundle)
+    }
+
+    private fun setupListeners() {
+        post_detail_toolbar.setNavigationOnClickListener {
+            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
+        }
+        post_detail_text.movementMethod = ScrollingMovementMethod()
+
+        post_detail_username.setOnClickListener {
+            viewModel.setIntention(PostDetailFragmentEvent.GoToProfileFragment)
+        }
+
+        post_detail_image_profile.setOnClickListener {
+            viewModel.setIntention(PostDetailFragmentEvent.GoToProfileFragment)
+
+        }
     }
 }
 
@@ -102,5 +122,6 @@ sealed class PostDetailFragmentEvent {
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 
+    object GoToProfileFragment: PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()
 }

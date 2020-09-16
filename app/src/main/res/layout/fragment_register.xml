@@ -1,122 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/background"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:fillViewport="true">
 
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/layout_bg_login_register"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/register_input_layout_username"
-            style="@style/AuthTextInputLayout"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:helperTextEnabled="true"
-            app:helperTextTextColor="@color/red"
-            android:paddingBottom="10dp">
+            android:layout_margin="10dp"
+            android:background="@drawable/layout_bg_login_register"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/register_input_text_username"
-                style="@style/AuthTextInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:maxLines="1"
-                android:maxLength="15"
-                android:layout_marginBottom="5dp"
-                android:hint="@string/username" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/register_input_layout_email"
-            style="@style/AuthTextInputLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:paddingBottom="10dp"
-            app:helperTextEnabled="true"
-            app:helperTextTextColor="@color/red">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/register_input_text_email"
-                style="@style/AuthTextInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:hint="@string/email"
-                android:maxLines="1"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/register_input_layout_password"
-            style="@style/AuthTextInputLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp"
-            app:helperTextEnabled="true"
-            app:helperTextTextColor="@color/red"
-            android:paddingBottom="10dp"
-            >
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/register_input_text_password"
-                style="@style/AuthTextInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:layout_marginBottom="5dp"
-                android:maxLines="1"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/register_input_layout_password_repeat"
-            style="@style/AuthTextInputLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
-            android:paddingBottom="10dp"
-            app:helperTextEnabled="true"
-            app:helperTextTextColor="@color/red">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/register_input_text_password_repeat"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/register_input_layout_username"
                 style="@style/AuthTextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
+                android:paddingBottom="10dp"
+                app:helperTextEnabled="true"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/register_input_text_username"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:hint="@string/username"
+                    android:maxLength="15"
+                    android:maxLines="1"
+                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/register_input_layout_email"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingBottom="10dp"
+                app:helperTextEnabled="true"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/register_input_text_email"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:hint="@string/email"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/register_input_layout_password"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
                 android:layout_marginBottom="5dp"
-                android:hint="@string/password"
-                android:maxLines="1"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:paddingBottom="10dp"
+                app:helperTextEnabled="true"
+                app:helperTextTextColor="@color/red">
 
-        <Button
-            android:id="@+id/btnSignUp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/blueTwitter"
-            android:textColor="@color/white"
-            android:text="@string/sign_up" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/register_input_text_password"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="15dp"
-            android:indeterminateTint="@color/blueTwitter"
-            android:visibility="gone" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/register_input_layout_password_repeat"
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:paddingBottom="10dp"
+                app:helperTextEnabled="true"
+                app:helperTextTextColor="@color/red">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/register_input_text_password_repeat"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/btnSignUp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/blueTwitter"
+                android:text="@string/sign_up"
+                android:textColor="@color/white" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:indeterminateTint="@color/blueTwitter"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

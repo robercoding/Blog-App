@@ -1,101 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".ui.auth.login.LoginFragment">
+    android:fillViewport="true">
 
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_height="match_parent"
+        android:background="@color/background"
+        android:fitsSystemWindows="true"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="20dp">
+        tools:context=".ui.auth.login.LoginFragment">
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/AuthTextInputLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEmail"
-                style="@style/AuthTextInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/email"
-                android:text="oldrober@gmail.com" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/AuthTextInputLayout"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="5dp"
-            app:endIconMode="password_toggle"
-            app:endIconTint="@color/grayLight">
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPassword"
+            <com.google.android.material.textfield.TextInputLayout
                 style="@style/AuthTextInputLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="@string/password"
-                android:inputType="textPassword"
-                android:text="oldrober" />
+                android:layout_height="wrap_content">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/email"
+                    android:text="oldrober@gmail.com" />
 
-        <TextView
-            android:id="@+id/tvPassword"
-            android:layout_width="match_parent"
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/AuthTextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="5dp"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/grayLight">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPassword"
+                    style="@style/AuthTextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:text="oldrober" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tvPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:text="@string/forgot_password"
+                android:textColor="@color/grayLight" />
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/blueGray"
+                android:text="@string/login"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:text="@string/forgot_password"
-            android:textColor="@color/grayLight" />
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/blueTwitter"
+            android:visibility="gone" />
 
         <Button
-            android:id="@+id/btnLogin"
+            android:id="@+id/btnRegisterEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:backgroundTint="@color/blueGray"
-            android:textColor="@color/white"
-            android:text="@string/login" />
+
+            android:padding="10dp"
+            android:text="@string/sign_up_with_email"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btnRegisterGoogle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:backgroundTint="@color/blueGray"
+            android:padding="10dp"
+            android:text="@string/sign_up_with_google"
+            android:textColor="@color/white" />
+
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/blueTwitter"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/btnRegisterEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:backgroundTint="@color/blueGray"
-
-        android:padding="10dp"
-        android:text="@string/sign_up_with_email"
-        android:textColor="@color/white" />
-
-    <Button
-        android:id="@+id/btnRegisterGoogle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:backgroundTint="@color/blueGray"
-        android:padding="10dp"
-        android:text="@string/sign_up_with_google"
-        android:textColor="@color/white" />
-
-</LinearLayout>
+</ScrollView>

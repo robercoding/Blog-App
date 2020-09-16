@@ -7,8 +7,10 @@ import java.lang.Exception
 sealed class PostDetailState {
     data class SetPostDetails(val post: Post, val user: User) : PostDetailState()
 
+    data class GoToProfileFragment(val user: User): PostDetailState()
     object BackToPreviousFragment: PostDetailState()
 
     data class Error(val exception: Exception): PostDetailState()
     object Loading: PostDetailState()
+    object Idle: PostDetailState()
 }
