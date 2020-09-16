@@ -7,7 +7,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.util.RecyclerViewActionInterface
 
-class OnScrollListenerHelper(val context: Context, val recyclerViewClickInterface: RecyclerViewActionInterface) : RecyclerView.OnScrollListener() {
+class OnScrollListenerHelper(
+    val context: Context,
+    val recyclerViewClickInterface: RecyclerViewActionInterface,
+    val onMoveRecyclerListener: OnMoveRecyclerListener
+) : RecyclerView.OnScrollListener() {
 
     var hasUserReachedBottomAndDraggingBefore = false
     //private var layoutManager =linearLayoutManager
@@ -46,6 +50,7 @@ class OnScrollListenerHelper(val context: Context, val recyclerViewClickInterfac
     }
 
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        onMoveRecyclerListener.onMove()
         super.onScrollStateChanged(recyclerView, newState)
 
 //        Toast.makeText(context, "Here we are at least on scrollstatechanged", Toast.LENGTH_SHORT).show()
@@ -55,22 +60,23 @@ class OnScrollListenerHelper(val context: Context, val recyclerViewClickInterfac
         val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
 
 //        Log.i("OnScrollListener", "OnScrollStateChanged: State = $newState")
-        val hasUserReachedBottom = totalItemCount-1 == lastVisible
+        val hasUserReachedBottom = totalItemCount - 1 == lastVisible
         val isUserDragging = newState == RecyclerView.SCROLL_STATE_DRAGGING
 
 
         Log.i("OnScrollListener", "Has Reached it before?? ${hasUserReachedBottomAndDraggingBefore}")
         Log.i("OnScrollListener", "is user dragging?? ${isUserDragging}")
         Log.i("OnScrollListener", "Has user reached bottom?? ${hasUserReachedBottom}")
-        if(hasUserReachedBottom && isUserDragging){
-            if(!hasUserReachedBottomAndDraggingBefore){
+        if (hasUserReachedBottom && isUserDragging) {
+            if (!hasUserReachedBottomAndDraggingBefore) {
 //                Toast.makeText(context, "Request", Toast.LENGTH_SHORT).show()
                 //Log.i("OnScrollListener", "Request")
                 hasUserReachedBottomAndDraggingBefore = true
 
-                val lastVisibleItemPosition = (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
+                val lastVisibleItemPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
                 recyclerViewClickInterface.requestMorePosts(lastVisibleItemPosition)
-            }else{
+            } else {
                 Log.i("OnScrollListener", "Can't request more data")
 //                Toast.makeText(context, "Can't request more data", Toast.LENGTH_SHORT).show()
 

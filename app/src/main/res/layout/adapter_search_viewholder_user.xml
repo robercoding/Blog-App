@@ -31,7 +31,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
-            android:background="@drawable/outline_account_circle_black_24dp"/>
+            android:background="@drawable/user_profile"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/adapter_search_username"

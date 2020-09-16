@@ -9,15 +9,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Toast
-import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,12 +23,9 @@ import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
-import com.rober.blogapp.util.AsyncResponse
-import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
@@ -280,7 +273,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
     private fun setImages(user: User){
         val profileImageToLoad : Any = if(user.profileImageUrl.isEmpty())
-            R.drawable.outline_account_circle_black_24dp
+            R.drawable.user_profile_png
         else
             user.profileImageUrl
 

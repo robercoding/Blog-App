@@ -22,15 +22,18 @@
         app:navGraph="@navigation/nav_graph" />
 
     <View
+        android:layout_height="1dp"
+        android:id="@+id/view_top_border_bottom_navigation_view"
         style="@style/Divider"
+        android:background="@drawable/bottom_navigation_view_top_line_color"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:textAlignment="center"
         app:backgroundTint="@color/background"
         app:itemIconTint="@color/bottom_navigation_color"

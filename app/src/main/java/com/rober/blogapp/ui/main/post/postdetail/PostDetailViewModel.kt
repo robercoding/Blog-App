@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,25 +36,30 @@ class PostDetailViewModel @ViewModelInject constructor(val firebaseRepository: F
     }
 
     private fun setPost(post: Post, userUID: String) {
-        val user = getUserProfile(userUID)
+        viewModelScope.launch {
+            val user = getUserProfile(userUID)
 
-        user?.also { tempUser ->
-            _postDetailState.value = PostDetailState.SetPostDetails(post, tempUser)
-        } ?: kotlin.run {
-            _postDetailState.value = PostDetailState.BackToPreviousFragment
+            user?.also { tempUser ->
+                _postDetailState.value = PostDetailState.SetPostDetails(post, tempUser)
+            } ?: kotlin.run {
+                _postDetailState.value = PostDetailState.BackToPreviousFragment
+            }
         }
     }
 
-    private fun getUserProfile(userUID: String): User? {
+    private suspend fun getUserProfile(userUID: String): User? {
         var tempUser: User? = null
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             firebaseRepository.getUserProfile(userUID)
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> tempUser = resultData.data!!
+
                     }
                 }
         }
+        job.join()
         return tempUser
+
     }
 }

@@ -2,6 +2,7 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -81,7 +82,7 @@ class PostDetailFragment : Fragment() {
         post_detail_username.text = "@${user.username}"
 
         val imageProfile: Any = if(user.profileImageUrl.isEmpty())
-            R.drawable.outline_account_circle_black_24dp
+            R.drawable.user
         else
             user.profileImageUrl
 

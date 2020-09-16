@@ -32,7 +32,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/outline_account_circle_black_24dp"
+        android:background="@drawable/user_profile"
         />
 
     <com.google.android.material.textview.MaterialTextView
@@ -67,7 +67,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="10dp"
-        android:maxHeight="200dp"
+        android:maxHeight="300dp"
         android:padding="10dp"
         android:textColor="@color/white"
         android:scrollbars="vertical"

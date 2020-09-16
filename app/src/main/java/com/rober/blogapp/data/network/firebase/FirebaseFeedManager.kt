@@ -235,9 +235,8 @@ constructor
 
             savedFeedListPosts = savedFeedListPosts.sortedByDescending { post -> post.created_at }.toMutableList()
 
-            dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
-
             if (newListPosts.size > 0) {
+                dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
                 newListPosts.sortedByDescending { post -> post.created_at }
 //                for (post in newListPosts)
 //                    savedFeedListPosts.add(0, post)

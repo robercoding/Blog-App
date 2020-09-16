@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:menu="@menu/toolbar_profile_edit"
-                app:navigationIcon="@drawable/ic_arrow_left">
+                app:navigationIcon="@drawable/ic_arrow_back_black_24dp">
 
                 <TextView
                     android:layout_width="150dp"
@@ -103,7 +103,7 @@
                 android:layout_marginStart="20dp"
                 android:elevation="1dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/outline_account_circle_black_24dp"
+                android:src="@drawable/user_profile"
                 android:translationY="-30dp"
                 app:civ_border_color="@color/background"
                 app:civ_border_width="4dp"

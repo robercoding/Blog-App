@@ -222,7 +222,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
             }
 
             try {
-                user = db.collection("users").document(documentUID)
+                tempUser = db.collection("users").document(documentUID)
                     .get()
                     .await()
                     .toObject(User::class.java)

@@ -140,32 +140,24 @@ class ProfileEditFragment : Fragment() {
         profile_text_edit_biography.setText(user.biography)
         profile_text_edit_location.setText(user.location)
 
-        if(user.profileImageUrl.isEmpty()){
-            Log.i(TAG, "Load default profile")
-            Glide.with(requireView())
-                .load(R.drawable.outline_account_circle_black_24dp)
-                .into(profile_edit_image_profile)
-        }else{
-            Log.i(TAG, "Load user profile")
-            Glide.with(requireView())
-                .load(user.profileImageUrl)
-                .into(profile_edit_image_profile)
-        }
+        val profileImage: Any = if (user.profileImageUrl.isEmpty())
+            R.drawable.user_profile_png
+        else
+            user.profileImageUrl
 
-        if(user.backgroundImageUrl.isEmpty()){
-            Log.i(TAG, "Load default background")
-            Glide.with(requireView())
-                .load(R.drawable.blue_screen)
-                .fitCenter()
-                .into(profile_edit_image_background)
-        }else{
-            Log.i(TAG, "Load user background")
-            Glide.with(requireView())
-                .load(user.backgroundImageUrl)
-                .fitCenter()
-                .into(profile_edit_image_background)
-        }
+        Glide.with(requireView())
+            .load(profileImage)
+            .into(profile_edit_image_profile)
 
+        val backgroundImage: Any = if (user.backgroundImageUrl.isEmpty())
+            R.drawable.blue_screen
+        else
+            user.profileImageUrl
+
+        Glide.with(requireView())
+            .load(backgroundImage)
+            .fitCenter()
+            .into(profile_edit_image_background)
     }
 
     private fun loadingUserView(display: Boolean) {

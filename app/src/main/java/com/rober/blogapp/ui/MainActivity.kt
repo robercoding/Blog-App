@@ -41,7 +41,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun displayBottomNavigation(display: Boolean){
-        if(display) bottom_navigation.visibility = View.VISIBLE else bottom_navigation.visibility = View.GONE
+        if(display){
+            bottom_navigation.visibility = View.VISIBLE
+            view_top_border_bottom_navigation_view.visibility = View.VISIBLE
+        } else{
+            bottom_navigation.visibility = View.GONE
+            view_top_border_bottom_navigation_view.visibility = View.GONE
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

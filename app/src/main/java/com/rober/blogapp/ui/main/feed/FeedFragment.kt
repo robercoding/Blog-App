@@ -6,10 +6,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -24,7 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(), RecyclerViewActionInterface {
+class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
 
 
     private val TAG: String = "FeedFragment"
@@ -34,6 +36,9 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
 
     private val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
+
+    private lateinit var animation: Animation
+    private var didNotifyNewPostsFadeOut = false
 
     private var onScrollListenerHelper: OnScrollListenerHelper? = null
 
@@ -55,6 +60,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         subscribeObservers()
+        animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out)
         viewModel.setIntention(FeedFragmentEvent.GetUserPicture)
 
         postAdapter = PostAdapter(requireView(), resource, this)
@@ -91,14 +97,12 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             is FeedState.LoadNewPosts -> {
                 stopSwipeRefresh()
                 displayTextNotifyMorePosts(true)
-                val animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
+                didNotifyNewPostsFadeOut = false
+                animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
                 feed_text_notify_new_posts.startAnimation(animation)
 
                 postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
-//                val scrollLinearLayoutManager = LinearLayoutManager(context)
-//                scrollLinearLayoutManager.orientation = LinearLayoutManager.VERTICAL
-//                scrollLinearLayoutManager.scrollToPositionWithOffset(feedState.scrollToPosition, 30)
 
                 recycler_feed.apply {
                     adapter = postAdapter
@@ -172,34 +176,38 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
             }
         }
     }
-    private fun setUserDetails(user: User){
+
+    private fun setUserDetails(user: User) {
         Log.i(TAG, "Setting user")
 
         Glide.with(requireView())
             .load(user.profileImageUrl)
             .into(feed_toolbar_image_profile)
     }
+
     private fun displayProgressBarInitialPosts(isDisplayed: Boolean) {
         feed_progress_bar_init.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
 
-    private fun displayTextWelcomeMessage(isDisplayed: Boolean){
+    private fun displayTextWelcomeMessage(isDisplayed: Boolean) {
         feed_box_welcome.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
+
     private fun displayProgressBarMorePosts(isDisplayed: Boolean) {
         feed_progress_bar_more_posts.visibility = if (isDisplayed) View.VISIBLE else View.GONE
     }
 
-    private fun displayTextNotifyMorePosts(isDisplayed: Boolean){
-        feed_text_notify_new_posts.visibility = if(isDisplayed) View.VISIBLE else View.GONE
+    private fun displayTextNotifyMorePosts(isDisplayed: Boolean) {
+        feed_text_notify_new_posts.visibility = if (isDisplayed) View.VISIBLE else View.GONE
 
     }
+
     private fun stopSwipeRefresh() {
         feed_swipe_refresh_layout.isRefreshing = false
     }
 
     private fun setAdapterToRecyclerFeed(linearLayoutManager: LinearLayoutManager) {
-        onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this)
+        onScrollListenerHelper = OnScrollListenerHelper(requireContext(), this, this)
 //        onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = false
 
         recycler_feed.apply {
@@ -288,10 +296,18 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface {
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
         viewModel.setIntention(FeedFragmentEvent.RetrieveOldFeedPosts(actualRecyclerViewPosition))
     }
+
+    override fun onMove() {
+        if (feed_text_notify_new_posts.isVisible) {
+            animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out)
+            feed_text_notify_new_posts.startAnimation(animation)
+            displayTextNotifyMorePosts(false)
+        }
+    }
 }
 
 sealed class FeedFragmentEvent {
-    object GetUserPicture: FeedFragmentEvent()
+    object GetUserPicture : FeedFragmentEvent()
 
     object RetrieveInitPosts : FeedFragmentEvent()
     object RetrieveNewFeedPosts : FeedFragmentEvent()
