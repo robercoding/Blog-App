@@ -50,6 +50,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
 
+
+
         setupListeners()
         subscribeObservers()
         getUserArgumentAndSetIntention()

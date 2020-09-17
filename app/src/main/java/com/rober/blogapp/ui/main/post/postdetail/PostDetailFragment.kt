@@ -6,16 +6,22 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PostDetailFragment : Fragment() {
@@ -30,10 +36,16 @@ class PostDetailFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_post_detail, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupListeners()
+        post_detail_toolbar.navigationIcon?.setTint(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        AndroidThreeTen.init(requireContext())
 
-        setupListeners()
         setupObservers()
 
         val post = arguments?.getParcelable<Post>("post")
@@ -74,6 +86,21 @@ class PostDetailFragment : Fragment() {
         post_detail_heart_number.text = "${post.likes}"
         post_detail_text.text = post.text
         post_detail_title.text = post.title
+//        val dateSecondWithZoneId = Instant.ofEpochSecond(post.created_at).toEpochMilli()
+
+//        Log.i("ZoneId", "${z.getAvailableZoneIds()}")
+
+        val instantDate = Instant.ofEpochSecond(post.created_at)
+        val zdt = ZoneId.systemDefault()
+        val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
+
+        val fmtDate = org.threeten.bp.format.DateTimeFormatter.ofPattern("dd/MM/yy")
+        val fmtTime = org.threeten.bp.format.DateTimeFormatter.ofPattern("HH:mm")
+
+        val date = fmtDate.format(instantDateZoneId)
+        val time = fmtTime.format(instantDateZoneId)
+
+        post_detail_date.text = "${date}   |   ${time}"
     }
 
     private fun setUserDetails(user: User) {
