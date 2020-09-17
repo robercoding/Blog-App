@@ -1,14 +1,15 @@
 package com.rober.blogapp.ui.main.profile.profiledetail
 
-import android.graphics.Bitmap
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -22,20 +23,29 @@ import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
+import com.rober.blogapp.ui.main.profile.profiledetail.utils.IOnTouchListener
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
+import com.rober.blogapp.ui.main.profile.profiledetail.utils.OnTouchListener
 import com.rober.blogapp.util.RecyclerViewActionInterface
+import com.stfalcon.imageviewer.StfalconImageViewer
+import com.stfalcon.imageviewer.listeners.OnDismissListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(), RecyclerViewActionInterface {
+class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListener {
 
     private val TAG = "ProfileDetailFragment"
 
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
     private val viewHolder = R.layout.adapter_feed_viewholder_posts
+
+    private var isProfileImageVisualizing = false
+    private var isBackgroundImageVisualizing = false
+
+    private lateinit var onTouchListener: OnTouchListener
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,8 +59,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         super.onActivityCreated(savedInstanceState)
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
+        onTouchListener = OnTouchListener(requireView(), this)
 
-
+        profile_detail_swipe_refresh_layout.setOnTouchListener(onTouchListener)
 
         setupListeners()
         subscribeObservers()
@@ -119,6 +130,51 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
             is ProfileDetailState.LoadingUser -> {
                 showProfileDetailView(false)
+            }
+
+            is ProfileDetailState.LoadBackgroundImage -> {
+                val imageProfile = profileDetailState.backgroundImageUrl
+
+                val images = mutableListOf<Any>()
+                if (imageProfile.isEmpty()) {
+                    images.add(R.drawable.blue_screen)
+                } else {
+                    images.add(imageProfile)
+                }
+
+                StfalconImageViewer.Builder<Any>(requireContext(), images) { view, image ->
+                    Glide.with(requireView())
+                        .load(image)
+                        .into(view)
+                }.allowZooming(true)
+                    .withHiddenStatusBar(false)
+                    .withTransitionFrom(profile_detail_image_background_clear)
+                    .withDismissListener { isBackgroundImageVisualizing = false }
+                    .show()
+            }
+
+            is ProfileDetailState.LoadProfileImage -> {
+                Toast.makeText(requireContext(), "Load image profile", Toast.LENGTH_SHORT).show()
+                val imageProfile = profileDetailState.profileImageUrl
+
+                val images = mutableListOf<Any>()
+                if (imageProfile.isEmpty()) {
+                    images.add(R.drawable.user_profile_png)
+                } else {
+                    images.add(imageProfile)
+                }
+
+                StfalconImageViewer.Builder<Any>(requireContext(), images) { view, image ->
+                    Glide.with(requireView())
+                        .load(image)
+                        .into(view)
+                }.allowZooming(true)
+                    .withDismissListener { isProfileImageVisualizing = false }
+                    .withHiddenStatusBar(false)
+                    .withTransitionFrom(uid_image)
+                    .show()
+
+//                isProfileImageVisualizing = false
             }
 
             is ProfileDetailState.Followed -> {
@@ -222,7 +278,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_button_follow.visibility = View.GONE
         profile_detail_button_edit.visibility = View.VISIBLE
 
-        val colorPalette = if(user.backgroundImageUrl.isEmpty())
+        val colorPalette = if (user.backgroundImageUrl.isEmpty())
             R.drawable.blue_screen
         else
             user.backgroundImageUrl
@@ -251,7 +307,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_button_follow.visibility = View.VISIBLE
         profile_detail_button_edit.visibility = View.GONE
 
-        val colorPalette = if(user.backgroundImageUrl.isEmpty())
+        val colorPalette = if (user.backgroundImageUrl.isEmpty())
             R.drawable.blue_screen
         else
             user.backgroundImageUrl
@@ -271,13 +327,13 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         setImages(user)
     }
 
-    private fun setImages(user: User){
-        val profileImageToLoad : Any = if(user.profileImageUrl.isEmpty())
+    private fun setImages(user: User) {
+        val profileImageToLoad: Any = if (user.profileImageUrl.isEmpty())
             R.drawable.user_profile_png
         else
             user.profileImageUrl
 
-        val backgroundImageToLoad = if(user.backgroundImageUrl.isEmpty())
+        val backgroundImageToLoad = if (user.backgroundImageUrl.isEmpty())
             R.drawable.blue_screen
         else
             user.backgroundImageUrl
@@ -339,7 +395,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             profile_detail_button_follow.apply {
                 isSelected = true
                 setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.blueGray))
-                text = "Following"
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
                 text = "Following"
@@ -385,6 +440,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         profile_detail_arrow_back.setOnClickListener {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.PopBackStack)
         }
+
+        profile_detail_image_background_clear.setOnClickListener {
+
+        }
     }
 
     private fun stopSwipeRefresh() {
@@ -408,7 +467,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     private fun backToPreviousFragment() {
 //        val navController = activity?.bottom_navigation ?: return
         val navController = findNavController()
-            navController.popBackStack()
+        navController.popBackStack()
     }
 
     private fun navigateToProfileEdit(user: User) {
@@ -417,6 +476,65 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         navController.navigate(R.id.action_profileDetailFragment_to_profileEditFragment, userBundle)
     }
 
+    override fun setRippleEffectIfTouch(view: View, touchCoordinateX: Float, touchCoordinateY: Float) {
+        val viewCoordinatesX = intArrayOf(view.left, view.right)
+        val viewCoordinatesY = intArrayOf(view.top, view.bottom)
+
+        if (touchCoordinateX > viewCoordinatesX[0] && touchCoordinateX < viewCoordinatesX[1] && touchCoordinateY > viewCoordinatesY[0] && touchCoordinateY < viewCoordinatesY[1]) {
+            view.isPressed = true
+        }
+    }
+
+//    private fun setDarkerModeOnImage(view: ImageView, touchCoordinateX: Float, touchCoordinateY: Float) {
+//        val viewCoordinatesX = intArrayOf(view.left, view.right)
+//        val viewCoordinatesY = intArrayOf(view.top, view.bottom)
+//
+//        if (touchCoordinateX > viewCoordinatesX[0] && touchCoordinateX < viewCoordinatesX[1] && touchCoordinateY > viewCoordinatesY[0] && touchCoordinateY < viewCoordinatesY[1]) {
+//        }
+//    }
+
+    override fun isTouchActionUpOnViewPlace(view: View, touchCoordinateX: Float, touchCoordinateY: Float): Boolean {
+        val viewCoordinatesX = intArrayOf(view.left, view.right)
+        val viewCoordinatesY = intArrayOf(view.top, view.bottom)
+
+        return touchCoordinateX > viewCoordinatesX[0] && touchCoordinateX < viewCoordinatesX[1] && touchCoordinateY > viewCoordinatesY[0] && touchCoordinateY < viewCoordinatesY[1]
+    }
+
+    override fun setTouchIntention(profileDetailFragmentEvent: ProfileDetailFragmentEvent) {
+        when(profileDetailFragmentEvent){
+            is ProfileDetailFragmentEvent.PopBackStack -> {
+                profileDetailViewModel.setIntention(profileDetailFragmentEvent)
+            }
+
+            is ProfileDetailFragmentEvent.NavigateToProfileEdit-> {
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToProfileEdit)
+            }
+
+            is ProfileDetailFragmentEvent.LoadProfileImage ->{
+                if(!isProfileImageVisualizing && !isProfileImageVisualizing){
+                    isProfileImageVisualizing = true
+                    profileDetailViewModel.setIntention(profileDetailFragmentEvent)
+                }
+            }
+
+            is ProfileDetailFragmentEvent.LoadBackgroundImage -> {
+                if(!isBackgroundImageVisualizing && !isProfileImageVisualizing){
+                    isBackgroundImageVisualizing = true
+                    profileDetailViewModel.setIntention(profileDetailFragmentEvent)
+                }
+            }
+
+            is ProfileDetailFragmentEvent.Follow -> {
+                setFollowButtonViewForOtherUser(false)
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+            }
+
+            is ProfileDetailFragmentEvent.Unfollow -> {
+                setFollowButtonViewForOtherUser(false)
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
+            }
+        }
+    }
 
     override fun clickListenerOnPost(positionAdapter: Int) {
         //TODO
@@ -430,8 +548,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
         //
     }
-
-
 }
 
 sealed class ProfileDetailFragmentEvent {
@@ -439,10 +555,13 @@ sealed class ProfileDetailFragmentEvent {
     object LoadUserPosts : ProfileDetailFragmentEvent()
     object LoadNewerPosts : ProfileDetailFragmentEvent()
 
+    object LoadBackgroundImage : ProfileDetailFragmentEvent()
+    object LoadProfileImage : ProfileDetailFragmentEvent()
+
     object Unfollow : ProfileDetailFragmentEvent()
     object Follow : ProfileDetailFragmentEvent()
 
     object NavigateToProfileEdit : ProfileDetailFragmentEvent()
-    object PopBackStack: ProfileDetailFragmentEvent()
+    object PopBackStack : ProfileDetailFragmentEvent()
     object Idle : ProfileDetailFragmentEvent()
 }

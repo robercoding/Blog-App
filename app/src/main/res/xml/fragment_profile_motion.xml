@@ -17,8 +17,8 @@
         <Constraint
             android:id="@+id/profile_detail_swipe_refresh_layout"
             android:layout_width="0dp"
-            app:layout_constraintWidth_percent="0.75"
-            android:layout_height="140dp"
+            app:layout_constraintWidth_percent="1"
+            android:layout_height="300dp"
             android:elevation="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +59,9 @@
             android:layout_marginTop="40dp"
             android:elevation="5dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
+            app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"/>
 
         <Constraint
             android:id="@+id/profile_detail_button_edit"

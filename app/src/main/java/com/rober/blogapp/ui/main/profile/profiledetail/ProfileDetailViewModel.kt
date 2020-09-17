@@ -74,6 +74,22 @@ class ProfileDetailViewModel
                 }
             }
 
+            is ProfileDetailFragmentEvent.LoadBackgroundImage -> {
+                user?.run {
+                    _profileDetailState.value = ProfileDetailState.LoadBackgroundImage(backgroundImageUrl)
+                }?: kotlin.run {
+                    _profileDetailState.value = ProfileDetailState.Idle
+                }
+            }
+
+            is ProfileDetailFragmentEvent.LoadProfileImage -> {
+                user?.run {
+                    _profileDetailState.value = ProfileDetailState.LoadProfileImage(profileImageUrl)
+                }?: kotlin.run {
+                    _profileDetailState.value = ProfileDetailState.Idle
+                }
+            }
+
             is ProfileDetailFragmentEvent.Follow -> {
                 user?.let {
                     followOtherUser()

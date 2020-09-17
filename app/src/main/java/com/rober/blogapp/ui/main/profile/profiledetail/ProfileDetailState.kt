@@ -12,6 +12,9 @@ sealed class ProfileDetailState {
 
     data class SetUserPosts(val listUserPosts: List<Post>,val user: User) : ProfileDetailState()
 
+    data class LoadBackgroundImage(val backgroundImageUrl: String): ProfileDetailState()
+    data class LoadProfileImage(val profileImageUrl: String): ProfileDetailState()
+
     data class Unfollowed(val user: User) : ProfileDetailState()
     data class Followed(val user: User) : ProfileDetailState()
 

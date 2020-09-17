@@ -5,9 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.profile.profiledetail.ProfileFragment"
-    android:id="@+id/profile_detail_layout_background"
-
-    >
+    android:id="@+id/profile_detail_layout_background">
 
     <ProgressBar
         android:id="@+id/profile_detail_background_progress_bar"
@@ -31,7 +29,9 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintVertical_bias="0.0"
+        android:clickable="false"
+        android:focusable="false">
 
         <ImageView
             android:id="@+id/profile_detail_image_background_blurred"
@@ -116,7 +116,8 @@
             android:scaleType="centerCrop"
             android:background="@drawable/user_profile"
             app:civ_border_color="@color/blueTwitter"
-            app:civ_border_width="3dp" />
+            app:civ_border_width="3dp"
+            android:clickable="true"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/profile_detail_button_edit"
@@ -221,14 +222,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:outlineSpotShadowColor="@color/blueTwitter"
-            android:backgroundTint="@color/background">
+            android:backgroundTint="@color/background"
+            android:clickable="false"
+            android:focusable="false">
             <Space
                 android:id="@+id/profile_detail_space_swipe_refresh"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                android:clickable="false"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
@@ -241,7 +245,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             app:tabSelectedTextColor="@color/white"
-            app:tabTextColor="@color/grayLight">
+            app:tabTextColor="@color/grayLight"
+            app:tabIndicatorColor="@color/blueLight">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
