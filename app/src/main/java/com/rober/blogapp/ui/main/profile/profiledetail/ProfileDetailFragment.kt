@@ -78,7 +78,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
         Log.i(TAG, "State: $profileDetailState")
         when (profileDetailState) {
             is ProfileDetailState.SetCurrentUserProfile -> {
-                Log.i("ProfileDetailFreeze", "SetCurrentUserProfile")
                 showProfileDetailView(true)
 
                 val user = profileDetailState.user
@@ -107,7 +106,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
             is ProfileDetailState.SetUserPosts -> {
                 val listUserPosts = profileDetailState.listUserPosts
                 setUserPosts(listUserPosts.toMutableList(), profileDetailState.user)
-                Log.i("Refresh", "lets stop display etc")
                 displayProgressBar(false)
                 stopSwipeRefresh()
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Idle)
@@ -374,8 +372,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
 
         profile_detail_button_edit.apply {
             setOnClickListener {
-                Toast.makeText(requireContext(), "Clicked", Toast.LENGTH_SHORT).show()
-
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToProfileEdit)
             }
         }
@@ -414,7 +410,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface {
     }
 
     private fun navigateToProfileEdit(user: User) {
-        Toast.makeText(requireContext(), "We are going to profile edit", Toast.LENGTH_SHORT).show()
         val navController = findNavController()
         val userBundle = bundleOf("user" to user)
         navController.navigate(R.id.action_profileDetailFragment_to_profileEditFragment, userBundle)

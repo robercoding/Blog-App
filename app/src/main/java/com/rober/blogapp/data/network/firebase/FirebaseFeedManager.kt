@@ -69,10 +69,16 @@ constructor
         if (!savedFeedListPosts.isNullOrEmpty()) { //Send listPosts if there's already posts saved in cache
             emit(ResultData.Success(savedFeedListPosts))
         } else { //Get posts every 30 days
-            dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
+            //If dateNewer is not null, then set from datenewer and rest days
+            dateToRetrieveNewerPostsEpochSeconds?.also {tempDateToRetrieveNewerPostsEpochSeconds->
+                dateLessThanEpochSeconds = Instant.ofEpochSecond(tempDateToRetrieveNewerPostsEpochSeconds).epochSecond
+                dateGreaterThanEpochSeconds = Instant.ofEpochSecond(tempDateToRetrieveNewerPostsEpochSeconds).minus(restDays + 30, ChronoUnit.DAYS).epochSecond
+            }?: kotlin.run {
+                dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
+                dateLessThanEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
+                dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 30, ChronoUnit.DAYS).epochSecond
+            }
 
-            dateLessThanEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
-            dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 30, ChronoUnit.DAYS).epochSecond
 
             try {
                 //Get all user followings
@@ -223,7 +229,8 @@ constructor
 
             if (listUserPosts.isNotEmpty()) {
                 var mapSavedPostsFromUserLoggedIn = mutableListOf<Post>()
-                mapSavedPostsFromUserLoggedIn.addAll(savedFeedHashMapPosts.getValue(user.user_id))
+                if(savedFeedHashMapPosts.containsKey(user.user_id))
+                    mapSavedPostsFromUserLoggedIn.addAll(savedFeedHashMapPosts.getValue(user.user_id))
                 mapSavedPostsFromUserLoggedIn.addAll(listUserPosts)
                 mapSavedPostsFromUserLoggedIn =
                     mapSavedPostsFromUserLoggedIn.sortedByDescending { post -> post.created_at }.toMutableList()

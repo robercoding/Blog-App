@@ -177,12 +177,10 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     private fun enableSearchUserEditText(enabled: Boolean){
         if (enabled){
             search_user_text.requestFocus()
-            Log.i(TAG, "Request Focus")
             search_user_text.setText(textSearch)
             search_user_text.setSelection(textSearch.length)
         }else{
             search_user_text.setText("")
-            Log.i(TAG, "Clear focus")
             search_user_text.clearFocus()
         }
     }

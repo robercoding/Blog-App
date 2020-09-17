@@ -92,6 +92,7 @@ constructor(
                     }
                 }
 
+            user?.let { feedListUsers.add(it) }
             if(feedListPosts.size == 0){
                 _feedState.value = FeedState.LoadMessageZeroPosts
                 return@launch
@@ -103,7 +104,6 @@ constructor(
                         is ResultData.Success -> {
                             resultData.data?.let { newListUsers ->
                                 feedListUsers.addAll(newListUsers)
-                                user?.let { feedListUsers.add(it) }
                                 addEndOfTimelineToMutableListPosts()
 
                                 _feedState.value = FeedState.SetListPosts(feedListPosts, feedListUsers)
@@ -130,7 +130,6 @@ constructor(
                         }
                     }
                 }
-
             if(newListPosts.isEmpty()){
                 _feedState.value =
                     FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))

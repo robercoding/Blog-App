@@ -339,7 +339,6 @@ class ProfileEditFragment : Fragment() {
         }
 
         profile_edit_image_profile_add.setOnClickListener {
-            Toast.makeText(requireContext(), "Clicked on add", Toast.LENGTH_SHORT).show()
             profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForProfile)
         }
 

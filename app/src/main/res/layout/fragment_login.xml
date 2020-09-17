@@ -34,7 +34,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/email"
-                    android:text="oldrober@gmail.com" />
+                    android:text="robercoding@gmail.com" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -54,7 +54,7 @@
                     android:layout_height="match_parent"
                     android:hint="@string/password"
                     android:inputType="textPassword"
-                    android:text="oldrober" />
+                    android:text="robercoding" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:text="@string/forgot_password"
-                android:textColor="@color/grayLight" />
+                android:textColor="@color/grayLight"/>
 
             <Button
                 android:id="@+id/btnLogin"
@@ -103,7 +103,8 @@
             android:backgroundTint="@color/blueGray"
             android:padding="10dp"
             android:text="@string/sign_up_with_google"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </ScrollView>

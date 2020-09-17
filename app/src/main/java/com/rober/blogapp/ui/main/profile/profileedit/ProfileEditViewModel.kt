@@ -89,7 +89,6 @@ class ProfileEditViewModel @ViewModelInject constructor(
 
             is ProfileEditFragmentEvent.SaveChanges -> {
                 _profileEditState.value = ProfileEditState.SavingChanges
-                Log.i("NextTimeChangeUsername", "wtf lets save")
 
                 viewModelScope.launch {
                     val success = saveChanges(event.username, event.biography, event.location)
@@ -115,7 +114,6 @@ class ProfileEditViewModel @ViewModelInject constructor(
                         when (resultData) {
                             is ResultData.Success -> {
                                 _profileEditState.value = ProfileEditState.NotifyUsernameAvailable(resultData.data!!)
-                                Log.i("NotifyUsername", "$username available = ${resultData.data}")
                             }
                             is ResultData.Error -> _profileEditState.value = ProfileEditState.Idle
                         }

@@ -11,7 +11,7 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
+import androidx.core.view.postOnAnimationDelayed
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -38,10 +38,9 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
     lateinit var postAdapter: PostAdapter
 
     private lateinit var animation: Animation
-    private var didNotifyNewPostsFadeOut = false
+    private var isBounceAnimationVisible = false
 
     private var onScrollListenerHelper: OnScrollListenerHelper? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,7 +82,6 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
                 displayTextWelcomeMessage(false)
                 displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
-                Log.i("SetPosts", "here are ${feedState.listFeedPosts.size}")
 
                 postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
@@ -97,16 +95,29 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
             is FeedState.LoadNewPosts -> {
                 stopSwipeRefresh()
                 displayTextNotifyMorePosts(true)
-                didNotifyNewPostsFadeOut = false
-                animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
-                feed_text_notify_new_posts.startAnimation(animation)
+                displayTextWelcomeMessage(false)
 
                 postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
                 postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
 
-                recycler_feed.apply {
-                    adapter = postAdapter
+                var linearLayoutManager = LinearLayoutManager(requireContext())
+                recycler_feed.layoutManager?.run {
+                    linearLayoutManager = this as LinearLayoutManager
                 }
+
+                recycler_feed.adapter?.itemCount?.also { itemCount ->
+                    val pos = linearLayoutManager.findLastCompletelyVisibleItemPosition()
+
+                    if (pos >= itemCount - 1) {
+                        animationNotifyPostsBounceAndFadeOut()
+                    } else {
+                        animationNotifyBounce()
+                    }
+                } ?: kotlin.run {
+                    animationNotifyPostsBounceAndFadeOut()
+                }
+                setAdapterToRecyclerFeed(linearLayoutManager)
+
                 mHasPullRefresh = false
                 viewModel.setIntention(FeedFragmentEvent.Idle)
             }
@@ -150,6 +161,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
             is FeedState.LoadMessageZeroPosts -> {
                 displayProgressBarInitialPosts(false)
                 displayTextWelcomeMessage(true)
+                recycler_feed.adapter
             }
 
             is FeedState.GoToPostDetailsFragment -> {
@@ -244,9 +256,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
         feed_text_notify_new_posts.setOnClickListener {
             val animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
             feed_text_notify_new_posts.startAnimation(animation)
-//            feed_text_notify_new_posts.clearAnimation()
             recycler_feed.smoothScrollToPosition(0)
             displayTextNotifyMorePosts(false)
+//            feed_text_notify_new_posts.clearAnimation()
+
         }
     }
 
@@ -271,8 +284,24 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
         navController.navigate(R.id.action_feedFragment_to_postAddFragment)
     }
 
+    private fun animationNotifyPostsBounceAndFadeOut(){
+        displayTextNotifyMorePosts(true)
+        animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
+        feed_text_notify_new_posts.startAnimation(animation)
+        feed_text_notify_new_posts.postOnAnimationDelayed(650) {
+            animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
+            feed_text_notify_new_posts.startAnimation(animation)
+            displayTextNotifyMorePosts(false)
+        }
+    }
+
+    private fun animationNotifyBounce(){
+        isBounceAnimationVisible = true
+        animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
+        feed_text_notify_new_posts.startAnimation(animation)
+    }
+
     override fun clickListenerOnPost(positionAdapter: Int) {
-        //val post = mutableListPosts[positionAdapter]
         viewModel.setIntention(FeedFragmentEvent.GoToPostDetailsFragment(positionAdapter))
     }
 
@@ -298,10 +327,14 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
     }
 
     override fun onMove() {
-        if (feed_text_notify_new_posts.isVisible) {
-            animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out)
+        if (isBounceAnimationVisible) {
+            isBounceAnimationVisible = false
+
+            animation = AnimationUtils.loadAnimation(context, R.anim.fade_out)
             feed_text_notify_new_posts.startAnimation(animation)
-            displayTextNotifyMorePosts(false)
+            feed_text_notify_new_posts.postOnAnimationDelayed(600) {
+                displayTextNotifyMorePosts(false)
+            }
         }
     }
 }

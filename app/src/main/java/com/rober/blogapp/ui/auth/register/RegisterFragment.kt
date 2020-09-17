@@ -84,7 +84,6 @@ class RegisterFragment : Fragment() {
             }
 
             is AuthState.UserLoggedIn -> {
-                Toast.makeText(activity, "LoggedIn", Toast.LENGTH_SHORT).show()
                 goToMainFragments()
                 hideKeyBoard()
             }
