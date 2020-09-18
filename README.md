@@ -2,13 +2,13 @@
 
 Blog App is an app to let users create an account to share their thoughts and interact with other people, it's inspired in Twitter.
 
-The app is built with * Firebase * using Cloud Firestore to store the data, Firebase Storage to save data images and Cloud Functions to execute the work on server-side. Client-side uses Kotlin and server-side use Node.js.
+The app is built with Kotlin and **Firebase** using _Cloud Firestore_ to store the data, _Firebase Storage_ to save data images and _Cloud Functions_ to execute the work on server-side. Client-side uses Kotlin and server-side use Node.js.
 
 Note: The project has been mostly focused on UI and UX aswell since I was lacking of experience and knowledge on this area and I was looking to improve myself there.
 
 #### Features 
 * Authentication
-* Watch timeline of users you follow
+* Watch timeline of users you follow and yourself
 * Add a post 
 * Search user on the app
 * See user profile with their posts
@@ -16,7 +16,7 @@ Note: The project has been mostly focused on UI and UX aswell since I was lackin
 * Edit profile (Also change username)
 * Follow or unfollow user 
  
- #### The app has implemented the next things:
+#### The app has implemented the next things:
 * Dagger-Hilt
 * Coroutines Flow
 * LiveData
@@ -41,4 +41,4 @@ Note: The project has been mostly focused on UI and UX aswell since I was lackin
 
 | Edit profile |
 |---|
-| <img src="demo/profile_edit.gif" width="200" height="400"/>  |
+| <img src="demo/profile_edit.jpg" width="200" height="400"/>  |
