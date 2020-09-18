@@ -246,7 +246,7 @@
             app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             app:tabSelectedTextColor="@color/white"
             app:tabTextColor="@color/grayLight"
-            app:tabIndicatorColor="@color/blueLight">
+            app:tabIndicatorColor="@color/blueTwitter">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"

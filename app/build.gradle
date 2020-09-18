@@ -128,9 +128,6 @@ dependencies {
     //Threetenabp LocalDate time for api < 26
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.4'
 
-    //Joda Time replaces Threetenabp
-    implementation 'net.danlew:android.joda:2.10.6'
-
     //Round image
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 

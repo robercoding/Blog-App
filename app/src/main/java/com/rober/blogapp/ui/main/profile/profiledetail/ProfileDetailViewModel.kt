@@ -45,6 +45,8 @@ class ProfileDetailViewModel
     private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
 
     private var colorUrl = 0
+    private var isUserFollowingInAction = false
+    private var isUserUnfollowingInAction = false
 
     fun setIntention(event: ProfileDetailFragmentEvent) {
         when (event) {
@@ -91,21 +93,28 @@ class ProfileDetailViewModel
             }
 
             is ProfileDetailFragmentEvent.Follow -> {
-                user?.let {
-                    followOtherUser()
-                } ?: kotlin.run {
-                    _profileDetailState.value =
-                        ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
+                if(!isUserFollowingInAction) {
+                    isUserFollowingInAction = true
+                    user?.let {
+                        followOtherUser()
+                    } ?: kotlin.run {
+                        _profileDetailState.value =
+                            ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
+                    }
                 }
             }
 
             is ProfileDetailFragmentEvent.Unfollow -> {
-                user?.let {
-                    unfollowOtherUser()
-                } ?: kotlin.run {
-                    _profileDetailState.value =
-                        ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
+                if(!isUserUnfollowingInAction){
+                    isUserUnfollowingInAction = true
+                    user?.let {
+                        unfollowOtherUser()
+                    } ?: kotlin.run {
+                        _profileDetailState.value =
+                            ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
+                    }
                 }
+
             }
 
             is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
@@ -316,6 +325,7 @@ class ProfileDetailViewModel
                             if (resultData.data!!) {
                                 user?.let {
                                     user?.follower = it.follower.plus(1)
+                                    isUserFollowingInAction = false
                                 }
                                 _profileDetailState.value = ProfileDetailState.Followed(user!!)
                             } else
@@ -338,6 +348,7 @@ class ProfileDetailViewModel
                             if (resultData.data!!) {
                                 user?.let {
                                     user?.follower = it.follower.minus(1)
+                                    isUserUnfollowingInAction = false
                                 }
 
                                 _profileDetailState.value = ProfileDetailState.Unfollowed(user!!)

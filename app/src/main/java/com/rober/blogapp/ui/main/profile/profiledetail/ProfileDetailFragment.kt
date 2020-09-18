@@ -45,6 +45,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     private var isProfileImageVisualizing = false
     private var isBackgroundImageVisualizing = false
 
+    private var isUserFollowingInAction = false
+    private var isUserUnfollowingInAction = false
+
     private lateinit var onTouchListener: OnTouchListener
 
     override fun onCreateView(
@@ -186,9 +189,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
                 ).show()
                 setFollowButtonViewForOtherUser(true)
                 setFollowerText(follower)
+                isUserFollowingInAction = false
             }
 
             is ProfileDetailState.FollowError -> {
+                isUserFollowingInAction = false
                 Toast.makeText(
                     requireContext(),
                     "Sorry we couldn't follow the user, try again later",
@@ -207,9 +212,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
                 ).show()
                 setFollowButtonViewForOtherUser(false)
                 setFollowerText(follower)
+                isUserUnfollowingInAction = false
             }
 
             is ProfileDetailState.UnfollowError -> {
+                isUserUnfollowingInAction = false
                 Toast.makeText(
                     requireContext(),
                     "Sorry we couldn't unfollow the user, try again later",
@@ -390,7 +397,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     }
 
     private fun setFollowButtonViewForOtherUser(currentUserFollowsOtherUser: Boolean) {
-
         if (currentUserFollowsOtherUser) {
             profile_detail_button_follow.apply {
                 isSelected = true
@@ -416,13 +422,17 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     private fun setupListeners() {
         profile_detail_button_follow.apply {
             setOnClickListener {
-                if (it.isSelected) {
-                    setFollowButtonViewForOtherUser(false)
-                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
-
-                } else {
-                    setFollowButtonViewForOtherUser(true)
-                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                if(!isUserFollowingInAction && !isUserUnfollowingInAction){
+                    Log.i("SeeFollow", "FollowAction = ${isUserFollowingInAction}, UnfollowAction= ${isUserUnfollowingInAction}")
+                    if (it.isSelected) {
+                        isUserUnfollowingInAction = true
+                        setFollowButtonViewForOtherUser(false)
+                        profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
+                    } else {
+                        isUserFollowingInAction = true
+                        setFollowButtonViewForOtherUser(true)
+                        profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                    }
                 }
             }
         }
@@ -525,13 +535,20 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailFragmentEvent.Follow -> {
-                setFollowButtonViewForOtherUser(false)
-                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                setFollowButtonViewForOtherUser(true)
+                if(!isUserUnfollowingInAction && !isUserFollowingInAction){
+                    isUserFollowingInAction = true
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
+                }
             }
 
             is ProfileDetailFragmentEvent.Unfollow -> {
                 setFollowButtonViewForOtherUser(false)
-                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
+                if(!isUserUnfollowingInAction && !isUserFollowingInAction){
+                    isUserUnfollowingInAction = true
+                    profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
+
+                }
             }
         }
     }

@@ -54,7 +54,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginStart="20dp"
             android:text="Here would go the biography and damn that's beautiful"
-            android:textStyle="italic"/>
+            android:textStyle="italic"
+            android:ellipsize="end"/>
 
         <View style="@style/Divider"
             tools:ignore="MissingConstraints"
