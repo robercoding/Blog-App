@@ -38,7 +38,7 @@ The app is built with **Kotlin** and **Firebase** using _Cloud Firestore_ to sto
 | <img src="demo/search_no_users.jpg" width="200" height="400"/>  |  <img src="demo/search_with_users.jpg" width="200" height="400"/> |
 
 | Profile logged in user | Profile with motion layout | Follow other user profile | 
-|---|---|
+|---|---|---|
 | <img src="demo/profile_logged_in_user.jpg" width="200" height="400"/>  |  <img src="demo/profile_motion_layout.jpg" width="200" height="400"/> | <img src="demo/profile_follow_other_user.jpg" width="200" height="400"/>  | 
 
 | Edit profile |
@@ -50,9 +50,9 @@ MVI is the newest architecture for Android and I've just done a project with MVV
 
 Having said this, MVI is a single source of truth. That means that this way, you're sure that your Models won't be modified in multiple places and will maintain a single state until the user makes an intention.
 
-Cycle Representation of MVI
+**Cycle Representation of MVI**
 
-<img src="demo/mvi_cycle_representation.jpg"/> 
+<img src="demo/mvi_cycle_representation.png" width="700" height="470"/> 
 
 
 
@@ -70,7 +70,7 @@ If you're interested in Dagger Hilt and want to get more in touch with this fram
 You can also checkout my [sample app](https://github.com/robercoding/DaggerHilt-Sample-Guide) that I've built for the article. 
 
 ### What has been the issues/challenges that you were facing in this project?
-1. How are you going to structure your database to optimize the read/written/updating in without getting high bill from Firebase? (Supposing that we had to take care of that)
+**1. How are you going to structure your database to optimize the read/written/updating in without getting high bill from Firebase? (Supposing that we had to take care of that)**
 
 * I started writting down on a notebook on how I would want to see my NoSql database and the process of getting any information from any document/collection.
 For example, when I was writting the **Post** model I did put a member variable
@@ -82,7 +82,7 @@ the **user** model and that would reduce the operations and would be so much mor
 
 In general I had a lot of new experiences that I've learned there and I hadn't any problem with refactoring the app if that made it better and learn from it.
 
-2. What's the plan for the design of the app? 
+**2. What's the plan for the design of the app?**
 
 * At first I had an idea to focus on _blue_ color but I wasn't sure how to match them together in the app, but I knew that I wanted to make sure the user can recognize differents part of the app making it easy for him to navigate which I did. Finally implemented 4 tones of blue.
 
@@ -92,10 +92,8 @@ In general I had a lot of new experiences that I've learned there and I hadn't a
 
 Note: I've been mostly focused on UI and UX aswell since I was lacking of experience and knowledge on this area and I was looking to improve myself there. The result was good but definitely there's room to improve, but I'm satisfied with the results.
 
-3. What project planning did you use and how do you stay organized with the tasks?
+**3. What project planning did you use and how do you stay organized with the tasks?**
 
 * I had a lot of different project planning tools to use here, for example Trello (Which I did use in my final project) but this time I did use a notebook. The thing that made me use a notebook was merely personal, I simply like writing on a notebook, but I wouldn't had any problem to use any technology tool for work.
 
 * I started writing down the tasks that I had to do, then I separately started creating little tasks for every task. I would set different levels E/M/H (_Easy/Medium/Hard_) and then I'd set them with a ✔️ once finished or, if I had any problem then I'd write down everything I've done until now and continue with other tasks.
-
- 
