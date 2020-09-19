@@ -56,7 +56,6 @@ class ProfileDetailViewModel
                     //getCurrentUserPosts()
                 } else {
                     val isUserCurrentUser = checkIfUserIsCurrentUser(event.userUID)
-
                     if (isUserCurrentUser)
                         getCurrentUser()
                     else
@@ -198,7 +197,7 @@ class ProfileDetailViewModel
             user?.let { tempUser ->
                 if (tempUser.backgroundImageUrl.isEmpty()) {
                     val bitmapOrangeScreen = createBitmapOrangeScreen()
-                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+                    _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, bitmapOrangeScreen)
                 } else {
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 }

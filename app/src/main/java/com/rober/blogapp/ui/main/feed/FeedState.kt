@@ -21,4 +21,5 @@ sealed class FeedState {
     data class Error(val message: String?): FeedState()
 
     object Idle: FeedState()
+    object  SignOut: FeedState()
 }

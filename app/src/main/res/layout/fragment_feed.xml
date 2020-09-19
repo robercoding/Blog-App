@@ -47,6 +47,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+
+                <ImageView
+                    android:id="@+id/feed_fragment_toolbar_exit_app"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/ic_exit_to_app_black_18dp"
+                    android:backgroundTint="@color/black"
+                    android:contentDescription="feed_user_profile"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginEnd="15dp"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 

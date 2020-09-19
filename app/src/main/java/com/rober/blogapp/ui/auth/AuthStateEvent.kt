@@ -16,10 +16,10 @@ sealed class AuthState {
     object CheckFields : AuthState()
 
     data class SetErrorFields(
-        var usernameError: String,
-        var emailError: String,
-        var passwordLengthError: String,
-        var passwordRepeatError: String
+        var usernameError: String = "",
+        var emailError: String = "",
+        var passwordLengthError: String = "",
+        var passwordRepeatError: String = ""
     ): AuthState()
 
     //Generics

@@ -183,11 +183,19 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
                 Log.i(TAG, "IDLE")
             }
 
+            is FeedState.SignOut -> {
+//                findNavController().popBackStack(R.id.feedFragment, true)
+//                findNavController().navigate(R.id.loginFragment)
+                findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
+            }
+
             is FeedState.Error -> {
                 Toast.makeText(requireContext(), feedState.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+
 
     private fun setUserDetails(user: User) {
         Log.i(TAG, "Setting user")
@@ -261,6 +269,10 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
 //            feed_text_notify_new_posts.clearAnimation()
 
         }
+
+        feed_fragment_toolbar_exit_app.setOnClickListener {
+            viewModel.setIntention(FeedFragmentEvent.SignOut)
+        }
     }
 
     private fun setupView() {
@@ -276,7 +288,6 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
                 R.color.blueTwitter
             )
         )
-
     }
 
     private fun goToPostAdd() {
@@ -353,4 +364,5 @@ sealed class FeedFragmentEvent {
     data class GoToProfileDetailsFragment(val positionAdapter: Int) : FeedFragmentEvent()
 
     object Idle : FeedFragmentEvent()
+    object SignOut: FeedFragmentEvent()
 }

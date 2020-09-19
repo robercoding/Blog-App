@@ -3,6 +3,7 @@ package com.rober.blogapp.ui.main.feed
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 //import com.rober.blogapp.data.room.repository.RoomRepository
@@ -61,6 +62,9 @@ constructor(
             is FeedFragmentEvent.Idle -> {
                 _feedState.value = FeedState.Idle
             }
+            is FeedFragmentEvent.SignOut ->{
+                _feedState.value = FeedState.SignOut
+            }
         }
     }
 
@@ -74,8 +78,6 @@ constructor(
 
     private fun retrieveInitPosts() {
         _feedState.value = FeedState.Loading
-
-        val endOfTimeline = firebaseRepository.getEndOfTimeline()
 
         viewModelScope.launch {
             firebaseRepository.retrieveInitFeedPosts()
@@ -279,5 +281,18 @@ constructor(
     private fun goToProfileDetailsFragment(positionAdapter: Int) {
         val user_id = feedListPosts[positionAdapter].userCreatorId
         _feedState.value = FeedState.GoToProfileDetailsFragment(user_id)
+    }
+
+    private fun signOut(){
+        viewModelScope.launch {
+            firebaseRepository.signOut()
+                .collect {
+                    when(it){
+                        is ResultAuth.Success -> _feedState.value = FeedState.SignOut
+
+                        is ResultAuth.Error -> _feedState.value = FeedState.Idle
+                    }
+                }
+        }
     }
 }
