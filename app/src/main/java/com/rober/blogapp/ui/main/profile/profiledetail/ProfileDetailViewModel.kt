@@ -14,6 +14,7 @@ import androidx.palette.graphics.Palette
 import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
+import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.ProfileUserCodes
 import com.rober.blogapp.util.AsyncResponse
@@ -37,9 +38,10 @@ class ProfileDetailViewModel
     val profileDetailState: LiveData<ProfileDetailState>
         get() = _profileDetailState
 
-    var user: User? = null
-    var previousBackgroundImageUrl = ""
-    var bitmap: Bitmap? = null
+    private var user: User? = null
+    private var userPosts = mutableListOf<Post>()
+    private var previousBackgroundImageUrl = ""
+    private var bitmap: Bitmap? = null
 
     private var currentUserFollowsOtherUser = false
     private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
@@ -113,7 +115,12 @@ class ProfileDetailViewModel
                             ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
                     }
                 }
+            }
 
+            is ProfileDetailFragmentEvent.NavigateToPostDetail -> {
+                val post = userPosts[event.positionAdapter]
+
+                _profileDetailState.value = ProfileDetailState.NavigateToPostDetail(post)
             }
 
             is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
@@ -254,8 +261,11 @@ class ProfileDetailViewModel
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
+                                resultData.data?.also {tempUserPosts->
+                                    userPosts = tempUserPosts.toMutableList()
+                                }
                                 _profileDetailState.value =
-                                    ProfileDetailState.SetUserPosts(resultData.data!!, tempUser)
+                                    ProfileDetailState.SetUserPosts(userPosts, tempUser)
                             }
                             is ResultData.Error -> {
                                 _profileDetailState.value =

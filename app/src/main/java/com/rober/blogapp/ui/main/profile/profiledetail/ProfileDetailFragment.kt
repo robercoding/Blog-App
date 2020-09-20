@@ -225,6 +225,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
                 setFollowButtonViewForOtherUser(true)
             }
 
+            is ProfileDetailState.NavigateToPostDetail -> {
+                navigateToPostDetail(profileDetailState.post)
+            }
+
             is ProfileDetailState.NavigateToProfileEdit -> {
                 navigateToProfileEdit(profileDetailState.user)
             }
@@ -480,6 +484,12 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         navController.popBackStack()
     }
 
+    private fun navigateToPostDetail(post: Post){
+        val navController = findNavController()
+        val postBundle = bundleOf("post" to post)
+        navController.navigate(R.id.action_profileDetailFragment_to_postDetailFragment, postBundle)
+    }
+
     private fun navigateToProfileEdit(user: User) {
         val navController = findNavController()
         val userBundle = bundleOf("user" to user)
@@ -554,7 +564,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {
-        //TODO
+        profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToPostDetail(positionAdapter))
     }
 
     override fun clickListenerOnUser(positionAdapter: Int) {
@@ -578,7 +588,9 @@ sealed class ProfileDetailFragmentEvent {
     object Unfollow : ProfileDetailFragmentEvent()
     object Follow : ProfileDetailFragmentEvent()
 
+    data class NavigateToPostDetail(val positionAdapter: Int): ProfileDetailFragmentEvent()
     object NavigateToProfileEdit : ProfileDetailFragmentEvent()
     object PopBackStack : ProfileDetailFragmentEvent()
+
     object Idle : ProfileDetailFragmentEvent()
 }

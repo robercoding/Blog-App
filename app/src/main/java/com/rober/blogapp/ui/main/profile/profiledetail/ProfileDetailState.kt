@@ -21,6 +21,7 @@ sealed class ProfileDetailState {
     object UnfollowError: ProfileDetailState()
     object FollowError: ProfileDetailState()
 
+    data class NavigateToPostDetail(val post: Post): ProfileDetailState()
     data class NavigateToProfileEdit(val user: User): ProfileDetailState()
     object PopBackStack: ProfileDetailState()
     object Idle : ProfileDetailState()
