@@ -32,6 +32,11 @@ constructor(
     private var feedListPosts = mutableListOf<Post>()
     private var feedListUsers = mutableListOf<User>()
 
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("CheckFirebaseBug", "OnCleared ViewModel")
+    }
+
     fun setIntention(event: FeedFragmentEvent) {
         when (event) {
             is FeedFragmentEvent.GetUserPicture -> getUserPicture()
@@ -63,6 +68,7 @@ constructor(
                 _feedState.value = FeedState.Idle
             }
             is FeedFragmentEvent.SignOut ->{
+                clearListsAndMapsLocalDatabase()
                 _feedState.value = FeedState.SignOut
             }
         }
@@ -281,6 +287,10 @@ constructor(
     private fun goToProfileDetailsFragment(positionAdapter: Int) {
         val user_id = feedListPosts[positionAdapter].userCreatorId
         _feedState.value = FeedState.GoToProfileDetailsFragment(user_id)
+    }
+
+    private fun clearListsAndMapsLocalDatabase(){
+        firebaseRepository.clearListsAndMapsLocalDatabase()
     }
 
     private fun signOut(){

@@ -348,6 +348,11 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("CheckFirebaseBug", "We on resume check everything")
+    }
 }
 
 sealed class FeedFragmentEvent {

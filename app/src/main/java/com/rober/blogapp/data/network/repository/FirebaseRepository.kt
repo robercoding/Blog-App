@@ -63,6 +63,8 @@ constructor(
     suspend fun getUsersFromCurrentFollowings(listUsers: MutableList<User>): Flow<ResultData<List<User>>> =
         firebaseFeedManager.getUsersFromCurrentFollowings(listUsers)
 
+    fun clearListsAndMapsLocalDatabase() = firebaseFeedManager.cleanListsAndMapsLocalDatabase()
+
     //suspend fun retrieveSavedLocalPosts(): Flow<ResultData<List<Post>>> = firebaseFeedManager.getSavedLocalPosts()
 
     //PostAdd

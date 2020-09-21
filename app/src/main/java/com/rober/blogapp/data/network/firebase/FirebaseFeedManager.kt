@@ -536,5 +536,17 @@ constructor
         }
     }
 
+    fun cleanListsAndMapsLocalDatabase(){
+        savedFeedHashMapPosts.clear()
+
+        savedFeedListPosts.clear()
+        savedListFollowing?.clear()
+        dateToRetrieveNewerPostsEpochSeconds = null
+        dateLessThanEpochSeconds = 0
+        dateGreaterThanEpochSeconds = 0
+        restDays = 0
+        currentIntervalHoursIndex = 0
+    }
+
     fun getEndOfTimeline(): Boolean = endOfTimeline
 }
