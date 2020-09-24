@@ -281,6 +281,16 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         uid_biography.text = user.biography
         profile_detail_user_following.text = "${user.following} Following"
 
+        if(user.location.isNotEmpty()){
+            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
+            profile_detail_location.text = user.location
+            val drawable = resources.getDrawable(R.drawable.ic_location, null)
+            drawable.setBounds(0, 0, (drawable.intrinsicWidth*0.8).toInt(), (drawable.intrinsicHeight*0.8).toInt())
+            profile_detail_location.setCompoundDrawables(drawable,null,null,null)
+        }else{
+            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
+        }
+
         setFollowerText(user.follower)
     }
 
@@ -378,6 +388,15 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
         profile_detail_user_following.text = "${user.following} Following"
+        if(user.location.isNotEmpty()){
+            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
+            profile_detail_location.text = user.location
+            val drawable = resources.getDrawable(R.drawable.ic_location, null)
+            drawable.setBounds(0, 0, (drawable.intrinsicWidth*0.8).toInt(), (drawable.intrinsicHeight*0.8).toInt())
+            profile_detail_location.setCompoundDrawables(drawable,null,null,null)
+        }else{
+            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
+        }
 
         setFollowerText(user.follower)
     }
