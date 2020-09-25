@@ -2,10 +2,15 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
@@ -16,8 +21,10 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
+import kotlinx.android.synthetic.main.fragment_profile_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
@@ -76,6 +83,19 @@ class PostDetailFragment : Fragment() {
                 goToProfileFragment(postDetailState.user)
             }
 
+            is PostDetailState.ShowPostOptions -> {
+                val listOptions = postDetailState.listOptions
+                post_detail_motion_layout_container.visibility = View.VISIBLE
+                post_detail_options_list.adapter =
+                    ArrayAdapter(requireContext(), android.R.layout.simple_expandable_list_item_1, listOptions)
+//                post_detail_motion_layout_container.getConstraintSet(R.id.end)?.let {endConstraintSet ->
+//                    endConstraintSet.
+//
+//                }
+                Toast.makeText(requireContext(), "To end theorically", Toast.LENGTH_SHORT).show()
+                post_detail_motion_layout_container.transitionToEnd()
+            }
+
             is PostDetailState.Idle -> {
                 //Nothing
             }
@@ -121,7 +141,7 @@ class PostDetailFragment : Fragment() {
         navController.popBackStack()
     }
 
-    private fun goToProfileFragment(user: User){
+    private fun goToProfileFragment(user: User) {
         val navController = findNavController()
         val bundle = bundleOf("user" to user)
         navController.navigate(R.id.profileDetailFragment, bundle)
@@ -139,8 +159,43 @@ class PostDetailFragment : Fragment() {
 
         post_detail_image_profile.setOnClickListener {
             viewModel.setIntention(PostDetailFragmentEvent.GoToProfileFragment)
-
         }
+
+        post_detail_options.setOnClickListener {
+            viewModel.setIntention(PostDetailFragmentEvent.ShowPostOptions)
+        }
+
+//        post_detail_space.setOnClickListener {
+//            Log.i("PostDetailMotion", "Space touch")
+//        }
+        post_detail_options_list.setOnItemClickListener { parent, view, position, id ->
+            Log.i(
+                "PostDetailMotion",
+                "List touch"
+            )
+        }
+
+        post_detail_motion_layout_container.setTransitionListener(object : MotionLayout.TransitionListener {
+            override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
+//                if(p0?.getConstraintSet(R.id.start) == post_detail_motion_layout_container.getConstraintSet(R.id.start)){
+//                    Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
+//                    post_detail_motion_layout_container.visibility = View.GONE
+//                }
+                if (p0?.currentState == post_detail_motion_layout_container.startState) {
+                    Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
+                    post_detail_motion_layout_container.visibility = View.GONE
+                }
+                if (p0?.currentState == post_detail_motion_layout_container.endState) {
+                    Toast.makeText(requireContext(), "Is end", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
+
+            override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {}
+
+            override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
+        })
     }
 }
 
@@ -149,6 +204,8 @@ sealed class PostDetailFragmentEvent {
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 
-    object GoToProfileFragment: PostDetailFragmentEvent()
+    object ShowPostOptions : PostDetailFragmentEvent()
+
+    object GoToProfileFragment : PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()
 }

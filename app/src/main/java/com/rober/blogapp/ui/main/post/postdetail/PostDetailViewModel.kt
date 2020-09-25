@@ -1,10 +1,12 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import android.app.Application
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Post
@@ -13,7 +15,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
-class PostDetailViewModel @ViewModelInject constructor(val firebaseRepository: FirebaseRepository) : ViewModel() {
+class PostDetailViewModel @ViewModelInject constructor(
+    val firebaseRepository: FirebaseRepository,
+    val application: Application
+) : ViewModel() {
 
     private val _postDetailState: MutableLiveData<PostDetailState> = MutableLiveData()
 
@@ -38,6 +43,14 @@ class PostDetailViewModel @ViewModelInject constructor(val firebaseRepository: F
 
             is PostDetailFragmentEvent.GoBackToPreviousFragment -> {
                 _postDetailState.value = PostDetailState.BackToPreviousFragment
+            }
+
+            is PostDetailFragmentEvent.ShowPostOptions -> {
+                _postDetailState.value = PostDetailState.ShowPostOptions(
+                    application.applicationContext.resources.getStringArray(
+                        R.array.list_post_detail_options
+                    ).toList()
+                )
             }
         }
     }

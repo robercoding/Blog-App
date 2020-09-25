@@ -10,6 +10,8 @@ sealed class PostDetailState {
     data class GoToProfileFragment(val user: User): PostDetailState()
     object BackToPreviousFragment: PostDetailState()
 
+    data class ShowPostOptions(val listOptions: List<String>): PostDetailState()
+
     data class Error(val exception: Exception): PostDetailState()
     object Loading: PostDetailState()
     object Idle: PostDetailState()
