@@ -86,6 +86,7 @@ class PostDetailFragment : Fragment() {
             is PostDetailState.ShowPostOptions -> {
                 val listOptions = postDetailState.listOptions
                 post_detail_motion_layout_container.visibility = View.VISIBLE
+                main_view_background_opaque.visibility = View.VISIBLE
                 post_detail_options_list.adapter =
                     ArrayAdapter(requireContext(), android.R.layout.simple_expandable_list_item_1, listOptions)
 //                post_detail_motion_layout_container.getConstraintSet(R.id.end)?.let {endConstraintSet ->
@@ -184,6 +185,7 @@ class PostDetailFragment : Fragment() {
                 if (p0?.currentState == post_detail_motion_layout_container.startState) {
                     Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
                     post_detail_motion_layout_container.visibility = View.GONE
+                    main_view_background_opaque.visibility = View.GONE
                 }
                 if (p0?.currentState == post_detail_motion_layout_container.endState) {
                     Toast.makeText(requireContext(), "Is end", Toast.LENGTH_SHORT).show()

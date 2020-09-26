@@ -12,6 +12,7 @@
     <color name="grayLight">#A5A5A5</color>
 
     <color name="background">#14242c</color>
+    <color name="background_opaque">#CC121B1F</color>
 
     <color name="red">#DC143C</color>
     <color name="yellow">#FFFF00</color>
