@@ -2,12 +2,12 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.DisplayMetrics
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -19,16 +19,14 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
+import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
+import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
-import kotlinx.android.synthetic.main.fragment_profile_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class PostDetailFragment : Fragment() {
@@ -87,12 +85,22 @@ class PostDetailFragment : Fragment() {
                 val listOptions = postDetailState.listOptions
                 post_detail_motion_layout_container.visibility = View.VISIBLE
                 main_view_background_opaque.visibility = View.VISIBLE
+//                val listOptionsTest = listOf<String>("Hey lets see", "Other one!")
+                val listOptionsTest = listOf<Option>(Option(R.drawable.ic_location, "DeletePost"), Option(R.drawable.ic_location, "Test2"))
                 post_detail_options_list.adapter =
-                    ArrayAdapter(requireContext(), android.R.layout.simple_expandable_list_item_1, listOptions)
-//                post_detail_motion_layout_container.getConstraintSet(R.id.end)?.let {endConstraintSet ->
-//                    endConstraintSet.
-//
-//                }
+                     ListOptionsAdapter(requireContext(), listOptionsTest)
+//                post_detail_options_list.adapter =
+//                    ArrayAdapter(requireContext(), android.R.layout.simple_expandable_list_item_1, listOptionsTest)
+
+
+                val layout = post_detail_options_list.layoutParams
+                val metrics = DisplayMetrics()
+                activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
+                val width = metrics.widthPixels
+                layout.width = width
+                layout.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                post_detail_options_list.layoutParams = layout
+
                 Toast.makeText(requireContext(), "To end theorically", Toast.LENGTH_SHORT).show()
                 post_detail_motion_layout_container.transitionToEnd()
             }
