@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="list_post_detail_options">
+    <!-- When post is from the user logged in-->
+    <string-array name="list_post_detail_options_text_if_post_is_created_by_logged_in_user">
+        <item>Edit post</item>
         <item>Delete post</item>
     </string-array>
+
+    <array name="list_post_detail_options_icons_if_post_is_created_by_logged_in_user">
+        <item>@drawable/ic_edit</item>
+        <item>@drawable/ic_delete</item>
+    </array>
+
+    <!--    When post is from other user    -->
+    <!--    Text    -->
+    <array name="list_post_detail_options_text_if_post_is_created_by_other_user">
+        <item>Report post</item>
+        <item>@array/list_post_detail_options_text_if_post_is_created_by_other_user_follow</item>
+    </array>
+
+    <string-array name="list_post_detail_options_text_if_post_is_created_by_other_user_follow">
+        <item>Follow</item>
+        <item>Unfollow</item>
+    </string-array>
+
+    <!--    Icons    -->
+    <array name="list_post_detail_options_icons_if_post_is_created_by_other_user">
+        <item>@drawable/ic_report</item>
+        <item>@array/list_post_detail_options_icons_if_post_is_created_by_other_user_follow</item>
+    </array>
+
+    <array name="list_post_detail_options_icons_if_post_is_created_by_other_user_follow">
+        <item>@drawable/ic_follow</item>
+        <item>@drawable/ic_unfollow</item>
+    </array>
 
 </resources>

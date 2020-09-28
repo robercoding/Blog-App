@@ -446,7 +446,6 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         profile_detail_button_follow.apply {
             setOnClickListener {
                 if(!isUserFollowingInAction && !isUserUnfollowingInAction){
-                    Log.i("SeeFollow", "FollowAction = ${isUserFollowingInAction}, UnfollowAction= ${isUserUnfollowingInAction}")
                     if (it.isSelected) {
                         isUserUnfollowingInAction = true
                         setFollowButtonViewForOtherUser(false)

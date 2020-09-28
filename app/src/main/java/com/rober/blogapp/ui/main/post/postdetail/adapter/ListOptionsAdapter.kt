@@ -11,7 +11,7 @@ import com.rober.blogapp.R
 import com.rober.blogapp.entity.Option
 import kotlinx.android.synthetic.main.listview_row_post_detail_options.view.*
 
-class ListOptionsAdapter(private val context: Context, private val listOptions: List<Option>) : BaseAdapter() {
+class ListOptionsAdapter(private val context: Context, private val listOptions: List<Option>, private val onListOptionsClickInterfaceCallback: OnListOptionsClickInterface) : BaseAdapter() {
 
     private class ViewHolder(row: View?){
         var optionText : TextView? = null
@@ -28,7 +28,7 @@ class ListOptionsAdapter(private val context: Context, private val listOptions: 
         val viewHolder: ViewHolder
 
         if(convertView == null){
-            var layout = LayoutInflater.from(context)
+            val layout = LayoutInflater.from(context)
 
             view = layout.inflate(R.layout.listview_row_post_detail_options, parent, false)
             viewHolder = ViewHolder(view)
@@ -37,13 +37,22 @@ class ListOptionsAdapter(private val context: Context, private val listOptions: 
             view = convertView
             viewHolder = view.tag as ViewHolder
         }
+
         val option : Option = getItem(position)
         viewHolder.optionText?.text = option.text
         viewHolder.optionIcon?.setImageResource(option.icon)
 
+        setupListener(view, position)
+
         return view as View
     }
 
+    private fun setupListener(view: View?, position: Int){
+        view?.setOnClickListener {
+            onListOptionsClickInterfaceCallback.onClickListOption(position)
+        }
+
+    }
     override fun getCount(): Int {
         return listOptions.size
     }
@@ -55,5 +64,9 @@ class ListOptionsAdapter(private val context: Context, private val listOptions: 
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
+    }
+
+    override fun isEnabled(position: Int): Boolean {
+        return true
     }
 }

@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import java.lang.Exception
@@ -10,7 +11,7 @@ sealed class PostDetailState {
     data class GoToProfileFragment(val user: User): PostDetailState()
     object BackToPreviousFragment: PostDetailState()
 
-    data class ShowPostOptions(val listOptions: List<String>): PostDetailState()
+    data class ShowPostOptions(val listOptions: List<Option>): PostDetailState()
 
     data class Error(val exception: Exception): PostDetailState()
     object Loading: PostDetailState()

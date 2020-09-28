@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
@@ -19,17 +18,17 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
-import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
+import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 
 @AndroidEntryPoint
-class PostDetailFragment : Fragment() {
+class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
 
     private val viewModel: PostDetailViewModel by viewModels()
 
@@ -83,25 +82,12 @@ class PostDetailFragment : Fragment() {
 
             is PostDetailState.ShowPostOptions -> {
                 val listOptions = postDetailState.listOptions
-                post_detail_motion_layout_container.visibility = View.VISIBLE
-                main_view_background_opaque.visibility = View.VISIBLE
-//                val listOptionsTest = listOf<String>("Hey lets see", "Other one!")
-                val listOptionsTest = listOf<Option>(Option(R.drawable.ic_location, "DeletePost"), Option(R.drawable.ic_location, "Test2"))
                 post_detail_options_list.adapter =
-                     ListOptionsAdapter(requireContext(), listOptionsTest)
-//                post_detail_options_list.adapter =
-//                    ArrayAdapter(requireContext(), android.R.layout.simple_expandable_list_item_1, listOptionsTest)
+                    ListOptionsAdapter(requireContext(), listOptions, this)
 
+                enablePostDetailOptionsMode(true)
+                setListViewMaxWidth()
 
-                val layout = post_detail_options_list.layoutParams
-                val metrics = DisplayMetrics()
-                activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
-                val width = metrics.widthPixels
-                layout.width = width
-                layout.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                post_detail_options_list.layoutParams = layout
-
-                Toast.makeText(requireContext(), "To end theorically", Toast.LENGTH_SHORT).show()
                 post_detail_motion_layout_container.transitionToEnd()
             }
 
@@ -109,6 +95,27 @@ class PostDetailFragment : Fragment() {
                 //Nothing
             }
         }
+    }
+
+    private fun enablePostDetailOptionsMode(displayOptionsMode: Boolean) {
+        if (displayOptionsMode) {
+            post_detail_motion_layout_container.visibility = View.VISIBLE
+            main_view_background_opaque.visibility = View.VISIBLE
+        } else {
+            post_detail_motion_layout_container.visibility = View.GONE
+            main_view_background_opaque.visibility = View.GONE
+        }
+    }
+
+    //Set max_width of every row in listview, so when you click you are able to select the entire row (XML doesn't do match set full width)
+    private fun setListViewMaxWidth() {
+        val layout = post_detail_options_list.layoutParams
+        val metrics = DisplayMetrics()
+        activity?.windowManager?.defaultDisplay?.getMetrics(metrics)
+        val width = metrics.widthPixels
+        layout.width = width
+        layout.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        post_detail_options_list.layoutParams = layout
     }
 
     private fun setPostDetails(post: Post) {
@@ -184,16 +191,12 @@ class PostDetailFragment : Fragment() {
             )
         }
 
+
         post_detail_motion_layout_container.setTransitionListener(object : MotionLayout.TransitionListener {
             override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
-//                if(p0?.getConstraintSet(R.id.start) == post_detail_motion_layout_container.getConstraintSet(R.id.start)){
-//                    Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
-//                    post_detail_motion_layout_container.visibility = View.GONE
-//                }
                 if (p0?.currentState == post_detail_motion_layout_container.startState) {
+                    enablePostDetailOptionsMode(false)
                     Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
-                    post_detail_motion_layout_container.visibility = View.GONE
-                    main_view_background_opaque.visibility = View.GONE
                 }
                 if (p0?.currentState == post_detail_motion_layout_container.endState) {
                     Toast.makeText(requireContext(), "Is end", Toast.LENGTH_SHORT).show()
@@ -206,6 +209,14 @@ class PostDetailFragment : Fragment() {
 
             override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
         })
+    }
+
+    override fun onClickListOption(position: Int) {
+        //TODO
+        Log.i(
+            "PostDetailMotion",
+            "List touch interface, position = $position"
+        )
     }
 }
 

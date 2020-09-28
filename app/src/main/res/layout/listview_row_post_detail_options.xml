@@ -1,27 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/listview_options_ripple_effect"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:layout_gravity="top|center_horizontal"
+    android:padding="2dp">
 
     <ImageView
         android:id="@+id/listview_row_option_image"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:src="@drawable/ic_location"
-        android:layout_marginStart="20dp"/>
+        android:tint="@color/grayLight"
+        android:layout_marginStart="20dp"
+        android:layout_gravity="center"
+        android:foregroundGravity="center_vertical"
+        />
 
 
     <TextView
         android:id="@+id/listview_row_option_text"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="10dp"
-        android:textSize="12dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+
+        android:textSize="16dp"
         android:text="Delete post"
-        android:fontFamily="@font/roboto_bold"/>
+        android:fontFamily="@font/roboto_bold"
+        android:textColor="@color/white"
+        android:layout_gravity="center_vertical"/>
 
 </LinearLayout>
