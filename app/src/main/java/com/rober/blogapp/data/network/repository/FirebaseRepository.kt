@@ -1,6 +1,5 @@
 package com.rober.blogapp.data.network.repository
 
-import android.graphics.Bitmap
 import android.net.Uri
 import com.google.firebase.firestore.Source
 import com.rober.blogapp.data.ResultAuth
@@ -8,7 +7,6 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.util.AsyncResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -18,9 +16,11 @@ constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
     private val firebaseFeedManager: FirebaseFeedManager,
     private val firebasePostAddManager: FirebasePostAddManager,
+    private val firebaseFirebasePostDetailManager: FirebasePostDetailManager,
     private val firebaseSearchManager: FirebaseSearchManager,
     private val firebaseProfileDetailManager: FirebaseProfileDetailManager,
     private val firebaseProfileEditManager: FirebaseProfileEditManager
+
 ) {
     val TAG = "FirebaseRepository"
 
@@ -69,6 +69,9 @@ constructor(
 
     //PostAdd
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
+
+    //PostDetail
+    suspend fun reportPost(post: Post): Flow<ResultData<Boolean>> = firebaseFirebasePostDetailManager.reportPost(post)
 
     //Search
     suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
