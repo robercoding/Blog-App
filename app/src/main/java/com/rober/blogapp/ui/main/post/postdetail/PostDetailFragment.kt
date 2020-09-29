@@ -120,6 +120,10 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
                 enablePostDetailOptionsMode(false)
             }
 
+            is PostDetailState.NotifyUser -> {
+                Toast.makeText(requireContext(), "${postDetailState.message}", Toast.LENGTH_SHORT).show()
+            }
+
             is PostDetailState.Idle -> {
                 //Nothing
             }
@@ -185,7 +189,6 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         val postToEditBundle = bundleOf("postToEdit" to postToEdit)
 
         if (findNavController().currentDestination?.id == R.id.postDetailFragment) {
-            Log.i("SeeNavigate", "here we pass x times")
             findNavController().navigate(R.id.action_postDetailFragment_to_postAddFragment, postToEditBundle)
         }
     }
@@ -197,7 +200,7 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
 
     private fun goToProfileFragment(user: User) {
         val navController = findNavController()
-        val bundle = bundleOf("user" to user)
+        val bundle = bundleOf("user_id" to user.user_id)
         navController.navigate(R.id.profileDetailFragment, bundle)
     }
 

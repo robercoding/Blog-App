@@ -181,9 +181,7 @@ class PostAddFragment : Fragment() {
         displayKeyBoard(false)
         displayActionBar(false)
         val updatedPostBundle = bundleOf("updatedPost" to updatedPost)
-        Log.i("SeeGo", "We are going to postdetail")
         if(findNavController().currentDestination?.id == R.id.postAddFragment){
-            Log.i("SeeGo", "We ARE NOW going to postdetail")
             findNavController().navigate(R.id.action_postAddFragment_to_postDetailFragment, updatedPostBundle)
         }
 

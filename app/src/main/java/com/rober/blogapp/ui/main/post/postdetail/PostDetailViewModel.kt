@@ -2,6 +2,7 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,7 +36,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     val postDetailState: LiveData<PostDetailState>
         get() = _postDetailState
 
-    private var user: User? = null
+    private var userPost: User? = null
     private var post: Post? = null
     private var isOptionsVisible = false
 
@@ -54,7 +55,7 @@ class PostDetailViewModel @ViewModelInject constructor(
             }
 
             is PostDetailFragmentEvent.GoToProfileFragment -> {
-                user?.run {
+                userPost?.run {
                     _postDetailState.value = PostDetailState.GoToProfileFragment(this)
                 } ?: kotlin.run { _postDetailState.value = PostDetailState.Idle }
             }
@@ -98,7 +99,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                         EDIT_POST -> redirectToEditPostFragment()
                         DELETE_POST -> deletePost()
                         REPORT_POST -> reportPost()
-                        FOLLOW_USER -> followUser()
+                        FOLLOW_USER -> followUser(userPost)
                         UNFOLLOW_USER -> unfollowUser()
                     }
                 }
@@ -113,8 +114,10 @@ class PostDetailViewModel @ViewModelInject constructor(
             }
 
             is PostDetailFragmentEvent.SaveUpdatedPost -> {
-                saveUpdatedPost(event.editedPost)
-                setPost(event.editedPost, event.editedPost.userCreatorId)
+                viewModelScope.launch {
+                    saveUpdatedPost(event.editedPost)
+                    setPost(event.editedPost, event.editedPost.userCreatorId)
+                }
             }
         }
     }
@@ -124,7 +127,7 @@ class PostDetailViewModel @ViewModelInject constructor(
             val userProfile = getUserProfile(userUID)
 
             userProfile?.also { tempUserProfile ->
-                user = tempUserProfile
+                userPost = tempUserProfile
                 _postDetailState.value = PostDetailState.SetPostDetails(post, tempUserProfile)
             } ?: kotlin.run {
                 _postDetailState.value = PostDetailState.BackToPreviousFragment
@@ -270,7 +273,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     }
 
     private fun redirectToEditPostFragment() {
-        if (user?.user_id != post?.userCreatorId) {
+        if (userPost?.user_id != post?.userCreatorId) {
             _postDetailState.value = PostDetailState.ErrorExecuteOption
             return
         }
@@ -280,15 +283,16 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun saveUpdatedPost(editedPost: Post) {
+    private suspend fun saveUpdatedPost(editedPost: Post) {
         post = editedPost
 
-        viewModelScope.launch {
+        var hasPostBeenUpdated = false
+        val job = viewModelScope.launch {
             firebaseRepository.saveEditedPost(editedPost)
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            val hasPostBeenUpdated = resultData.data!!
+                            hasPostBeenUpdated = resultData.data!!
 
                             Log.i("SeePostUpdated", "Has been post updated = ${hasPostBeenUpdated}")
                         }
@@ -299,7 +303,12 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
                 }
         }
+        job.join()
 
+        if(hasPostBeenUpdated)
+            _postDetailState.value = PostDetailState.NotifyUser("Post has been updated!")
+        else
+            _postDetailState.value = PostDetailState.NotifyUser("Sorry, post coudln't been updated.")
     }
 
     private suspend fun deletePost() {
@@ -332,8 +341,34 @@ class PostDetailViewModel @ViewModelInject constructor(
 
     }
 
-    private fun followUser() {
+    private suspend fun followUser(userToFollow: User?) {
 
+        if(userToFollow == null){
+            _postDetailState.value = PostDetailState.Idle
+            return
+        }
+
+        var followedUser = false
+        val job = viewModelScope.launch {
+            firebaseRepository.followOtherUser(userToFollow)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            followedUser = resultData.data!!
+                        }
+                        is ResultData.Error -> {
+                            _postDetailState.value = PostDetailState.Idle
+                        }
+                    }
+                }
+        }
+        job.join()
+
+        if(followedUser) {
+            _postDetailState.value = PostDetailState.NotifyUser("Succesfully followed")
+        }else{
+            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to follow the userPost")
+        }
     }
 
     private fun unfollowUser() {

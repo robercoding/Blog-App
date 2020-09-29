@@ -24,5 +24,6 @@ sealed class PostDetailState {
 
     data class Error(val exception: Exception): PostDetailState()
     object Loading: PostDetailState()
+    data class NotifyUser(val message: String): PostDetailState()
     object Idle: PostDetailState()
 }

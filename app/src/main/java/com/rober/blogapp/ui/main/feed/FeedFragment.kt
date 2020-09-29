@@ -186,8 +186,6 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             }
 
             is FeedState.SignOut -> {
-//                findNavController().popBackStack(R.id.feedFragment, true)
-//                findNavController().navigate(R.id.loginFragment)
                 findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
             }
 
