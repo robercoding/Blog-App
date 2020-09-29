@@ -51,8 +51,8 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebasePostDetailManager(firebaseSource: FirebaseSource): FirebasePostDetailManager =
-        FirebasePostDetailManager(firebaseSource)
+    fun provideFirebasePostDetailManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebasePostDetailManager =
+        FirebasePostDetailManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides

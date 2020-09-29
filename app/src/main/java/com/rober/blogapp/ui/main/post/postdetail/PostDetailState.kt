@@ -12,6 +12,11 @@ sealed class PostDetailState {
     object BackToPreviousFragment: PostDetailState()
 
     data class ShowPostOptions(val listOptions: List<Option>): PostDetailState()
+    object PostDeleted : PostDetailState()
+    object ErrorExecuteOption: PostDetailState()
+
+    //Options
+    data class RedirectToEditPost(val post: Post): PostDetailState()
 
     data class Error(val exception: Exception): PostDetailState()
     object Loading: PostDetailState()

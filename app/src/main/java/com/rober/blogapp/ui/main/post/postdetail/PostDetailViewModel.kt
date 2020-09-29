@@ -58,16 +58,35 @@ class PostDetailViewModel @ViewModelInject constructor(
             }
 
             is PostDetailFragmentEvent.ShowPostOptions -> {
+                if (isOptionsVisible) {
+                    _postDetailState.value = PostDetailState.Idle
+                    return
+                }
+
+                isOptionsVisible = true
                 val currentUser = getCurrentUser()
                 viewModelScope.launch {
                     post?.also { tempPost ->
                         if (tempPost.userCreatorId == currentUser.user_id) {
                             loadPostOptionsFromCurrentUser()
-                        }else{
+                        } else {
                             loadPostOptionsFromOtherUser()
                         }
                     }
                 }
+            }
+
+            is PostDetailFragmentEvent.ExecuteOption -> {
+                val optionPositionIndex = event.optionPositionIndex
+                val option = listOptions[optionPositionIndex]
+
+                viewModelScope.launch {
+                    when (option.text) {
+                        "Edit post" -> redirectToEditPostFragment()
+                        "Delete post" -> deletePost()
+                    }
+                }
+
             }
         }
     }
@@ -116,39 +135,40 @@ class PostDetailViewModel @ViewModelInject constructor(
         //Get resource id from items and resourcesid from arrays
         val tempListOptionsText = mutableListOf<String>()
         val tempListOptionsIcons = mutableListOf<Int>()
-        for (index in 0..optionsIconsTypedArray.indexCount+1) {
+        for (index in 0..optionsIconsTypedArray.indexCount + 1) {
             if (index == 1) { //Index where array is found
                 //Get array id
                 val textResourceId = optionsTextTypedArray.getResourceId(index, -1)
                 val iconResourceId = optionsIconsTypedArray.getResourceId(index, -1)
 
-                if(doesUserFollowPostCreatorUser){
+                if (doesUserFollowPostCreatorUser) {
                     //Text
                     val optionTextArray = application.applicationContext.resources.getStringArray(textResourceId) //Get array
                     val optionTextResource = optionTextArray[ArrayUtils.UNFOLLOW] //Get item string from array
                     tempListOptionsText.add(optionTextResource)
 
                     //Icon
-                    val optionIconArray = application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
+                    val optionIconArray =
+                        application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
                     val optionIconResource = optionIconArray.getResourceId(ArrayUtils.UNFOLLOW, -1) //Get item int from array
                     tempListOptionsIcons.add(optionIconResource)
 
                     optionIconArray.recycle()
-                }
-                else{
+                } else {
                     //Text
                     val optionTextArray = application.applicationContext.resources.getStringArray(textResourceId) //Get array
                     val optionTextResource = optionTextArray[ArrayUtils.FOLLOW] //Get item string from array
                     tempListOptionsText.add(optionTextResource)
 
                     //Icon
-                    val optionIconArray = application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
+                    val optionIconArray =
+                        application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
                     val optionIconResource = optionIconArray.getResourceId(ArrayUtils.FOLLOW, -1) //Get item int from array
                     tempListOptionsIcons.add(optionIconResource)
                     optionIconArray.recycle()
                 }
 
-            }else{ //Get items
+            } else { //Get items
                 optionsTextTypedArray.getString(index)?.let { tempListOptionsText.add(it) }
                 tempListOptionsIcons.add(optionsIconsTypedArray.getResourceId(index, -1))
             }
@@ -161,7 +181,7 @@ class PostDetailViewModel @ViewModelInject constructor(
 
         //Create a list of Option for ListOptionsAdapter
         val tempListOptions = mutableListOf<Option>()
-        for(index in listOptionsText.indices){
+        for (index in listOptionsText.indices) {
             val option = Option(listOptionsIcons[index], listOptionsText[index])
             tempListOptions.add(option)
         }
@@ -170,7 +190,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         _postDetailState.value = PostDetailState.ShowPostOptions(listOptions)
     }
 
-    private suspend fun doesCurrentUserFollowsUserPost(): Boolean{
+    private suspend fun doesCurrentUserFollowsUserPost(): Boolean {
         var doesUserFollowPostCreatorUser = false
         val job = viewModelScope.launch {
             post?.also { tempPost ->
@@ -180,7 +200,8 @@ class PostDetailViewModel @ViewModelInject constructor(
                             is ResultData.Success -> {
                                 doesUserFollowPostCreatorUser = resultData.data!!
                             }
-                            is ResultData.Error -> {}
+                            is ResultData.Error -> {
+                            }
                         }
                     }
             }
@@ -203,7 +224,7 @@ class PostDetailViewModel @ViewModelInject constructor(
 
         //Get resources Int from typedarray
         val tempListOptionsIcons = mutableListOf<Int>()
-        for (index in 0..optionsIconsTypedArray.indexCount+1) {
+        for (index in 0..optionsIconsTypedArray.indexCount + 1) {
             tempListOptionsIcons.add(optionsIconsTypedArray.getResourceId(index, -1))
         }
         listOptionsIcons = tempListOptionsIcons
@@ -218,6 +239,43 @@ class PostDetailViewModel @ViewModelInject constructor(
 
         listOptions = tempListOptions
         _postDetailState.value = PostDetailState.ShowPostOptions(listOptions)
+    }
+
+    private fun redirectToEditPostFragment(){
+        if(user?.user_id != post?.userCreatorId){
+            _postDetailState.value = PostDetailState.ErrorExecuteOption
+            return
+        }
+
+        post?.run {
+            _postDetailState.value = PostDetailState.RedirectToEditPost(this)
+        }
+    }
+
+    private suspend fun deletePost() {
+        var deletedPost = false
+        val job = viewModelScope.launch {
+            post?.let { tempPost ->
+                firebaseRepository.deletePost(tempPost)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                deletedPost = resultData.data!!
+                            }
+
+                            is ResultData.Error -> {
+                                deletedPost = false
+                            }
+                        }
+                    }
+            }
+        }
+        job.join()
+
+        if(deletedPost)
+            _postDetailState.value = PostDetailState.PostDeleted
+        else
+            _postDetailState.value = PostDetailState.ErrorExecuteOption
     }
 
     private fun getCurrentUser(): User {

@@ -22,4 +22,8 @@ class FirebasePath @Inject constructor() {
     //Followers
     val follower_col = "follower"
     val user_followers = "user_followers"
+
+    //Post
+    val reports_col = "reports"
+    val posts_reports = "posts_reports"
 }

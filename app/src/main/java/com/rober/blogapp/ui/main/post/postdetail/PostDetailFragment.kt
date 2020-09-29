@@ -90,6 +90,13 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
 
                 post_detail_motion_layout_container.transitionToEnd()
             }
+            is PostDetailState.PostDeleted -> {
+                moveToFeedFragment()
+            }
+
+            is PostDetailState.ErrorExecuteOption -> {
+                enablePostDetailOptionsMode(false)
+            }
 
             is PostDetailState.Idle -> {
                 //Nothing
@@ -212,7 +219,7 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
     }
 
     override fun onClickListOption(position: Int) {
-        //TODO
+        viewModel.setIntention(PostDetailFragmentEvent.ExecuteOption(position))
         Log.i(
             "PostDetailMotion",
             "List touch interface, position = $position"
@@ -226,6 +233,7 @@ sealed class PostDetailFragmentEvent {
     object AddRepost : PostDetailFragmentEvent()
 
     object ShowPostOptions : PostDetailFragmentEvent()
+    data class ExecuteOption(val optionPositionIndex: Int): PostDetailFragmentEvent()
 
     object GoToProfileFragment : PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()

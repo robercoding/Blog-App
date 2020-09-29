@@ -16,7 +16,7 @@ constructor(
     private val firebaseAuthManager: FirebaseAuthManager,
     private val firebaseFeedManager: FirebaseFeedManager,
     private val firebasePostAddManager: FirebasePostAddManager,
-    private val firebaseFirebasePostDetailManager: FirebasePostDetailManager,
+    private val firebasePostDetailManager: FirebasePostDetailManager,
     private val firebaseSearchManager: FirebaseSearchManager,
     private val firebaseProfileDetailManager: FirebaseProfileDetailManager,
     private val firebaseProfileEditManager: FirebaseProfileEditManager
@@ -71,7 +71,9 @@ constructor(
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
 
     //PostDetail
-    suspend fun reportPost(post: Post): Flow<ResultData<Boolean>> = firebaseFirebasePostDetailManager.reportPost(post)
+    suspend fun reportPost(post: Post, reportedCause: String, message: String): Flow<ResultData<Boolean>> = firebasePostDetailManager.reportPost(post, reportedCause, message)
+    
+    suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.deletePost(post)
 
     //Search
     suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
