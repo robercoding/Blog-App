@@ -23,16 +23,49 @@ class PostAddViewModel @ViewModelInject constructor(
         get() = _statePost
 
     var user : User? = null
+    var post: Post? = null
+
+    var isPostToUpdate = false
 
     fun setIntention(event: PostAddEvent){
         when(event) {
             is PostAddEvent.LoadUserDetails -> getCurrentUser()
-            is PostAddEvent.SavePost -> {
-                savePost(event.post)
+
+            is PostAddEvent.GetPostToEdit -> {
+                _statePost.value = PostAddState.GetPostToEdit
+            }
+
+            is PostAddEvent.RenderPostToEditInView -> {
+                post = event.post
+                isPostToUpdate = true
+                _statePost.value = PostAddState.RenderPostToEditInView(event.post)
             }
 
             is PostAddEvent.ReadyToWrite -> {
                 _statePost.value = PostAddState.ReadyToWrite
+            }
+
+            is PostAddEvent.ReadyToSaveOrUpdatePost -> {
+                _statePost.value = PostAddState.SaveOrUpdatePost(isPostToUpdate)
+            }
+
+            is PostAddEvent.UpdatePost ->{
+                post?.also {tempPost->
+                    tempPost.title = event.title
+                    tempPost.text = event.text
+
+                    _statePost.value = PostAddState.GoToPostDetailAndUpdatePost(tempPost)
+                }?: kotlin.run {
+                    _statePost.value = PostAddState.Idle
+                }
+            }
+
+            is PostAddEvent.SavePost -> {
+                savePost(event.post)
+            }
+
+            is PostAddEvent.NotifyErrorFieldValidation -> {
+                _statePost.value = PostAddState.NotifyErrorFieldValidation
             }
 
             PostAddEvent.Idle -> {

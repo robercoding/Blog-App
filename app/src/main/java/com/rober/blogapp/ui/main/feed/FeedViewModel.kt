@@ -140,7 +140,7 @@ constructor(
                 }
             if(newListPosts.isEmpty()){
                 _feedState.value =
-                    FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now " + ("\ud83d\ude27")))
+                    FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now "))
                 return@launch
             }
 

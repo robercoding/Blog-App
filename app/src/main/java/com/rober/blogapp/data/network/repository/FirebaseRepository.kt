@@ -75,6 +75,8 @@ constructor(
     
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.deletePost(post)
 
+    suspend fun saveEditedPost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.updateEditedPost(post)
+
     //Search
     suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
 

@@ -20,13 +20,15 @@ import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
+import com.rober.blogapp.util.EmojiUtils.ANGUISHED_FACE
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
+class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
 
 
     private val TAG: String = "FeedFragment"
@@ -128,7 +130,7 @@ class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerList
                 feedState.messageUtil?.run {
                     Toast.makeText(
                         requireContext(),
-                        message,
+                        message + getEmoji(ANGUISHED_FACE),
                         Toast.LENGTH_SHORT
                     ).show()
                 }

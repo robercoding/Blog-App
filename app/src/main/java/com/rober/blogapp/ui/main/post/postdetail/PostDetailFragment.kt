@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -20,15 +21,17 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
+import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 
 @AndroidEntryPoint
-class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
+class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
 
     private val viewModel: PostDetailViewModel by viewModels()
 
@@ -43,22 +46,16 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
+//        if(bud)
         post_detail_toolbar.navigationIcon?.setTint(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         AndroidThreeTen.init(requireContext())
-
         setupObservers()
 
-        val post = arguments?.getParcelable<Post>("post")
-
-        if (post == null) {
-            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
-        } else {
-            viewModel.setIntention(PostDetailFragmentEvent.SetPost(post))
-        }
+        viewModel.setIntention(PostDetailFragmentEvent.GetParcelableUpdatedPost)
     }
 
     private fun setupObservers() {
@@ -69,13 +66,28 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
 
     private fun render(postDetailState: PostDetailState) {
         when (postDetailState) {
+
+            is PostDetailState.GetParcelableUpdatedPost -> {
+                getParcelableUpdatedPostAndSetIntention()
+            }
+
+            is PostDetailState.GetParcelablePost -> {
+                getParcelablePostAndSetIntention()
+            }
+
             is PostDetailState.SetPostDetails -> {
                 setPostDetails(postDetailState.post)
                 setUserDetails(postDetailState.user)
             }
+
+            is PostDetailState.RedirectToEditPost -> {
+                goToPostAdd(postDetailState.post)
+            }
+
             is PostDetailState.BackToPreviousFragment -> {
                 moveToFeedFragment()
             }
+
             is PostDetailState.GoToProfileFragment -> {
                 goToProfileFragment(postDetailState.user)
             }
@@ -90,8 +102,18 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
 
                 post_detail_motion_layout_container.transitionToEnd()
             }
+
             is PostDetailState.PostDeleted -> {
+                Toast.makeText(
+                    requireContext(),
+                    "Post has been successfully deleted! ${getEmoji(OK_HAND)}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 moveToFeedFragment()
+            }
+
+            is PostDetailState.HideOptions -> {
+                enablePostDetailOptionsMode(false)
             }
 
             is PostDetailState.ErrorExecuteOption -> {
@@ -159,9 +181,18 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             .into(post_detail_image_profile)
     }
 
+    private fun goToPostAdd(postToEdit: Post) {
+        val postToEditBundle = bundleOf("postToEdit" to postToEdit)
+
+        if (findNavController().currentDestination?.id == R.id.postDetailFragment) {
+            Log.i("SeeNavigate", "here we pass x times")
+            findNavController().navigate(R.id.action_postDetailFragment_to_postAddFragment, postToEditBundle)
+        }
+    }
+
     private fun moveToFeedFragment() {
         val navController = findNavController()
-        navController.popBackStack()
+        navController.navigate(R.id.feedFragment)
     }
 
     private fun goToProfileFragment(user: User) {
@@ -188,21 +219,10 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             viewModel.setIntention(PostDetailFragmentEvent.ShowPostOptions)
         }
 
-//        post_detail_space.setOnClickListener {
-//            Log.i("PostDetailMotion", "Space touch")
-//        }
-        post_detail_options_list.setOnItemClickListener { parent, view, position, id ->
-            Log.i(
-                "PostDetailMotion",
-                "List touch"
-            )
-        }
-
-
         post_detail_motion_layout_container.setTransitionListener(object : MotionLayout.TransitionListener {
             override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
                 if (p0?.currentState == post_detail_motion_layout_container.startState) {
-                    enablePostDetailOptionsMode(false)
+                    viewModel.setIntention(PostDetailFragmentEvent.HideOptions)
                     Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
                 }
                 if (p0?.currentState == post_detail_motion_layout_container.endState) {
@@ -225,15 +245,42 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             "List touch interface, position = $position"
         )
     }
+
+    private fun getParcelableUpdatedPostAndSetIntention() {
+        val updatedPost = arguments?.getParcelable<Post>("updatedPost")
+
+        updatedPost?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.SaveUpdatedPost(updatedPost))
+        } ?: kotlin.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetParcelablePost)
+        }
+    }
+
+    private fun getParcelablePostAndSetIntention() {
+        val post = arguments?.getParcelable<Post>("post")
+
+        if (post == null) {
+            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
+        } else {
+            viewModel.setIntention(PostDetailFragmentEvent.SetPost(post))
+        }
+    }
 }
 
 sealed class PostDetailFragmentEvent {
+    object GetParcelableUpdatedPost : PostDetailFragmentEvent()
+    object GetParcelablePost : PostDetailFragmentEvent()
+
     data class SetPost(val post: Post) : PostDetailFragmentEvent()
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 
+    object HideOptions: PostDetailFragmentEvent()
     object ShowPostOptions : PostDetailFragmentEvent()
-    data class ExecuteOption(val optionPositionIndex: Int): PostDetailFragmentEvent()
+
+    data class ExecuteOption(val optionPositionIndex: Int) : PostDetailFragmentEvent()
+
+    data class SaveUpdatedPost(val editedPost: Post) : PostDetailFragmentEvent()
 
     object GoToProfileFragment : PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()

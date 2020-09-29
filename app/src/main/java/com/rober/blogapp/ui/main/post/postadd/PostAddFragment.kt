@@ -2,6 +2,7 @@ package com.rober.blogapp.ui.main.post.postadd
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -64,18 +66,45 @@ class PostAddFragment : Fragment() {
         viewModel.setIntention(PostAddEvent.LoadUserDetails)
     }
 
-    private fun observeViewModel(){
+    private fun observeViewModel() {
         viewModel.statePost.observe(viewLifecycleOwner, Observer { postAddState ->
             render(postAddState)
         })
     }
 
-    private fun render(postAddState : PostAddState){
-        when(postAddState){
+    private fun render(postAddState: PostAddState) {
+        when (postAddState) {
             is PostAddState.SetUserDetail -> {
                 setUserDetail(postAddState.user)
+                viewModel.setIntention(PostAddEvent.GetPostToEdit)
+//                viewModel.setIntention(PostAddEvent.ReadyToWrite)
+            }
+
+            is PostAddState.GetPostToEdit -> {
+                val isTherePostToEdit = getParcelablePostToEdit()
+
+                if (!isTherePostToEdit) {
+                    viewModel.setIntention(PostAddEvent.ReadyToWrite)
+                }
+            }
+
+            is PostAddState.RenderPostToEditInView -> {
+                renderPostToEditInView(postAddState.post)
                 viewModel.setIntention(PostAddEvent.ReadyToWrite)
             }
+
+            is PostAddState.SaveOrUpdatePost -> {
+                if (postAddState.isPostToUpdate) {
+                    updatePost()
+                } else {
+                    savePost()
+                }
+            }
+
+            is PostAddState.GoToPostDetailAndUpdatePost -> {
+                goToPostDetailFragment(postAddState.post)
+            }
+
             is PostAddState.PostHasBeenSaved -> {
 //                Toast.makeText(requireContext(),"Saved", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), postAddState.messageUtil.message, Toast.LENGTH_SHORT).show()
@@ -83,25 +112,45 @@ class PostAddFragment : Fragment() {
                 viewModel.setIntention(PostAddEvent.Idle)
             }
 
-            is PostAddState.Idle -> {
-                //Nothing
-            }
-
             is PostAddState.ReadyToWrite -> {
                 setViewReadyToWrite()
+            }
+
+            is PostAddState.NotifyErrorFieldValidation -> {
+                Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
+                viewModel.setIntention(PostAddEvent.Idle)
             }
 
             is PostAddState.Error -> {
 //                Toast.makeText(requireContext(),"No saved", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), postAddState.exception.message.toString(), Toast.LENGTH_SHORT).show()
             }
+
+            is PostAddState.Idle -> {
+                //Nothing
+            }
         }
     }
 
-    private fun setUserDetail(user: User){
+    private fun setUserDetail(user: User) {
         Glide.with(requireView())
             .load(user.profileImageUrl)
             .into(post_add_profile_picture)
+    }
+
+    private fun renderPostToEditInView(post: Post) {
+        post_add_title.setText(post.title)
+        post_add_text.setText(post.text)
+    }
+
+    private fun getParcelablePostToEdit(): Boolean {
+        val postToEdit = arguments?.getParcelable<Post>("postToEdit")
+
+        postToEdit?.run {
+            viewModel.setIntention(PostAddEvent.RenderPostToEditInView(this))
+            return true
+        }
+        return false
     }
 
     private fun setupListeners() {
@@ -109,11 +158,11 @@ class PostAddFragment : Fragment() {
             goToFeedFragment()
         }
 
-        top_app_bar.setOnMenuItemClickListener {menuItem ->
-            when(menuItem.itemId){
+        top_app_bar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
                 R.id.save_post -> {
+                    viewModel.setIntention(PostAddEvent.ReadyToSaveOrUpdatePost)
 //                    goToFeedFragment()
-                    savePost()
                     true
                 }
                 else -> {
@@ -123,59 +172,89 @@ class PostAddFragment : Fragment() {
         }
     }
 
-    private fun setViewReadyToWrite(){
+    private fun setViewReadyToWrite() {
         post_add_title.requestFocus()
         //displayKeyBoard(true)
     }
 
-    private fun goToFeedFragment(){
+    private fun goToPostDetailFragment(updatedPost: Post) {
+        displayKeyBoard(false)
+        displayActionBar(false)
+        val updatedPostBundle = bundleOf("updatedPost" to updatedPost)
+        Log.i("SeeGo", "We are going to postdetail")
+        if(findNavController().currentDestination?.id == R.id.postAddFragment){
+            Log.i("SeeGo", "We ARE NOW going to postdetail")
+            findNavController().navigate(R.id.action_postAddFragment_to_postDetailFragment, updatedPostBundle)
+        }
+
+    }
+
+    private fun goToFeedFragment() {
         displayKeyBoard(false)
         displayActionBar(false)
         findNavController().popBackStack()
     }
 
-    private fun displayActionBar(display: Boolean){
-        if(display)
+    private fun displayActionBar(display: Boolean) {
+        if (display)
             (requireActivity() as AppCompatActivity).supportActionBar?.show()
         else
             (requireActivity() as AppCompatActivity).supportActionBar?.hide()
     }
 
-
-    private fun savePost(){
+    private fun updatePost() {
         val title = post_add_title.text.toString()
         val text = post_add_text.text.toString()
-        if(isEmpty(title, text)){
+
+        if (isEmpty(title, text)) {
+            viewModel.setIntention(PostAddEvent.NotifyErrorFieldValidation)
+            return
+        }
+
+        viewModel.setIntention(PostAddEvent.UpdatePost(title, text))
+    }
+
+    private fun savePost() {
+        val title = post_add_title.text.toString()
+        val text = post_add_text.text.toString()
+        if (isEmpty(title, text)) {
             Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
         }
 
-        val post = Post(0, "", title, text, "", Instant.now().epochSecond , 0)
+        val post = Post(0, "", title, text, "", Instant.now().epochSecond, 0)
 
         viewModel.setIntention(PostAddEvent.SavePost(post))
     }
 
-    private fun isEmpty(title: String, text: String): Boolean{
-        if(title.isEmpty() || text.isEmpty()){
+    private fun isEmpty(title: String, text: String): Boolean {
+        if (title.isEmpty() || text.isEmpty()) {
             return true
         }
         return false
     }
 
-    private fun displayKeyBoard(display: Boolean){
-        val imm: InputMethodManager =  context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    private fun displayKeyBoard(display: Boolean) {
+        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
 
-        if(display)
+        if (display)
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         else
             imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 }
 
-sealed class PostAddEvent{
-    object LoadUserDetails: PostAddEvent()
-    object ReadyToWrite: PostAddEvent()
+sealed class PostAddEvent {
+    object LoadUserDetails : PostAddEvent()
 
-    data class SavePost(val post:Post): PostAddEvent()
+    object GetPostToEdit : PostAddEvent()
+    data class RenderPostToEditInView(val post: Post) : PostAddEvent()
+    object ReadyToWrite : PostAddEvent()
 
-    object Idle: PostAddEvent()
+    object ReadyToSaveOrUpdatePost : PostAddEvent()
+    data class UpdatePost(val title: String, val text: String) : PostAddEvent()
+    data class SavePost(val post: Post) : PostAddEvent()
+
+    object NotifyErrorFieldValidation : PostAddEvent()
+
+    object Idle : PostAddEvent()
 }

@@ -19,7 +19,7 @@ class FirebasePostDetailManager @Inject constructor(
 
         val user = firebaseSource.user
 
-        if(user == null){
+        if (user == null) {
             emit(ResultData.Error(Exception("We couldn't report the post sorry"), false))
             return@flow
         }
@@ -60,5 +60,31 @@ class FirebasePostDetailManager @Inject constructor(
             .await()
 
         emit(ResultData.Success(deleted))
+    }
+
+    suspend fun updateEditedPost(post: Post): Flow<ResultData<Boolean>> = flow {
+        val user = firebaseSource.user
+        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
+
+        if (postDocumentUID == null || user == null) {
+            emit(ResultData.Error(Exception("Post couldn't be deleted"), false))
+            return@flow
+        }
+        val mapPostUpdate = mapOf(
+            "text" to post.text,
+            "title" to post.title
+        )
+
+        val postDocumentReference = firebaseSource.db
+            .collection(firebasePath.posts_col).document(postDocumentUID)
+            .collection(firebasePath.user_posts).document(post.postId)
+
+
+        var postUpdated = false
+        postDocumentReference.update(mapPostUpdate)
+            .addOnSuccessListener {  postUpdated = true}
+            .await()
+
+        emit(ResultData.Success(postUpdated))
     }
 }

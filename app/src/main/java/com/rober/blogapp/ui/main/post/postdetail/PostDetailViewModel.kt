@@ -14,6 +14,12 @@ import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.DELETE_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.EDIT_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.FOLLOW_USER
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.REPORT_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.UNFOLLOW_USER
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -76,17 +82,39 @@ class PostDetailViewModel @ViewModelInject constructor(
                 }
             }
 
+            is PostDetailFragmentEvent.HideOptions -> {
+                isOptionsVisible = false
+                _postDetailState.value = PostDetailState.HideOptions
+            }
+
             is PostDetailFragmentEvent.ExecuteOption -> {
+                isOptionsVisible = false
+                _postDetailState.value = PostDetailState.HideOptions
                 val optionPositionIndex = event.optionPositionIndex
                 val option = listOptions[optionPositionIndex]
 
                 viewModelScope.launch {
                     when (option.text) {
-                        "Edit post" -> redirectToEditPostFragment()
-                        "Delete post" -> deletePost()
+                        EDIT_POST -> redirectToEditPostFragment()
+                        DELETE_POST -> deletePost()
+                        REPORT_POST -> reportPost()
+                        FOLLOW_USER -> followUser()
+                        UNFOLLOW_USER -> unfollowUser()
                     }
                 }
+            }
 
+            is PostDetailFragmentEvent.GetParcelableUpdatedPost -> {
+                _postDetailState.value = PostDetailState.GetParcelableUpdatedPost
+            }
+
+            is PostDetailFragmentEvent.GetParcelablePost -> {
+                _postDetailState.value = PostDetailState.GetParcelablePost
+            }
+
+            is PostDetailFragmentEvent.SaveUpdatedPost -> {
+                saveUpdatedPost(event.editedPost)
+                setPost(event.editedPost, event.editedPost.userCreatorId)
             }
         }
     }
@@ -241,8 +269,8 @@ class PostDetailViewModel @ViewModelInject constructor(
         _postDetailState.value = PostDetailState.ShowPostOptions(listOptions)
     }
 
-    private fun redirectToEditPostFragment(){
-        if(user?.user_id != post?.userCreatorId){
+    private fun redirectToEditPostFragment() {
+        if (user?.user_id != post?.userCreatorId) {
             _postDetailState.value = PostDetailState.ErrorExecuteOption
             return
         }
@@ -250,6 +278,28 @@ class PostDetailViewModel @ViewModelInject constructor(
         post?.run {
             _postDetailState.value = PostDetailState.RedirectToEditPost(this)
         }
+    }
+
+    private fun saveUpdatedPost(editedPost: Post) {
+        post = editedPost
+
+        viewModelScope.launch {
+            firebaseRepository.saveEditedPost(editedPost)
+                .collect { resultData ->
+                    when (resultData) {
+                        is ResultData.Success -> {
+                            val hasPostBeenUpdated = resultData.data!!
+
+                            Log.i("SeePostUpdated", "Has been post updated = ${hasPostBeenUpdated}")
+                        }
+
+                        is ResultData.Error -> {
+                            Log.i("SeePostUpdated", "Error updating post")
+                        }
+                    }
+                }
+        }
+
     }
 
     private suspend fun deletePost() {
@@ -272,10 +322,22 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
         job.join()
 
-        if(deletedPost)
+        if (deletedPost)
             _postDetailState.value = PostDetailState.PostDeleted
         else
             _postDetailState.value = PostDetailState.ErrorExecuteOption
+    }
+
+    private fun reportPost() {
+
+    }
+
+    private fun followUser() {
+
+    }
+
+    private fun unfollowUser() {
+
     }
 
     private fun getCurrentUser(): User {
