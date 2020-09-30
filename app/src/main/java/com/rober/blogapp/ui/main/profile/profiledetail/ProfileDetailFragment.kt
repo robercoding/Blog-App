@@ -80,13 +80,19 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     }
 
     private fun getUserArgumentAndSetIntention() {
-        val userName = arguments?.getString("user_id")
+        val user = arguments?.getParcelable<User>("userObject")
 
-        Log.i("ProfileDetailFreeze", "UID is blank? ${userName.isNullOrBlank()}")
-        if (userName.isNullOrBlank()) {
-            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(null))
-        } else {
-            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(userName))
+        user?.run{
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.SetUserObjectDetails(user))
+        }?: kotlin.run {
+
+            val userName = arguments?.getString("userId")
+
+            if (userName.isNullOrBlank()) {
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(null))
+            } else {
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserDetails(userName))
+            }
         }
     }
 
@@ -596,6 +602,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 }
 
 sealed class ProfileDetailFragmentEvent {
+    data class SetUserObjectDetails(val user: User): ProfileDetailFragmentEvent()
     data class LoadUserDetails(val userUID: String? = null) : ProfileDetailFragmentEvent()
     object LoadUserPosts : ProfileDetailFragmentEvent()
     object LoadNewerPosts : ProfileDetailFragmentEvent()

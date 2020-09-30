@@ -46,7 +46,6 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
-//        if(bud)
         post_detail_toolbar.navigationIcon?.setTint(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
     }
 
@@ -68,6 +67,7 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         when (postDetailState) {
 
             is PostDetailState.GetParcelableUpdatedPost -> {
+                enableLoadingPost(true)
                 getParcelableUpdatedPostAndSetIntention()
             }
 
@@ -78,6 +78,7 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
             is PostDetailState.SetPostDetails -> {
                 setPostDetails(postDetailState.post)
                 setUserDetails(postDetailState.user)
+                enableLoadingPost(false)
             }
 
             is PostDetailState.RedirectToEditPost -> {
@@ -200,8 +201,8 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
 
     private fun goToProfileFragment(user: User) {
         val navController = findNavController()
-        val bundle = bundleOf("user_id" to user.user_id)
-        navController.navigate(R.id.profileDetailFragment, bundle)
+        val bundleUserId = bundleOf("userId" to user.user_id)
+        navController.navigate(R.id.profileDetailFragment, bundleUserId)
     }
 
     private fun setupListeners() {
@@ -267,6 +268,10 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         } else {
             viewModel.setIntention(PostDetailFragmentEvent.SetPost(post))
         }
+    }
+
+    private fun enableLoadingPost(display: Boolean){
+        if(display) post_detail_background_loading.visibility = View.VISIBLE else post_detail_background_loading.visibility = View.GONE
     }
 }
 

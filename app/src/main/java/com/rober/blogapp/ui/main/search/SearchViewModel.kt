@@ -1,6 +1,5 @@
 package com.rober.blogapp.ui.main.search
 
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.util.state.DataState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -24,6 +22,7 @@ class SearchViewModel @ViewModelInject constructor(
         get() = _searchState
 
     var user : User? = null
+    var listUsers = mutableListOf<User>()
 
     fun setIntention(event: SearchFragmentEvent){
         when(event){
@@ -35,6 +34,11 @@ class SearchViewModel @ViewModelInject constructor(
 
             is SearchFragmentEvent.ReadySearchUser -> {
                 _searchState.value = SearchState.ReadySearchUser
+            }
+
+            is SearchFragmentEvent.GoToProfileFragment -> {
+                val user = listUsers[event.positionAdapter]
+                _searchState.value = SearchState.GoToProfileFragment(user)
             }
 
             is SearchFragmentEvent.StopSearchUser -> {
@@ -58,15 +62,15 @@ class SearchViewModel @ViewModelInject constructor(
                 viewModelScope.launch {
                     firebaseRepository.getUserByString(searchUsername)
                         .collect {resultData ->
-                            Log.i(TAG, "ResultData: $resultData with letter $searchUsername")
                             when(resultData){
-
                                 is ResultData.Success -> {
-                                    resultData.data?.let {listUsers ->
-                                        if(listUsers.isEmpty())
+                                    resultData.data?.let {resultListUsers ->
+                                        if(resultListUsers.isEmpty())
                                             _searchState.value = SearchState.EmptyResultsSearch(searchUsername)
-                                        else
-                                            _searchState.value = SearchState.ShowResultSearch(listUsers)
+                                        else{
+                                            listUsers = resultListUsers.toMutableList()
+                                            _searchState.value = SearchState.ShowResultSearch(resultListUsers)
+                                        }
                                     }
                                 }
 

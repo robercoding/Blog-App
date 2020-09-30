@@ -97,7 +97,7 @@ constructor
 
                 var countTotalPosts = 0
                 var getPostsTries = 0
-                while (getPostsTries < 5) {
+                while (getPostsTries < 3) {
                     getPostsTries += 1
 
                     if (!newListFollowing.isNullOrEmpty()) {

@@ -355,9 +355,7 @@ class FirebaseProfileDetailManager @Inject constructor(
 
         if (hasUserBeenFollowed) {
             hashMapCurrentUserFollowsOtherUser[otherUser.username] = true
-            firebaseSource.listNewFollowingsUserID.add(otherUser.user_id)
-            if (checkIfNewFollowingHasBeenUnfollowedBefore(otherUser.user_id))
-                removeNewFollowingFromUnfollowing(otherUser.user_id)
+            firebaseSource.addToNewFollowingList(otherUser.user_id)
             updateFollowingCount(true)
         }
 
@@ -480,10 +478,7 @@ class FirebaseProfileDetailManager @Inject constructor(
             if (hashMapCurrentUserFollowsOtherUser.containsKey(otherUser.username))
                 hashMapCurrentUserFollowsOtherUser.remove(otherUser.username)
 
-            if (checkIfNewUnfollowingHasBeenFollowedBefore(otherUser.username))
-                removeNewUnfollowingFromFollowing(otherUser.username)
-
-            firebaseSource.listNewUnfollowingsUsername.add(otherUser.user_id)
+            firebaseSource.addToNewUnfollowingList(otherUser.user_id)
 
             //substract 1 count of following and follower
             updateFollowingCount(false)

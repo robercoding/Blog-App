@@ -54,14 +54,14 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         subscribeObservers()
     }
 
-    private fun subscribeObservers(){
+    private fun subscribeObservers() {
         viewModel.searchState.observe(viewLifecycleOwner, Observer { searchState ->
             render(searchState)
         })
     }
 
-    private fun render(searchState : SearchState){
-        when(searchState){
+    private fun render(searchState: SearchState) {
+        when (searchState) {
             is SearchState.SetUserDetails -> {
                 setUserDetails(searchState.user)
                 setupListeners()
@@ -94,33 +94,37 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
                 search_text_cant_find_user.visibility = View.VISIBLE
             }
 
+            is SearchState.GoToProfileFragment -> {
+                goToProfileFragment(searchState.user)
+            }
+
             is SearchState.Loading -> {
                 //Load
             }
         }
     }
 
-    private fun setUserDetails(user: User){
+    private fun setUserDetails(user: User) {
         Glide.with(requireView())
             .load(user.profileImageUrl)
             .into(search_toolbar_profile_image)
     }
 
-    private fun recyclerAdapterApply(){
+    private fun recyclerAdapterApply() {
         recycler_user_search.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = userSearchAdapter
         }
     }
 
-    private fun setupListeners(){
+    private fun setupListeners() {
         search_user_text.setOnClickListener {
-            if(!alreadyFocusOnSearchText)
+            if (!alreadyFocusOnSearchText)
                 viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
         }
 
         search_user_text.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
-            if(hasFocus){
+            if (hasFocus) {
                 viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
                 alreadyFocusOnSearchText = true
             }
@@ -135,8 +139,8 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
             viewModel.setIntention(SearchFragmentEvent.StopSearchUser)
         }
 
-        search_top_app_bar.setOnMenuItemClickListener {menuItem ->
-            when(menuItem.itemId){
+        search_top_app_bar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
                 R.id.icon_settings -> {
                     findNavController().popBackStack()
                     true
@@ -144,11 +148,10 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
                 else -> true
             }
-
         }
     }
 
-    private fun readySearchUser(){
+    private fun readySearchUser() {
         search_toolbar_profile_image.visibility = View.GONE
         search_top_app_bar.menu.findItem(R.id.icon_settings).isVisible = false
 
@@ -159,7 +162,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         displayBottomNavigation(false)
     }
 
-    private fun stopSearchUser(){
+    private fun stopSearchUser() {
         textSearch = search_user_text.text.toString()
         alreadyFocusOnSearchText = false
 
@@ -174,44 +177,51 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         search_arrow_back.visibility = View.GONE
     }
 
-    private fun enableSearchUserEditText(enabled: Boolean){
-        if (enabled){
+    private fun enableSearchUserEditText(enabled: Boolean) {
+        if (enabled) {
             search_user_text.requestFocus()
             search_user_text.setText(textSearch)
             search_user_text.setSelection(textSearch.length)
-        }else{
+        } else {
             search_user_text.setText("")
             search_user_text.clearFocus()
         }
     }
 
-    private fun displayBottomNavigation(display: Boolean){
-        val navController = activity?.bottom_navigation ?: return
-        if(display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
+    private fun goToProfileFragment(user: User) {
+//        val userId = listUsers[positionAdapter].user_id
+
+        val navController = findNavController()
+        val bundleUserObject = bundleOf("userObject" to user)
+        hideKeyBoard()
+        navController.navigate(R.id.action_searchFragment_to_profileFragment, bundleUserObject)
     }
 
-    private fun hideKeyBoard(){
-        val imm: InputMethodManager =  context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    private fun displayBottomNavigation(display: Boolean) {
+        val navController = activity?.bottom_navigation ?: return
+        if (display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
+    }
+
+    private fun hideKeyBoard() {
+        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {}
 
     override fun clickListenerOnUser(positionAdapter: Int) {
-        val user_id = listUsers[positionAdapter].user_id
+        viewModel.setIntention(SearchFragmentEvent.GoToProfileFragment(positionAdapter))
 
-        val navController = findNavController()
-        val bundle_user_id = bundleOf("user_id" to user_id)
-        hideKeyBoard()
-        navController.navigate(R.id.action_searchFragment_to_profileFragment, bundle_user_id)
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
 }
 
-sealed class SearchFragmentEvent(){
-    object LoadUserDetails: SearchFragmentEvent()
+sealed class SearchFragmentEvent() {
+    object LoadUserDetails : SearchFragmentEvent()
     data class RetrieveUserByUsername(val searchUsername: String) : SearchFragmentEvent()
     object ReadySearchUser : SearchFragmentEvent()
     object StopSearchUser : SearchFragmentEvent()
+
+    data class GoToProfileFragment(val positionAdapter: Int) : SearchFragmentEvent()
 }

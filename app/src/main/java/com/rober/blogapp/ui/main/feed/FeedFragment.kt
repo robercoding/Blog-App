@@ -329,8 +329,8 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
 
     private fun goToProfileDetailsFragment(user_id: String) {
         val navController = findNavController()
-        val bundle_user_id = bundleOf("user_id" to user_id)
-        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundle_user_id)
+        val bundleUserId = bundleOf("userId" to user_id)
+        navController.navigate(R.id.action_feedFragment_to_profileFragment, bundleUserId)
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {

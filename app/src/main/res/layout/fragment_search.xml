@@ -14,7 +14,13 @@
         android:background="@color/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+<!--        <EditText-->
+<!--            android:layout_width="1dp"-->
+<!--            android:layout_height="1dp"-->
+<!--            android:visibility="invisible"/>-->
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/search_top_app_bar"

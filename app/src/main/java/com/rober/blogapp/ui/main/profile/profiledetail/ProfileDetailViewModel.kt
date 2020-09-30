@@ -52,16 +52,29 @@ class ProfileDetailViewModel
 
     fun setIntention(event: ProfileDetailFragmentEvent) {
         when (event) {
+            is ProfileDetailFragmentEvent.SetUserObjectDetails -> {
+                user = event.user
+                viewModelScope.launch {
+                    user?.run {
+                        setUserObjectDetails(this)
+                    } ?: kotlin.run {
+                        _profileDetailState.value = ProfileDetailState.PopBackStack
+                    }
+                }
+            }
+
             is ProfileDetailFragmentEvent.LoadUserDetails -> {
                 if (event.userUID.isNullOrBlank()) {
                     getCurrentUser()
                     //getCurrentUserPosts()
                 } else {
-                    val isUserCurrentUser = checkIfUserIsCurrentUser(event.userUID)
-                    if (isUserCurrentUser)
-                        getCurrentUser()
-                    else
-                        getUserProfile(event.userUID)
+                    viewModelScope.launch {
+                        val isUserCurrentUser = checkIfUserIsCurrentUser(event.userUID)
+                        if (isUserCurrentUser)
+                            getCurrentUser()
+                        else
+                            getUserProfile(event.userUID)
+                    }
                 }
             }
 
@@ -80,7 +93,7 @@ class ProfileDetailViewModel
             is ProfileDetailFragmentEvent.LoadBackgroundImage -> {
                 user?.run {
                     _profileDetailState.value = ProfileDetailState.LoadBackgroundImage(backgroundImageUrl)
-                }?: kotlin.run {
+                } ?: kotlin.run {
                     _profileDetailState.value = ProfileDetailState.Idle
                 }
             }
@@ -88,13 +101,13 @@ class ProfileDetailViewModel
             is ProfileDetailFragmentEvent.LoadProfileImage -> {
                 user?.run {
                     _profileDetailState.value = ProfileDetailState.LoadProfileImage(profileImageUrl)
-                }?: kotlin.run {
+                } ?: kotlin.run {
                     _profileDetailState.value = ProfileDetailState.Idle
                 }
             }
 
             is ProfileDetailFragmentEvent.Follow -> {
-                if(!isUserFollowingInAction) {
+                if (!isUserFollowingInAction) {
                     isUserFollowingInAction = true
                     user?.let {
                         followOtherUser()
@@ -106,7 +119,7 @@ class ProfileDetailViewModel
             }
 
             is ProfileDetailFragmentEvent.Unfollow -> {
-                if(!isUserUnfollowingInAction){
+                if (!isUserUnfollowingInAction) {
                     isUserUnfollowingInAction = true
                     user?.let {
                         unfollowOtherUser()
@@ -139,12 +152,40 @@ class ProfileDetailViewModel
         }
     }
 
+    private suspend fun setUserObjectDetails(user: User) {
+        _profileDetailState.value = ProfileDetailState.LoadingUser
+
+        val isUserTheCurrentUser = checkIfUserIsCurrentUser(user.user_id)
+
+
+        if (isUserTheCurrentUser)
+            PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
+        else{
+            currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(user.user_id)
+            PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
+        }
+
+        if (user.backgroundImageUrl.isEmpty()) {
+            bitmap = createBitmapOrangeScreen()
+
+            bitmap?.also { tempBitmap ->
+                setUserDetails(user, tempBitmap)
+            } ?: kotlin.run {
+                _profileDetailState.value = ProfileDetailState.PopBackStack
+            }
+
+        } else {
+            getBitmapFromUrl(user.backgroundImageUrl)
+        }
+    }
+
     private fun getCurrentUser() {
         _profileDetailState.value = ProfileDetailState.LoadingUser
+
         PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
         user = firebaseRepository.getCurrentUser()
 
-        user?.let {tempUser->
+        user?.let { tempUser ->
             if (tempUser.backgroundImageUrl.isEmpty()) {
                 val bitmapOrangeScreen = createBitmapOrangeScreen()
                 _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
@@ -157,10 +198,10 @@ class ProfileDetailViewModel
         }
     }
 
-    private fun checkIfUserIsCurrentUser(userUID: String): Boolean {
+    private suspend fun checkIfUserIsCurrentUser(userUID: String): Boolean {
         var isUserCurrentUser = false
 
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             firebaseRepository.getCurrentUserProfileDetail()
                 .collect { resultData ->
                     when (resultData) {
@@ -174,6 +215,7 @@ class ProfileDetailViewModel
                     }
                 }
         }
+        job.join()
         return isUserCurrentUser
     }
 
@@ -204,7 +246,8 @@ class ProfileDetailViewModel
             user?.let { tempUser ->
                 if (tempUser.backgroundImageUrl.isEmpty()) {
                     val bitmapOrangeScreen = createBitmapOrangeScreen()
-                    _profileDetailState.value = ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, bitmapOrangeScreen)
+                    _profileDetailState.value =
+                        ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, bitmapOrangeScreen)
                 } else {
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 }
@@ -220,26 +263,34 @@ class ProfileDetailViewModel
     }
 
     override fun processFinish(processedBitmap: Bitmap?) {
+
         user?.also { tempUser ->
             processedBitmap?.also { tempProcessedBitmap ->
                 bitmap = tempProcessedBitmap
-
-                if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
-                    _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, processedBitmap)
-                } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
-                    _profileDetailState.value =
-                        ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, processedBitmap)
-                }
+                setUserDetails(tempUser, tempProcessedBitmap)
 
             } ?: kotlin.run {
                 val bitmapOrangeScreen = createBitmapOrangeScreen()
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+                bitmap = bitmapOrangeScreen
+                setUserDetails(tempUser, bitmapOrangeScreen)
+//                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
             }
         }
     }
 
     private fun createBitmapOrangeScreen(): Bitmap =
         BitmapFactory.decodeResource(application.applicationContext.resources, R.drawable.blue_screen)
+
+    private fun setUserDetails(user: User, bitmap: Bitmap) {
+        if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
+            _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(user, bitmap)
+        } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
+            _profileDetailState.value =
+                ProfileDetailState.SetOtherUserProfile(user, currentUserFollowsOtherUser, bitmap)
+        } else {
+            _profileDetailState.value = ProfileDetailState.PopBackStack
+        }
+    }
 
 //    private fun getDominantColorFromBitmap(bitmap: Bitmap) {
 //
@@ -261,7 +312,7 @@ class ProfileDetailViewModel
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                resultData.data?.also {tempUserPosts->
+                                resultData.data?.also { tempUserPosts ->
                                     userPosts = tempUserPosts.toMutableList()
                                 }
                                 _profileDetailState.value =
@@ -282,7 +333,7 @@ class ProfileDetailViewModel
 
     private fun getNewerPosts() {
         viewModelScope.launch {
-            user?.also {tempUser->
+            user?.also { tempUser ->
                 previousBackgroundImageUrl = tempUser.backgroundImageUrl
             }
             user = firebaseRepository.getCurrentUserRefreshed()

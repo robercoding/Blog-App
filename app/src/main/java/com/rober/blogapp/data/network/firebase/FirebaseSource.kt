@@ -240,4 +240,42 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
+    fun addToNewFollowingList(userUID: String){
+        val userIsAlreadyOnNewFollowing = listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
+
+        if(userIsAlreadyOnNewFollowing != null) {
+            return
+        }
+
+        val userIsAlreadyOnNewUnfollowing = listNewUnfollowingsUsername.find { newUnfollowingUserUID ->  newUnfollowingUserUID == userUID }
+
+        if(userIsAlreadyOnNewUnfollowing != null){
+            listNewUnfollowingsUsername.remove(userUID)
+        }
+
+        val userIsAlreadyFollowing = followingList?.find { following-> following.following_id == userUID }
+
+        if(userIsAlreadyFollowing != null){
+            return
+        }
+
+        listNewFollowingsUserID.add(userUID)
+    }
+
+    fun addToNewUnfollowingList(userUID: String){
+        val userIsAlreadyOnNewFollowing = listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
+
+        if(userIsAlreadyOnNewFollowing != null) {
+            listNewFollowingsUserID.remove(userUID)
+
+        }
+
+        val userIsAlreadyOnNewUnfollowing = listNewUnfollowingsUsername.find { newUnfollowingUserUID ->  newUnfollowingUserUID == userUID }
+
+        if(userIsAlreadyOnNewUnfollowing != null){
+            return
+        }
+
+        listNewUnfollowingsUsername.add(userUID)
+    }
 }

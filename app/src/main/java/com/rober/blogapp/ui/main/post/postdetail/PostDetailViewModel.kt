@@ -100,7 +100,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                         DELETE_POST -> deletePost()
                         REPORT_POST -> reportPost()
                         FOLLOW_USER -> followUser(userPost)
-                        UNFOLLOW_USER -> unfollowUser()
+                        UNFOLLOW_USER -> unfollowUser(userPost)
                     }
                 }
             }
@@ -292,12 +292,9 @@ class PostDetailViewModel @ViewModelInject constructor(
                     when (resultData) {
                         is ResultData.Success -> {
                             hasPostBeenUpdated = resultData.data!!
-
-                            Log.i("SeePostUpdated", "Has been post updated = ${hasPostBeenUpdated}")
                         }
 
                         is ResultData.Error -> {
-                            Log.i("SeePostUpdated", "Error updating post")
                         }
                     }
                 }
@@ -343,7 +340,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     private suspend fun followUser(userToFollow: User?) {
 
         if(userToFollow == null){
-            _postDetailState.value = PostDetailState.Idle
+            _postDetailState.value = PostDetailState.Error(Exception("There was an error when trying to follow the user"))
             return
         }
 
@@ -366,12 +363,37 @@ class PostDetailViewModel @ViewModelInject constructor(
         if(followedUser) {
             _postDetailState.value = PostDetailState.NotifyUser("Succesfully followed")
         }else{
-            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to follow the userPost")
+            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to follow the user")
         }
     }
 
-    private fun unfollowUser() {
+    private suspend fun unfollowUser(userToUnfollow: User?) {
+        if(userToUnfollow == null){
+            _postDetailState.value = PostDetailState.Error(Exception("There was an error when trying to unfollow the user"))
+            return
+        }
 
+        var unfollowedUser = false
+        val job = viewModelScope.launch {
+            firebaseRepository.unfollowOtherUser(userToUnfollow)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            unfollowedUser = resultData.data!!
+                        }
+                        is ResultData.Error -> {
+                            _postDetailState.value = PostDetailState.Idle
+                        }
+                    }
+                }
+        }
+        job.join()
+
+        if(unfollowedUser) {
+            _postDetailState.value = PostDetailState.NotifyUser("Succesfully unfollowed")
+        }else{
+            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to unfollow the user")
+        }
     }
 
     private fun getCurrentUser(): User {
