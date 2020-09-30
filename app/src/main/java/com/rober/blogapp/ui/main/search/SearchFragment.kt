@@ -95,6 +95,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
             }
 
             is SearchState.GoToProfileFragment -> {
+                textSearch = search_user_text.text.toString()
                 goToProfileFragment(searchState.user)
             }
 
