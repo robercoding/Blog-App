@@ -142,7 +142,6 @@ class PostDetailViewModel @ViewModelInject constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> tempUser = resultData.data!!
-
                     }
                 }
         }

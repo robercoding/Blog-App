@@ -66,14 +66,19 @@ constructor
             removeUnfollowingsFromLocalLists()
         }
 
+        if(checkIfCurrentUserDeletedPosts()){
+            removeDeletedPostsFromLocal()
+        }
+
         if (!savedFeedListPosts.isNullOrEmpty()) { //Send listPosts if there's already posts saved in cache
             emit(ResultData.Success(savedFeedListPosts))
         } else { //Get posts every 30 days
             //If dateNewer is not null, then set from datenewer and rest days
-            dateToRetrieveNewerPostsEpochSeconds?.also {tempDateToRetrieveNewerPostsEpochSeconds->
+            dateToRetrieveNewerPostsEpochSeconds?.also { tempDateToRetrieveNewerPostsEpochSeconds ->
                 dateLessThanEpochSeconds = Instant.ofEpochSecond(tempDateToRetrieveNewerPostsEpochSeconds).epochSecond
-                dateGreaterThanEpochSeconds = Instant.ofEpochSecond(tempDateToRetrieveNewerPostsEpochSeconds).minus(restDays + 30, ChronoUnit.DAYS).epochSecond
-            }?: kotlin.run {
+                dateGreaterThanEpochSeconds = Instant.ofEpochSecond(tempDateToRetrieveNewerPostsEpochSeconds)
+                    .minus(restDays + 30, ChronoUnit.DAYS).epochSecond
+            } ?: kotlin.run {
                 dateToRetrieveNewerPostsEpochSeconds = Instant.now().epochSecond
                 dateLessThanEpochSeconds = Instant.now().minus(restDays, ChronoUnit.DAYS).epochSecond
                 dateGreaterThanEpochSeconds = Instant.now().minus(restDays + 30, ChronoUnit.DAYS).epochSecond
@@ -229,7 +234,7 @@ constructor
 
             if (listUserPosts.isNotEmpty()) {
                 var mapSavedPostsFromUserLoggedIn = mutableListOf<Post>()
-                if(savedFeedHashMapPosts.containsKey(user.user_id))
+                if (savedFeedHashMapPosts.containsKey(user.user_id))
                     mapSavedPostsFromUserLoggedIn.addAll(savedFeedHashMapPosts.getValue(user.user_id))
                 mapSavedPostsFromUserLoggedIn.addAll(listUserPosts)
                 mapSavedPostsFromUserLoggedIn =
@@ -536,7 +541,25 @@ constructor
         }
     }
 
-    fun cleanListsAndMapsLocalDatabase(){
+    private fun checkIfCurrentUserDeletedPosts(): Boolean {
+        return firebaseSource.listPostsDeleted.size > 0
+    }
+
+    //Delete local posts from maps and lists
+    private fun removeDeletedPostsFromLocal() {
+        for (post in firebaseSource.listPostsDeleted) {
+
+            if (savedFeedHashMapPosts.containsKey(post.userCreatorId)) {
+                savedFeedHashMapPosts[post.userCreatorId]?.remove(post)
+            }
+
+            if (savedFeedListPosts.contains(post)) {
+                savedFeedListPosts.remove(post)
+            }
+        }
+    }
+
+    fun cleanListsAndMapsLocalDatabase() {
         savedFeedHashMapPosts.clear()
 
         savedFeedListPosts.clear()

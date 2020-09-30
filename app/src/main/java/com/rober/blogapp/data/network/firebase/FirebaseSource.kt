@@ -31,6 +31,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     var userDocumentUID: UserDocumentUID? = null
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
+    var listPostsDeleted = mutableListOf<Post>()
 
     var userChangedUsername = false
     var usernameBeforeChange = ""

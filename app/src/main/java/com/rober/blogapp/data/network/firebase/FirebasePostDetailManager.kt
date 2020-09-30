@@ -59,6 +59,9 @@ class FirebasePostDetailManager @Inject constructor(
             }
             .await()
 
+        if(deleted){
+            firebaseSource.listPostsDeleted.add(post)
+        }
         emit(ResultData.Success(deleted))
     }
 
