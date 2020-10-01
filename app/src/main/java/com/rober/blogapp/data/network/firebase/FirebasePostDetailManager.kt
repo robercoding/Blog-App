@@ -20,7 +20,12 @@ class FirebasePostDetailManager @Inject constructor(
         val user = firebaseSource.user
 
         if (user == null) {
-            emit(ResultData.Error(Exception("We couldn't report the post sorry"), false))
+            emit(ResultData.Error(Exception("We couldn't report the post due to an error, sorry."), false))
+            return@flow
+        }
+
+        if(checkIfUserAlreadyReportedThePost(post.postId, user.user_id)){
+            emit(ResultData.Error(Exception("Thank you for submitting a report, but you already reported this post!"), false))
             return@flow
         }
 
@@ -35,11 +40,37 @@ class FirebasePostDetailManager @Inject constructor(
             }.await()
 
 
-        if(savedReport){
+        if (savedReport) {
             emit(ResultData.Success(savedReport))
-        }else{
+        } else {
             emit(ResultData.Error(Exception("There was an error reporting the post, try again later"), false))
         }
+    }
+
+    private suspend fun checkIfUserAlreadyReportedThePost(postID: String, userID: String): Boolean {
+
+        val reportUserCollection =
+            firebaseSource.db.collection(firebasePath.reports_col).document(userID).collection(firebasePath.posts_reports)
+
+        var reportedPost = false
+        reportUserCollection.whereEqualTo("reportedPostId", postID)
+            .get()
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    reportedPost = false
+                }
+
+                task.result?.run {
+                    if(documents.size >= 1){
+                        reportedPost = true
+                    }
+                }?: kotlin.run {
+                    reportedPost = false
+                }
+            }
+            .await()
+
+        return reportedPost
     }
 
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = flow {
@@ -64,7 +95,7 @@ class FirebasePostDetailManager @Inject constructor(
             }
             .await()
 
-        if(deleted){
+        if (deleted) {
             firebaseSource.listPostsDeleted.add(post)
         }
         emit(ResultData.Success(deleted))
@@ -90,7 +121,7 @@ class FirebasePostDetailManager @Inject constructor(
 
         var postUpdated = false
         postDocumentReference.update(mapPostUpdate)
-            .addOnSuccessListener {  postUpdated = true}
+            .addOnSuccessListener { postUpdated = true }
             .await()
 
         emit(ResultData.Success(postUpdated))

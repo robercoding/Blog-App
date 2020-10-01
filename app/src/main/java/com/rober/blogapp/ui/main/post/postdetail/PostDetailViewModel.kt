@@ -364,7 +364,8 @@ class PostDetailViewModel @ViewModelInject constructor(
                         }
 
                         is ResultData.Error -> {
-
+                            val exception = resultData.exception
+                            _postDetailState.value = PostDetailState.Error(exception)
                         }
                     }
                 }

@@ -27,6 +27,7 @@ import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
+import com.rober.blogapp.util.EmojiUtils
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_report_post.*
@@ -132,6 +133,10 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
 
             is PostDetailState.NotifyUser -> {
                 Toast.makeText(requireContext(), "${postDetailState.message}", Toast.LENGTH_SHORT).show()
+            }
+
+            is PostDetailState.Error -> {
+                Toast.makeText(requireContext(), "${postDetailState.exception.message}", Toast.LENGTH_SHORT).show()
             }
 
             is PostDetailState.Idle -> {
