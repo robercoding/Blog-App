@@ -19,8 +19,8 @@ constructor(
     private val firebasePostDetailManager: FirebasePostDetailManager,
     private val firebaseSearchManager: FirebaseSearchManager,
     private val firebaseProfileDetailManager: FirebaseProfileDetailManager,
-    private val firebaseProfileEditManager: FirebaseProfileEditManager
-
+    private val firebaseProfileEditManager: FirebaseProfileEditManager,
+    private val firebaseSettingsManager: FirebaseSettingsManager
 ) {
     val TAG = "FirebaseRepository"
 

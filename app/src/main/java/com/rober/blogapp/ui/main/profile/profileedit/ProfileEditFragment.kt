@@ -219,7 +219,7 @@ class ProfileEditFragment : Fragment() {
 
     private fun navigateToProfileDetail() {
         val navController = findNavController()
-        navController.navigate(R.id.action_profileEditFragment_to_profileDetailFragment)
+        navController.popBackStack()
     }
 
     private fun getImageFromGallery() {
