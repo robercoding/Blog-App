@@ -39,6 +39,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     private var userPost: User? = null
     private var post: Post? = null
     private var isOptionsVisible = false
+    private var isOptionReportDialogOpen = false
 
     private var listOptionsIcons = listOf<Int>()
     private var listOptionsText = listOf<String>()
@@ -98,11 +99,23 @@ class PostDetailViewModel @ViewModelInject constructor(
                     when (option.text) {
                         EDIT_POST -> redirectToEditPostFragment()
                         DELETE_POST -> deletePost()
-                        REPORT_POST -> reportPost()
+                        REPORT_POST -> openReportDialog()
                         FOLLOW_USER -> followUser(userPost)
                         UNFOLLOW_USER -> unfollowUser(userPost)
                     }
                 }
+            }
+
+            is PostDetailFragmentEvent.SendReport -> {
+                post?.also {tempPost->
+                    reportPost(tempPost, event.reportCause, event.message)
+                }
+
+            }
+
+            is PostDetailFragmentEvent.CancelReport -> {
+                isOptionReportDialogOpen = false
+                _postDetailState.value = PostDetailState.Idle
             }
 
             is PostDetailFragmentEvent.GetParcelableUpdatedPost -> {
@@ -333,8 +346,30 @@ class PostDetailViewModel @ViewModelInject constructor(
             _postDetailState.value = PostDetailState.ErrorExecuteOption
     }
 
-    private fun reportPost() {
+    private fun openReportDialog(){
+        if(!isOptionReportDialogOpen){
+            isOptionReportDialogOpen = true
+            _postDetailState.value = PostDetailState.OpenDialogReport
+        }
 
+    }
+
+    private fun reportPost(post: Post, reportCause: String, message: String) {
+        viewModelScope.launch {
+            firebaseRepository.reportPost(post, reportCause, message)
+                .collect {resultData ->
+                    when(resultData){
+                        is ResultData.Success -> {
+                            _postDetailState.value = PostDetailState.NotifyUser("Post has been successfully reported!")
+                        }
+
+                        is ResultData.Error -> {
+
+                        }
+                    }
+                }
+        }
+        isOptionReportDialogOpen = false
     }
 
     private suspend fun followUser(userToFollow: User?) {

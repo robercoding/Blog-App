@@ -16,6 +16,7 @@ sealed class PostDetailState {
 
     object HideOptions: PostDetailState()
     data class ShowPostOptions(val listOptions: List<Option>): PostDetailState()
+    object OpenDialogReport: PostDetailState()
     object PostDeleted : PostDetailState()
     object ErrorExecuteOption: PostDetailState()
 

@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.DisplayMetrics
@@ -13,10 +14,12 @@ import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.get
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
@@ -26,6 +29,8 @@ import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.dialog_report_post.*
+import kotlinx.android.synthetic.main.dialog_report_post.view.*
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -111,6 +116,10 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
                     Toast.LENGTH_SHORT
                 ).show()
                 moveToFeedFragment()
+            }
+
+            is PostDetailState.OpenDialogReport -> {
+                openDialogReport()
             }
 
             is PostDetailState.HideOptions -> {
@@ -205,6 +214,28 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         navController.navigate(R.id.profileDetailFragment, bundleUserId)
     }
 
+    private fun openDialogReport(){
+        val viewLayout = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_report_post, null)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+
+        dialog.setView(viewLayout)
+            .setBackground(ContextCompat.getDrawable(requireContext(), R.color.background))
+            .setPositiveButton(R.string.dialog_positive_button, object: DialogInterface.OnClickListener{
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    val reportCause = viewLayout.dialog_report_spinner.selectedItem as String
+                    val message = viewLayout.dialog_report_message_box.text.toString()
+                    viewModel.setIntention(PostDetailFragmentEvent.SendReport(reportCause, message))
+                }
+            })
+            .setNegativeButton(R.string.dialog_negative_button, object: DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    viewModel.setIntention(PostDetailFragmentEvent.CancelReport)
+                    dialog?.dismiss()
+                }
+            })
+            .show()
+    }
+
     private fun setupListeners() {
         post_detail_toolbar.setNavigationOnClickListener {
             viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
@@ -289,6 +320,9 @@ sealed class PostDetailFragmentEvent {
     data class ExecuteOption(val optionPositionIndex: Int) : PostDetailFragmentEvent()
 
     data class SaveUpdatedPost(val editedPost: Post) : PostDetailFragmentEvent()
+
+    object CancelReport: PostDetailFragmentEvent()
+    data class SendReport(val reportCause:String, val message: String): PostDetailFragmentEvent()
 
     object GoToProfileFragment : PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()

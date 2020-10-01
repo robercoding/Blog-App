@@ -15,4 +15,15 @@
     <string name="sign_up">SIGN UP</string>
     <string name="sign_up_with_email">Sign up with email</string>
     <string name="sign_up_with_google">Sign up with Google</string>
+
+    <!--    Dialog Report Post    -->
+    <string name="dialog_report_title">Report post</string>
+    <string name="dialog_report_title_spinner">"Help us understand what's the problem. What is going on with this Post?"</string>
+    <string name="dialog_report_title_message_box">"Could you give us a brief description of the problem with the Post?"</string>
+    <string name="dialog_spinner_option_spam">"It's suspicious or spam"</string>
+    <string name="dialog_spinner_option_harmful">"It's abusive or harmful"</string>
+
+    <string name="dialog_positive_button">Send report</string>
+    <string name="dialog_negative_button">Cancel</string>
+
 </resources>

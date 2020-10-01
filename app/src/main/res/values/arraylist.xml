@@ -35,4 +35,9 @@
         <item>@drawable/ic_unfollow</item>
     </array>
 
+    <string-array name="list_dialog_report">
+        <item>@string/dialog_spinner_option_spam</item>
+        <item>@string/dialog_spinner_option_harmful</item>
+    </string-array>
+
 </resources>

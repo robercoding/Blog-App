@@ -34,7 +34,12 @@ class FirebasePostDetailManager @Inject constructor(
                 savedReport = true
             }.await()
 
-        emit(ResultData.Success(savedReport))
+
+        if(savedReport){
+            emit(ResultData.Success(savedReport))
+        }else{
+            emit(ResultData.Error(Exception("There was an error reporting the post, try again later"), false))
+        }
     }
 
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = flow {
