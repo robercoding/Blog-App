@@ -117,7 +117,7 @@ class LoginFragment : Fragment() {
     private fun goToMainFragments() {
         val navController: NavController = findNavController()
 
-        navController.navigate(R.id.feedFragment)
+        navController.navigate(R.id.settingsFragment)
     }
 
     private fun goToRegisterFragment() {

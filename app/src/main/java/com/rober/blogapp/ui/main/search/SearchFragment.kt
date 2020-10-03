@@ -212,10 +212,11 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
     override fun clickListenerOnUser(positionAdapter: Int) {
         viewModel.setIntention(SearchFragmentEvent.GoToProfileFragment(positionAdapter))
-
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
+
+    override fun clickListenerOnSettings(positionAdapter: Int) {}
 }
 
 sealed class SearchFragmentEvent() {

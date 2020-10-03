@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 interface RecyclerViewActionInterface{
     fun clickListenerOnPost(positionAdapter: Int)
     fun clickListenerOnUser(positionAdapter: Int)
+    fun clickListenerOnSettings(positionAdapter: Int)
 
     fun requestMorePosts(actualRecyclerViewPosition: Int)
 }

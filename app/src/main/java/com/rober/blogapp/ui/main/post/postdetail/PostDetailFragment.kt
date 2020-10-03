@@ -37,7 +37,7 @@ import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 
 @AndroidEntryPoint
-class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
+class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
 
     private val viewModel: PostDetailViewModel by viewModels()
 
@@ -219,20 +219,20 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         navController.navigate(R.id.profileDetailFragment, bundleUserId)
     }
 
-    private fun openDialogReport(){
+    private fun openDialogReport() {
         val viewLayout = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_report_post, null)
         val dialog = MaterialAlertDialogBuilder(requireContext())
 
         dialog.setView(viewLayout)
             .setBackground(ContextCompat.getDrawable(requireContext(), R.color.background))
-            .setPositiveButton(R.string.dialog_positive_button, object: DialogInterface.OnClickListener{
+            .setPositiveButton(R.string.dialog_positive_button, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     val reportCause = viewLayout.dialog_report_spinner.selectedItem as String
                     val message = viewLayout.dialog_report_message_box.text.toString()
                     viewModel.setIntention(PostDetailFragmentEvent.SendReport(reportCause, message))
                 }
             })
-            .setNegativeButton(R.string.dialog_negative_button, object: DialogInterface.OnClickListener {
+            .setNegativeButton(R.string.dialog_negative_button, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     viewModel.setIntention(PostDetailFragmentEvent.CancelReport)
                     dialog?.dismiss()
@@ -306,8 +306,13 @@ class PostDetailFragment : BaseFragment(), OnListOptionsClickInterface {
         }
     }
 
-    private fun enableLoadingPost(display: Boolean){
-        if(display) post_detail_background_loading.visibility = View.VISIBLE else post_detail_background_loading.visibility = View.GONE
+    private fun enableLoadingPost(display: Boolean) {
+        if (display) post_detail_background_loading.visibility =
+            View.VISIBLE else post_detail_background_loading.visibility = View.GONE
+    }
+
+    private fun getEmoji(codePoint: Int) {
+
     }
 }
 
@@ -319,15 +324,15 @@ sealed class PostDetailFragmentEvent {
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 
-    object HideOptions: PostDetailFragmentEvent()
+    object HideOptions : PostDetailFragmentEvent()
     object ShowPostOptions : PostDetailFragmentEvent()
 
     data class ExecuteOption(val optionPositionIndex: Int) : PostDetailFragmentEvent()
 
     data class SaveUpdatedPost(val editedPost: Post) : PostDetailFragmentEvent()
 
-    object CancelReport: PostDetailFragmentEvent()
-    data class SendReport(val reportCause:String, val message: String): PostDetailFragmentEvent()
+    object CancelReport : PostDetailFragmentEvent()
+    data class SendReport(val reportCause: String, val message: String) : PostDetailFragmentEvent()
 
     object GoToProfileFragment : PostDetailFragmentEvent()
     object GoBackToPreviousFragment : PostDetailFragmentEvent()

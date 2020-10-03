@@ -599,6 +599,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
         //
     }
+
+    override fun clickListenerOnSettings(positionAdapter: Int) {
+        //
+    }
 }
 
 sealed class ProfileDetailFragmentEvent {

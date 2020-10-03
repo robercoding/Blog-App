@@ -28,7 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
+class FeedFragment : Fragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
 
 
     private val TAG: String = "FeedFragment"
@@ -327,6 +327,10 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         viewModel.setIntention(FeedFragmentEvent.GoToProfileDetailsFragment(positionAdapter))
     }
 
+    override fun clickListenerOnSettings(positionAdapter: Int) {
+        //
+    }
+
     private fun goToProfileDetailsFragment(user_id: String) {
         val navController = findNavController()
         val bundleUserId = bundleOf("userId" to user_id)
@@ -352,6 +356,10 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
     override fun onResume() {
         super.onResume()
         Log.i("CheckFirebaseBug", "We on resume check everything")
+    }
+
+    private fun getEmoji(codePoint: Int){
+
     }
 }
 
