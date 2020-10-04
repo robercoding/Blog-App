@@ -24,7 +24,8 @@ class OnTouchListener constructor(val rootView: View, val iOnTouchListenerDelega
 
 
             val rectEditButton = Rect()
-            val profileEditButtonVisible = rootView.profile_detail_button_edit.getGlobalVisibleRect(rectEditButton)
+            val profileEditButtonVisible =
+                rootView.profile_detail_button_edit.getGlobalVisibleRect(rectEditButton)
 
             if (profileEditButtonVisible) {
                 iOnTouchListenerDelegate.setRippleEffectIfTouch(
@@ -35,7 +36,8 @@ class OnTouchListener constructor(val rootView: View, val iOnTouchListenerDelega
             }
 
             val rectFollowButton = Rect()
-            val profileFollowButtonVisible = rootView.profile_detail_button_edit.getGlobalVisibleRect(rectFollowButton)
+            val profileFollowButtonVisible =
+                rootView.profile_detail_button_edit.getGlobalVisibleRect(rectFollowButton)
 
             if (profileFollowButtonVisible) {
                 iOnTouchListenerDelegate.setRippleEffectIfTouch(
@@ -46,7 +48,8 @@ class OnTouchListener constructor(val rootView: View, val iOnTouchListenerDelega
             }
 
             val rectArrowButton = Rect()
-            val profileRectArrowButton = rootView.profile_detail_arrow_back.getGlobalVisibleRect(rectArrowButton)
+            val profileRectArrowButton =
+                rootView.profile_detail_arrow_back.getGlobalVisibleRect(rectArrowButton)
             if (profileRectArrowButton) {
                 iOnTouchListenerDelegate.setRippleEffectIfTouch(
                     rootView.profile_detail_arrow_back,
@@ -79,30 +82,52 @@ class OnTouchListener constructor(val rootView: View, val iOnTouchListenerDelega
                         rootView.uid_image,
                         touchCoordinateX,
                         touchCoordinateY
-                    )-> {
+                    ) -> {
                         iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.LoadProfileImage)
+                    }
+                    iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(
+                        rootView.profile_detail_settings,
+                        touchCoordinateX,
+                        touchCoordinateY
+                    ) -> {
+                        iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.NavigateToSettings)
                     }
                     iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(
                         rootView.profile_detail_image_background_clear,
                         touchCoordinateX,
                         touchCoordinateY
-                    )-> {
+                    ) -> {
                         iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.LoadBackgroundImage)
                     }
                 }
             }
 
-            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(rootView.uid_image, touchCoordinateX, touchCoordinateY)) {
+            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(
+                    rootView.uid_image,
+                    touchCoordinateX,
+                    touchCoordinateY
+                )
+            ) {
                 iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.LoadProfileImage)
             }
 
-            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(rootView.profile_detail_button_edit, touchCoordinateX, touchCoordinateY)) {
+            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(
+                    rootView.profile_detail_button_edit,
+                    touchCoordinateX,
+                    touchCoordinateY
+                )
+            ) {
                 iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.NavigateToProfileEdit)
             } else {
                 rootView.profile_detail_button_edit.isPressed = false
             }
 //
-            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(rootView.profile_detail_button_follow, touchCoordinateX, touchCoordinateY)) {
+            if (iOnTouchListenerDelegate.isTouchActionUpOnViewPlace(
+                    rootView.profile_detail_button_follow,
+                    touchCoordinateX,
+                    touchCoordinateY
+                )
+            ) {
                 if (rootView.profile_detail_button_follow.isSelected) {
                     iOnTouchListenerDelegate.setTouchIntention(ProfileDetailFragmentEvent.Unfollow)
                 } else {

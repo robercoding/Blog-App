@@ -1,11 +1,12 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
 import android.content.DialogInterface
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,6 @@ import android.widget.Toast
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.get
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -24,17 +24,15 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
-import com.rober.blogapp.util.EmojiUtils
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.dialog_report_post.*
 import kotlinx.android.synthetic.main.dialog_report_post.view.*
 import kotlinx.android.synthetic.main.fragment_post_detail.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 
 @AndroidEntryPoint
 class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
@@ -52,7 +50,11 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupListeners()
-        post_detail_toolbar.navigationIcon?.setTint(ContextCompat.getColor(requireContext(), R.color.blueTwitter))
+        post_detail_toolbar.navigationIcon?.colorFilter =
+            PorterDuffColorFilter(
+                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+                PorterDuff.Mode.SRC_ATOP
+            )
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -136,7 +138,8 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             }
 
             is PostDetailState.Error -> {
-                Toast.makeText(requireContext(), "${postDetailState.exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "${postDetailState.exception.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
 
             is PostDetailState.Idle -> {
@@ -178,8 +181,8 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
         val zdt = ZoneId.systemDefault()
         val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
 
-        val fmtDate = org.threeten.bp.format.DateTimeFormatter.ofPattern("dd/MM/yy")
-        val fmtTime = org.threeten.bp.format.DateTimeFormatter.ofPattern("HH:mm")
+        val fmtDate = DateTimeFormatter.ofPattern("dd/MM/yy")
+        val fmtTime = DateTimeFormatter.ofPattern("HH:mm")
 
         val date = fmtDate.format(instantDateZoneId)
         val time = fmtTime.format(instantDateZoneId)

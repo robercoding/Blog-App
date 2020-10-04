@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Customize your theme here. -->
@@ -6,6 +6,7 @@
         <item name="colorPrimaryDark">@color/blueTwitter</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionMenuTextColor">@color/blueTwitter</item>
+        <item name="colorControlNormal">@color/yellow</item>
     </style>
 
     <style name="Divider">
@@ -15,7 +16,7 @@
     </style>
 
     <style name="PostBackground">
-        <item name="android:background"> @color/background </item>
+        <item name="android:background">@color/background</item>
     </style>
 
     <style name="PostUserName">
@@ -34,12 +35,12 @@
     </style>
 
     <style name="SearchUserUnfocused">
-<!--        <item name="background">@drawable/search_user_selector</item>-->
-        <item name="android:layout_marginStart"> 10dp </item>
+        <!--        <item name="background">@drawable/search_user_selector</item>-->
+        <item name="android:layout_marginStart">10dp</item>
     </style>
 
     <style name="SearchUserFocused">
-<!--        <item name="background">@drawable/layout_bg_login_register</item>-->
+        <!--        <item name="background">@drawable/layout_bg_login_register</item>-->
         <item name="android:layout_marginStart">30dp</item>
     </style>
 
@@ -86,5 +87,10 @@
         <item name="android:popupBackground">@color/background</item>
         <item name="android:layout_marginStart">5dp</item>
         <item name="android:layout_marginTop">5dp</item>
+    </style>
+
+    <style name="Toolbar.Button.Navigation.Tinted" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/yellow</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 </resources>

@@ -117,7 +117,7 @@ class LoginFragment : Fragment() {
     private fun goToMainFragments() {
         val navController: NavController = findNavController()
 
-        navController.navigate(R.id.settingsFragment)
+        navController.navigate(R.id.action_loginFragment_to_feedFragment)
     }
 
     private fun goToRegisterFragment() {
@@ -138,7 +138,8 @@ class LoginFragment : Fragment() {
     }
 
     private fun hideKeyBoard() {
-        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm: InputMethodManager =
+            context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 }

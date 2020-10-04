@@ -136,6 +136,10 @@ class ProfileDetailViewModel
                 _profileDetailState.value = ProfileDetailState.NavigateToPostDetail(post)
             }
 
+            is ProfileDetailFragmentEvent.NavigateToSettings -> {
+                _profileDetailState.value = ProfileDetailState.NavigateToSettings
+            }
+
             is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
                 user?.let { user ->
                     _profileDetailState.value = ProfileDetailState.NavigateToProfileEdit(user)
@@ -144,7 +148,8 @@ class ProfileDetailViewModel
                 }
             }
 
-            is ProfileDetailFragmentEvent.PopBackStack -> _profileDetailState.value = ProfileDetailState.PopBackStack
+            is ProfileDetailFragmentEvent.PopBackStack -> _profileDetailState.value =
+                ProfileDetailState.PopBackStack
 
             is ProfileDetailFragmentEvent.Idle -> {
                 _profileDetailState.value = ProfileDetailState.Idle
@@ -160,7 +165,7 @@ class ProfileDetailViewModel
 
         if (isUserTheCurrentUser)
             PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
-        else{
+        else {
             currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(user.user_id)
             PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         }
@@ -188,7 +193,8 @@ class ProfileDetailViewModel
         user?.let { tempUser ->
             if (tempUser.backgroundImageUrl.isEmpty()) {
                 val bitmapOrangeScreen = createBitmapOrangeScreen()
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+                _profileDetailState.value =
+                    ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
             } else {
                 getBitmapFromUrl(tempUser.backgroundImageUrl)
             }
@@ -230,7 +236,8 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
+                                currentUserFollowsOtherUser =
+                                    checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
 //                                val bitmap = getBitmapFromUrl(imageUrl)
 //                                val bitmap = getBitmapLightWeight(imageUrl)
                             }
@@ -247,7 +254,11 @@ class ProfileDetailViewModel
                 if (tempUser.backgroundImageUrl.isEmpty()) {
                     val bitmapOrangeScreen = createBitmapOrangeScreen()
                     _profileDetailState.value =
-                        ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, bitmapOrangeScreen)
+                        ProfileDetailState.SetOtherUserProfile(
+                            tempUser,
+                            currentUserFollowsOtherUser,
+                            bitmapOrangeScreen
+                        )
                 } else {
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 }
@@ -343,7 +354,8 @@ class ProfileDetailViewModel
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 } else {
                     bitmap?.let { tempBitmap ->
-                        _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
+                        _profileDetailState.value =
+                            ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
                 firebaseRepository.retrieveNewerPostsUserProfile(tempUser.user_id)

@@ -1,18 +1,17 @@
 package com.rober.blogapp.ui.main.settings
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.ui.base.BaseEvent
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.settings.adapter.AdapterSettings
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -24,18 +23,12 @@ class SettingsFragment : BaseFragment<SettingsViewState, SettingsFragmentEvent, 
 
     override val viewModel: SettingsViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-//    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-//        return LayoutInflater.from(requireContext()).inflate(R.layout.fragment_settings, container, false)
-//    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-//        viewModel.setIntention(SettingsFragmentEvent.SayHello)
+        setupViewDesign()
+        setupListeners()
         viewModel.setIntention(SettingsFragmentEvent.LoadSettings)
+
     }
 
     override fun render(viewState: SettingsViewState) {
@@ -59,6 +52,18 @@ class SettingsFragment : BaseFragment<SettingsViewState, SettingsFragmentEvent, 
             adapter = settingsAdapter
             addItemDecoration(decoration)
         }
+    }
+
+    override fun setupListeners() {
+        settings_material_toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    override fun setupViewDesign(){
+        val backArrow = resources.getDrawable(R.drawable.ic_arrow_left, null)
+        backArrow.colorFilter = PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.blueTwitter), PorterDuff.Mode.SRC_ATOP)
+        settings_material_toolbar.navigationIcon = backArrow
     }
 
     override fun displayLoadingFragment(display: Boolean) {

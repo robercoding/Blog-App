@@ -4,21 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-abstract class BaseViewModel<State, Event> : ViewModel(){
+abstract class BaseViewModel<STATE, EVENT> : ViewModel() {
 
-    private val _viewStates: MutableLiveData<State> = MutableLiveData()
-    fun viewStates() : LiveData<State> = _viewStates
+    private val _viewStates: MutableLiveData<STATE> = MutableLiveData()
+    fun viewStates(): LiveData<STATE> = _viewStates
 
-    private var _viewState : State? = null
-    protected var viewState : State
-        get() = _viewState ?: throw UninitializedPropertyAccessException("\"viewState\" was queried before being initialized")
-
+    private var _viewState: STATE? = null
+    protected var viewState: STATE
+        get() = _viewState
+            ?: throw UninitializedPropertyAccessException("\"viewState\" was queried before being initialized")
         set(value) {
             _viewState = value
             _viewStates.value = value
         }
 
-        abstract fun setIntention(event: Event)
-
-
+    abstract fun setIntention(event: EVENT)
 }

@@ -60,6 +60,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        profile_detail_arrow_back.colorFilter =
+            PorterDuffColorFilter(
+                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+                PorterDuff.Mode.SRC_ATOP
+            )
 
         postAdapter = PostAdapter(requireView(), viewHolder, this)
         onTouchListener = OnTouchListener(requireView(), this)
@@ -82,9 +87,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     private fun getUserArgumentAndSetIntention() {
         val user = arguments?.getParcelable<User>("userObject")
 
-        user?.run{
+        user?.run {
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.SetUserObjectDetails(user))
-        }?: kotlin.run {
+        } ?: kotlin.run {
 
             val userName = arguments?.getString("userId")
 
@@ -239,6 +244,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
                 navigateToProfileEdit(profileDetailState.user)
             }
 
+            is ProfileDetailState.NavigateToSettings -> {
+                navigateToSettings()
+            }
+
             is ProfileDetailState.PopBackStack -> {
                 backToPreviousFragment()
             }
@@ -287,14 +296,21 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         uid_biography.text = user.biography
         profile_detail_user_following.text = "${user.following} Following"
 
-        if(user.location.isNotEmpty()){
-            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
+        if (user.location.isNotEmpty()) {
+            profile_detail_motion_layout.getConstraintSet(R.id.start)
+                .getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
             profile_detail_location.text = user.location
             val drawable = resources.getDrawable(R.drawable.ic_location, null)
-            drawable.setBounds(0, 0, (drawable.intrinsicWidth*0.8).toInt(), (drawable.intrinsicHeight*0.8).toInt())
-            profile_detail_location.setCompoundDrawables(drawable,null,null,null)
-        }else{
-            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
+            drawable.setBounds(
+                0,
+                0,
+                (drawable.intrinsicWidth * 0.8).toInt(),
+                (drawable.intrinsicHeight * 0.8).toInt()
+            )
+            profile_detail_location.setCompoundDrawables(drawable, null, null, null)
+        } else {
+            profile_detail_motion_layout.getConstraintSet(R.id.start)
+                .getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
         }
 
         setFollowerText(user.follower)
@@ -343,8 +359,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
         profile_detail_motion_layout.apply {
             this.getConstraintSet(R.id.start)?.let { constraintSet ->
-                constraintSet.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
-                constraintSet.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility = View.VISIBLE
+                constraintSet.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility =
+                    View.GONE
+                constraintSet.getConstraint(R.id.profile_detail_button_follow).propertySet.visibility =
+                    View.VISIBLE
             }
             this.getConstraintSet(R.id.end)?.let {
                 it.getConstraint(R.id.profile_detail_button_edit).propertySet.visibility = View.GONE
@@ -394,14 +412,21 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         uid_name.text = "@${user.username}"
         uid_biography.text = user.biography
         profile_detail_user_following.text = "${user.following} Following"
-        if(user.location.isNotEmpty()){
-            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
+        if (user.location.isNotEmpty()) {
+            profile_detail_motion_layout.getConstraintSet(R.id.start)
+                .getConstraint(R.id.profile_detail_location).propertySet.visibility = View.VISIBLE
             profile_detail_location.text = user.location
             val drawable = resources.getDrawable(R.drawable.ic_location, null)
-            drawable.setBounds(0, 0, (drawable.intrinsicWidth*0.8).toInt(), (drawable.intrinsicHeight*0.8).toInt())
-            profile_detail_location.setCompoundDrawables(drawable,null,null,null)
-        }else{
-            profile_detail_motion_layout.getConstraintSet(R.id.start).getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
+            drawable.setBounds(
+                0,
+                0,
+                (drawable.intrinsicWidth * 0.8).toInt(),
+                (drawable.intrinsicHeight * 0.8).toInt()
+            )
+            profile_detail_location.setCompoundDrawables(drawable, null, null, null)
+        } else {
+            profile_detail_motion_layout.getConstraintSet(R.id.start)
+                .getConstraint(R.id.profile_detail_location).propertySet.visibility = View.GONE
         }
 
         setFollowerText(user.follower)
@@ -451,7 +476,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     private fun setupListeners() {
         profile_detail_button_follow.apply {
             setOnClickListener {
-                if(!isUserFollowingInAction && !isUserUnfollowingInAction){
+                if (!isUserFollowingInAction && !isUserUnfollowingInAction) {
                     if (it.isSelected) {
                         isUserUnfollowingInAction = true
                         setFollowButtonViewForOtherUser(false)
@@ -479,8 +504,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.PopBackStack)
         }
 
-        profile_detail_image_background_clear.setOnClickListener {
+        profile_detail_settings.setOnClickListener {
+            profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToSettings)
+        }
 
+        profile_detail_image_background_clear.setOnClickListener {
         }
     }
 
@@ -508,7 +536,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         navController.popBackStack()
     }
 
-    private fun navigateToPostDetail(post: Post){
+    private fun navigateToPostDetail(post: Post) {
         val navController = findNavController()
         val postBundle = bundleOf("post" to post)
         navController.navigate(R.id.action_profileDetailFragment_to_postDetailFragment, postBundle)
@@ -518,6 +546,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         val navController = findNavController()
         val userBundle = bundleOf("user" to user)
         navController.navigate(R.id.action_profileDetailFragment_to_profileEditFragment, userBundle)
+    }
+
+    private fun navigateToSettings() {
+        findNavController().navigate(R.id.action_profileDetailFragment_to_settingsFragment)
     }
 
     override fun setRippleEffectIfTouch(view: View, touchCoordinateX: Float, touchCoordinateY: Float) {
@@ -537,7 +569,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 //        }
 //    }
 
-    override fun isTouchActionUpOnViewPlace(view: View, touchCoordinateX: Float, touchCoordinateY: Float): Boolean {
+    override fun isTouchActionUpOnViewPlace(
+        view: View,
+        touchCoordinateX: Float,
+        touchCoordinateY: Float
+    ): Boolean {
         val viewCoordinatesX = intArrayOf(view.left, view.right)
         val viewCoordinatesY = intArrayOf(view.top, view.bottom)
 
@@ -545,24 +581,28 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
     }
 
     override fun setTouchIntention(profileDetailFragmentEvent: ProfileDetailFragmentEvent) {
-        when(profileDetailFragmentEvent){
+        when (profileDetailFragmentEvent) {
             is ProfileDetailFragmentEvent.PopBackStack -> {
                 profileDetailViewModel.setIntention(profileDetailFragmentEvent)
             }
 
-            is ProfileDetailFragmentEvent.NavigateToProfileEdit-> {
+            is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToProfileEdit)
             }
 
-            is ProfileDetailFragmentEvent.LoadProfileImage ->{
-                if(!isProfileImageVisualizing && !isProfileImageVisualizing){
+            is ProfileDetailFragmentEvent.NavigateToSettings -> {
+                profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.NavigateToSettings)
+            }
+
+            is ProfileDetailFragmentEvent.LoadProfileImage -> {
+                if (!isProfileImageVisualizing && !isProfileImageVisualizing) {
                     isProfileImageVisualizing = true
                     profileDetailViewModel.setIntention(profileDetailFragmentEvent)
                 }
             }
 
             is ProfileDetailFragmentEvent.LoadBackgroundImage -> {
-                if(!isBackgroundImageVisualizing && !isProfileImageVisualizing){
+                if (!isBackgroundImageVisualizing && !isProfileImageVisualizing) {
                     isBackgroundImageVisualizing = true
                     profileDetailViewModel.setIntention(profileDetailFragmentEvent)
                 }
@@ -570,7 +610,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
             is ProfileDetailFragmentEvent.Follow -> {
                 setFollowButtonViewForOtherUser(true)
-                if(!isUserUnfollowingInAction && !isUserFollowingInAction){
+                if (!isUserUnfollowingInAction && !isUserFollowingInAction) {
                     isUserFollowingInAction = true
                     profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Follow)
                 }
@@ -578,7 +618,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
             is ProfileDetailFragmentEvent.Unfollow -> {
                 setFollowButtonViewForOtherUser(false)
-                if(!isUserUnfollowingInAction && !isUserFollowingInAction){
+                if (!isUserUnfollowingInAction && !isUserFollowingInAction) {
                     isUserUnfollowingInAction = true
                     profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Unfollow)
 
@@ -606,7 +646,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 }
 
 sealed class ProfileDetailFragmentEvent {
-    data class SetUserObjectDetails(val user: User): ProfileDetailFragmentEvent()
+    data class SetUserObjectDetails(val user: User) : ProfileDetailFragmentEvent()
     data class LoadUserDetails(val userUID: String? = null) : ProfileDetailFragmentEvent()
     object LoadUserPosts : ProfileDetailFragmentEvent()
     object LoadNewerPosts : ProfileDetailFragmentEvent()
@@ -617,8 +657,9 @@ sealed class ProfileDetailFragmentEvent {
     object Unfollow : ProfileDetailFragmentEvent()
     object Follow : ProfileDetailFragmentEvent()
 
-    data class NavigateToPostDetail(val positionAdapter: Int): ProfileDetailFragmentEvent()
+    data class NavigateToPostDetail(val positionAdapter: Int) : ProfileDetailFragmentEvent()
     object NavigateToProfileEdit : ProfileDetailFragmentEvent()
+    object NavigateToSettings : ProfileDetailFragmentEvent()
     object PopBackStack : ProfileDetailFragmentEvent()
 
     object Idle : ProfileDetailFragmentEvent()
