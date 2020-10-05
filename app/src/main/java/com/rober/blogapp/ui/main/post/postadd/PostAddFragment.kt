@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_add.*
 import org.threeten.bp.Instant
@@ -27,57 +28,26 @@ import java.util.*
 
 
 @AndroidEntryPoint
-class PostAddFragment : Fragment() {
+class PostAddFragment :
+    BaseFragment<PostAddState, PostAddEvent, PostAddViewModel>(R.layout.fragment_post_add) {
 
-    val viewModel: PostAddViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-
-//        val contextThemeWrapper = ContextThemeWrapper(requireContext(), R.style.TopBar)
-//        val localInflater = inflater.cloneInContext(contextThemeWrapper)
-//
-//
-//        return localInflater.inflate(R.layout.fragment_post_add, container, false)
-        //requireActivity().actionBar?.hide()
-
-        //See delay of hide
-        displayActionBar(false)
-
-        return inflater.inflate(R.layout.fragment_post_add, container, false)
-    }
+    override val viewModel: PostAddViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupListeners()
+        displayActionBar(false)
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        observeViewModel()
         viewModel.setIntention(PostAddEvent.LoadUserDetails)
     }
 
-    private fun observeViewModel() {
-        viewModel.statePost.observe(viewLifecycleOwner, Observer { postAddState ->
-            render(postAddState)
-        })
-    }
-
-    private fun render(postAddState: PostAddState) {
-        when (postAddState) {
+    override fun render(viewState: PostAddState) {
+        when (viewState) {
             is PostAddState.SetUserDetail -> {
-                setUserDetail(postAddState.user)
+                setUserDetail(viewState.user)
                 viewModel.setIntention(PostAddEvent.GetPostToEdit)
-//                viewModel.setIntention(PostAddEvent.ReadyToWrite)
             }
 
             is PostAddState.GetPostToEdit -> {
@@ -89,12 +59,12 @@ class PostAddFragment : Fragment() {
             }
 
             is PostAddState.RenderPostToEditInView -> {
-                renderPostToEditInView(postAddState.post)
+                renderPostToEditInView(viewState.post)
                 viewModel.setIntention(PostAddEvent.ReadyToWrite)
             }
 
             is PostAddState.SaveOrUpdatePost -> {
-                if (postAddState.isPostToUpdate) {
+                if (viewState.isPostToUpdate) {
                     updatePost()
                 } else {
                     savePost()
@@ -102,12 +72,11 @@ class PostAddFragment : Fragment() {
             }
 
             is PostAddState.GoToPostDetailAndUpdatePost -> {
-                goToPostDetailFragment(postAddState.post)
+                goToPostDetailFragment(viewState.post)
             }
 
             is PostAddState.PostHasBeenSaved -> {
-//                Toast.makeText(requireContext(),"Saved", Toast.LENGTH_SHORT).show()
-                Toast.makeText(requireContext(), postAddState.messageUtil.message, Toast.LENGTH_SHORT).show()
+                displayToast(viewState.messageUtil.message)
                 goToFeedFragment()
                 viewModel.setIntention(PostAddEvent.Idle)
             }
@@ -117,13 +86,12 @@ class PostAddFragment : Fragment() {
             }
 
             is PostAddState.NotifyErrorFieldValidation -> {
-                Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
+                displayToast("Fields can't be empty")
                 viewModel.setIntention(PostAddEvent.Idle)
             }
 
             is PostAddState.Error -> {
-//                Toast.makeText(requireContext(),"No saved", Toast.LENGTH_SHORT).show()
-                Toast.makeText(requireContext(), postAddState.exception.message.toString(), Toast.LENGTH_SHORT).show()
+                displayToast(viewState.exception.message.toString())
             }
 
             is PostAddState.Idle -> {
@@ -153,7 +121,7 @@ class PostAddFragment : Fragment() {
         return false
     }
 
-    private fun setupListeners() {
+    override fun setupListeners() {
         top_app_bar.setNavigationOnClickListener {
             goToFeedFragment()
         }
@@ -181,10 +149,9 @@ class PostAddFragment : Fragment() {
         displayKeyBoard(false)
         displayActionBar(false)
         val updatedPostBundle = bundleOf("updatedPost" to updatedPost)
-        if(findNavController().currentDestination?.id == R.id.postAddFragment){
+        if (findNavController().currentDestination?.id == R.id.postAddFragment) { //Solution conditional to the crash that says that "we are in other fragment"
             findNavController().navigate(R.id.action_postAddFragment_to_postDetailFragment, updatedPostBundle)
         }
-
     }
 
     private fun goToFeedFragment() {
@@ -233,7 +200,8 @@ class PostAddFragment : Fragment() {
     }
 
     private fun displayKeyBoard(display: Boolean) {
-        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm: InputMethodManager =
+            context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
 
         if (display)
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)

@@ -26,4 +26,10 @@
     <string name="dialog_positive_button">Send report</string>
     <string name="dialog_negative_button">Cancel</string>
 
+    <!--    List Settings Fragment-->
+    <string name="row_list_settings_reports">Reported posts</string>
+    <string name="row_list_settings_count_posts">Posts</string>
+    <string name="row_list_settings_delete_account">Delete account</string>
+
+
 </resources>

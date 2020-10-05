@@ -3,40 +3,26 @@ package com.rober.blogapp.ui.main.profile.profiledetail
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.palette.graphics.Palette
 import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.ProfileUserCodes
 import com.rober.blogapp.util.AsyncResponse
 import com.rober.blogapp.util.GetImageBitmapFromUrlAsyncTask
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.net.URL
-
 
 class ProfileDetailViewModel
 @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository,
     private val application: Application
-) : ViewModel(), AsyncResponse {
-
-
-    private val TAG = "ProfileDetailViewModel"
-    private var _profileDetailState: MutableLiveData<ProfileDetailState> = MutableLiveData()
-
-    val profileDetailState: LiveData<ProfileDetailState>
-        get() = _profileDetailState
+) : BaseViewModel<ProfileDetailState, ProfileDetailFragmentEvent>(), AsyncResponse {
 
     private var user: User? = null
     private var userPosts = mutableListOf<Post>()
@@ -46,11 +32,10 @@ class ProfileDetailViewModel
     private var currentUserFollowsOtherUser = false
     private var PROFILE_USER = ProfileUserCodes.EMPTY_USER_PROFILE
 
-    private var colorUrl = 0
     private var isUserFollowingInAction = false
     private var isUserUnfollowingInAction = false
 
-    fun setIntention(event: ProfileDetailFragmentEvent) {
+    override fun setIntention(event: ProfileDetailFragmentEvent) {
         when (event) {
             is ProfileDetailFragmentEvent.SetUserObjectDetails -> {
                 user = event.user
@@ -58,7 +43,7 @@ class ProfileDetailViewModel
                     user?.run {
                         setUserObjectDetails(this)
                     } ?: kotlin.run {
-                        _profileDetailState.value = ProfileDetailState.PopBackStack
+                        viewState = ProfileDetailState.PopBackStack
                     }
                 }
             }
@@ -92,17 +77,17 @@ class ProfileDetailViewModel
 
             is ProfileDetailFragmentEvent.LoadBackgroundImage -> {
                 user?.run {
-                    _profileDetailState.value = ProfileDetailState.LoadBackgroundImage(backgroundImageUrl)
+                    viewState = ProfileDetailState.LoadBackgroundImage(backgroundImageUrl)
                 } ?: kotlin.run {
-                    _profileDetailState.value = ProfileDetailState.Idle
+                    viewState = ProfileDetailState.Idle
                 }
             }
 
             is ProfileDetailFragmentEvent.LoadProfileImage -> {
                 user?.run {
-                    _profileDetailState.value = ProfileDetailState.LoadProfileImage(profileImageUrl)
+                    viewState = ProfileDetailState.LoadProfileImage(profileImageUrl)
                 } ?: kotlin.run {
-                    _profileDetailState.value = ProfileDetailState.Idle
+                    viewState = ProfileDetailState.Idle
                 }
             }
 
@@ -112,7 +97,7 @@ class ProfileDetailViewModel
                     user?.let {
                         followOtherUser()
                     } ?: kotlin.run {
-                        _profileDetailState.value =
+                        viewState =
                             ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
                     }
                 }
@@ -124,7 +109,7 @@ class ProfileDetailViewModel
                     user?.let {
                         unfollowOtherUser()
                     } ?: kotlin.run {
-                        _profileDetailState.value =
+                        viewState =
                             ProfileDetailState.Error(Exception("We couldn't find the user, sorry"))
                     }
                 }
@@ -133,34 +118,39 @@ class ProfileDetailViewModel
             is ProfileDetailFragmentEvent.NavigateToPostDetail -> {
                 val post = userPosts[event.positionAdapter]
 
-                _profileDetailState.value = ProfileDetailState.NavigateToPostDetail(post)
+                viewState = ProfileDetailState.NavigateToPostDetail(post)
+            }
+
+            is ProfileDetailFragmentEvent.NavigateToSettings -> {
+                viewState = ProfileDetailState.NavigateToSettings
             }
 
             is ProfileDetailFragmentEvent.NavigateToProfileEdit -> {
                 user?.let { user ->
-                    _profileDetailState.value = ProfileDetailState.NavigateToProfileEdit(user)
+                    viewState = ProfileDetailState.NavigateToProfileEdit(user)
                 } ?: kotlin.run {
-                    _profileDetailState.value = ProfileDetailState.Idle
+                    viewState = ProfileDetailState.Idle
                 }
             }
 
-            is ProfileDetailFragmentEvent.PopBackStack -> _profileDetailState.value = ProfileDetailState.PopBackStack
+            is ProfileDetailFragmentEvent.PopBackStack -> viewState =
+                ProfileDetailState.PopBackStack
 
             is ProfileDetailFragmentEvent.Idle -> {
-                _profileDetailState.value = ProfileDetailState.Idle
+                viewState = ProfileDetailState.Idle
             }
         }
     }
 
     private suspend fun setUserObjectDetails(user: User) {
-        _profileDetailState.value = ProfileDetailState.LoadingUser
+        viewState = ProfileDetailState.LoadingUser
 
         val isUserTheCurrentUser = checkIfUserIsCurrentUser(user.user_id)
 
 
         if (isUserTheCurrentUser)
             PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
-        else{
+        else {
             currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(user.user_id)
             PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         }
@@ -171,7 +161,7 @@ class ProfileDetailViewModel
             bitmap?.also { tempBitmap ->
                 setUserDetails(user, tempBitmap)
             } ?: kotlin.run {
-                _profileDetailState.value = ProfileDetailState.PopBackStack
+                viewState = ProfileDetailState.PopBackStack
             }
 
         } else {
@@ -180,7 +170,7 @@ class ProfileDetailViewModel
     }
 
     private fun getCurrentUser() {
-        _profileDetailState.value = ProfileDetailState.LoadingUser
+        viewState = ProfileDetailState.LoadingUser
 
         PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
         user = firebaseRepository.getCurrentUser()
@@ -188,12 +178,13 @@ class ProfileDetailViewModel
         user?.let { tempUser ->
             if (tempUser.backgroundImageUrl.isEmpty()) {
                 val bitmapOrangeScreen = createBitmapOrangeScreen()
-                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+                viewState =
+                    ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
             } else {
                 getBitmapFromUrl(tempUser.backgroundImageUrl)
             }
         } ?: kotlin.run {
-            _profileDetailState.value =
+            viewState =
                 ProfileDetailState.Error(Exception("We couldn't provide the user"))
         }
     }
@@ -220,7 +211,7 @@ class ProfileDetailViewModel
     }
 
     private fun getUserProfile(userUID: String) {
-        _profileDetailState.value = ProfileDetailState.LoadingUser
+        viewState = ProfileDetailState.LoadingUser
         PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         viewModelScope.launch {
             delay(200)
@@ -230,14 +221,15 @@ class ProfileDetailViewModel
                         is ResultData.Success -> {
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
-                                currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
+                                currentUserFollowsOtherUser =
+                                    checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
 //                                val bitmap = getBitmapFromUrl(imageUrl)
 //                                val bitmap = getBitmapLightWeight(imageUrl)
                             }
                         }
 
                         is ResultData.Error -> {
-                            _profileDetailState.value =
+                            viewState =
                                 ProfileDetailState.Error(resultData.exception)
                         }
                     }
@@ -246,8 +238,12 @@ class ProfileDetailViewModel
             user?.let { tempUser ->
                 if (tempUser.backgroundImageUrl.isEmpty()) {
                     val bitmapOrangeScreen = createBitmapOrangeScreen()
-                    _profileDetailState.value =
-                        ProfileDetailState.SetOtherUserProfile(tempUser, currentUserFollowsOtherUser, bitmapOrangeScreen)
+                    viewState =
+                        ProfileDetailState.SetOtherUserProfile(
+                            tempUser,
+                            currentUserFollowsOtherUser,
+                            bitmapOrangeScreen
+                        )
                 } else {
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 }
@@ -273,7 +269,7 @@ class ProfileDetailViewModel
                 val bitmapOrangeScreen = createBitmapOrangeScreen()
                 bitmap = bitmapOrangeScreen
                 setUserDetails(tempUser, bitmapOrangeScreen)
-//                _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
+//                viewState = ProfileDetailState.SetCurrentUserProfile(tempUser, bitmapOrangeScreen)
             }
         }
     }
@@ -283,12 +279,12 @@ class ProfileDetailViewModel
 
     private fun setUserDetails(user: User, bitmap: Bitmap) {
         if (PROFILE_USER == ProfileUserCodes.CURRENT_USER_PROFILE) {
-            _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(user, bitmap)
+            viewState = ProfileDetailState.SetCurrentUserProfile(user, bitmap)
         } else if (PROFILE_USER == ProfileUserCodes.OTHER_USER_PROFILE) {
-            _profileDetailState.value =
+            viewState =
                 ProfileDetailState.SetOtherUserProfile(user, currentUserFollowsOtherUser, bitmap)
         } else {
-            _profileDetailState.value = ProfileDetailState.PopBackStack
+            viewState = ProfileDetailState.PopBackStack
         }
     }
 
@@ -305,7 +301,7 @@ class ProfileDetailViewModel
 //    }
 
     private fun getUserPosts() {
-//        _profileDetailState.value = ProfileDetailState.LoadingPosts
+//        viewState = ProfileDetailState.LoadingPosts
         user?.let { tempUser ->
             viewModelScope.launch {
                 firebaseRepository.retrieveProfileUsersPosts(tempUser.user_id)
@@ -315,15 +311,15 @@ class ProfileDetailViewModel
                                 resultData.data?.also { tempUserPosts ->
                                     userPosts = tempUserPosts.toMutableList()
                                 }
-                                _profileDetailState.value =
+                                viewState =
                                     ProfileDetailState.SetUserPosts(userPosts, tempUser)
                             }
                             is ResultData.Error -> {
-                                _profileDetailState.value =
+                                viewState =
                                     ProfileDetailState.Error(Exception("Sorry we couldn't load posts"))
                             }
                             is ResultData.Loading -> {
-                                _profileDetailState.value = ProfileDetailState.LoadingPosts
+                                viewState = ProfileDetailState.LoadingPosts
                             }
                         }
                     }
@@ -343,14 +339,15 @@ class ProfileDetailViewModel
                     getBitmapFromUrl(tempUser.backgroundImageUrl)
                 } else {
                     bitmap?.let { tempBitmap ->
-                        _profileDetailState.value = ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
+                        viewState =
+                            ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
                 firebaseRepository.retrieveNewerPostsUserProfile(tempUser.user_id)
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                _profileDetailState.value =
+                                viewState =
                                     ProfileDetailState.SetUserPosts(resultData.data!!, tempUser)
                             }
                         }
@@ -387,12 +384,12 @@ class ProfileDetailViewModel
                                     user?.follower = it.follower.plus(1)
                                     isUserFollowingInAction = false
                                 }
-                                _profileDetailState.value = ProfileDetailState.Followed(user!!)
+                                viewState = ProfileDetailState.Followed(user!!)
                             } else
-                                _profileDetailState.value = ProfileDetailState.FollowError
+                                viewState = ProfileDetailState.FollowError
                         }
                         is ResultData.Error -> {
-                            _profileDetailState.value = ProfileDetailState.FollowError
+                            viewState = ProfileDetailState.FollowError
                         }
                     }
                 }
@@ -411,14 +408,14 @@ class ProfileDetailViewModel
                                     isUserUnfollowingInAction = false
                                 }
 
-                                _profileDetailState.value = ProfileDetailState.Unfollowed(user!!)
+                                viewState = ProfileDetailState.Unfollowed(user!!)
                             } else {
-                                _profileDetailState.value = ProfileDetailState.UnfollowError
+                                viewState = ProfileDetailState.UnfollowError
 
                             }
                         }
                         is ResultData.Error -> {
-                            _profileDetailState.value =
+                            viewState =
                                 ProfileDetailState.UnfollowError
                         }
                     }

@@ -35,9 +35,25 @@
         <item>@drawable/ic_unfollow</item>
     </array>
 
+
+    <!--    List dialog report    -->
     <string-array name="list_dialog_report">
         <item>@string/dialog_spinner_option_spam</item>
         <item>@string/dialog_spinner_option_harmful</item>
     </string-array>
+
+    <!--    List settings fragment    -->
+    <string-array name="list_settings_fragment_text">
+        <item>@string/row_list_settings_reports</item>
+        <item>@string/row_list_settings_count_posts</item>
+        <item>@string/row_list_settings_delete_account</item>
+    </string-array>
+
+    <array name="list_settings_fragment_icons">
+        <item>@drawable/ic_report</item>
+        <item>@drawable/ic_event_note_black_18dp</item>
+        <item>@drawable/ic_delete</item>
+    </array>
+
 
 </resources>

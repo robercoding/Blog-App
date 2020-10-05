@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
@@ -28,15 +29,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feed.*
 
 @AndroidEntryPoint
-class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecyclerListener {
-
-
-    private val TAG: String = "FeedFragment"
+class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R.layout.fragment_feed),
+    RecyclerViewActionInterface, OnMoveRecyclerListener {
 
     private var mHasPullRefresh = false
     private var resource: Int = R.layout.adapter_feed_viewholder_posts
 
-    private val viewModel: FeedViewModel by viewModels()
+    override val viewModel: FeedViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
 
     private lateinit var animation: Animation
@@ -44,49 +43,36 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
 
     private var onScrollListenerHelper: OnScrollListenerHelper? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_feed, container, false)
-    }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupListeners()
-        setupView()
+        setupViewDesign()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        subscribeObservers()
         animation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out)
         viewModel.setIntention(FeedFragmentEvent.GetUserPicture)
 
         postAdapter = PostAdapter(requireView(), resource, this)
     }
 
-    private fun subscribeObservers() {
-        viewModel.feedState.observe(viewLifecycleOwner, Observer { feedState ->
-            render(feedState)
-        })
-    }
+    override fun render(viewState: FeedState) {
+        Log.i("States", "State = ${viewState}")
+        when (viewState) {
 
-    private fun render(feedState: FeedState) {
-        Log.i("States", "State = ${feedState}")
-        when (feedState) {
             is FeedState.SetUserDetails -> {
-                setUserDetails(feedState.user)
+                setUserDetails(viewState.user)
                 viewModel.setIntention(FeedFragmentEvent.RetrieveInitPosts)
             }
+
             is FeedState.SetListPosts -> {
                 displayTextWelcomeMessage(false)
                 displayProgressBarInitialPosts(false)
                 stopSwipeRefresh()
 
-                postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
-                postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
+                postAdapter.setUsers(viewState.listFeedUsers.toMutableList())
+                postAdapter.setPosts(viewState.listFeedPosts.toMutableList())
 
                 val linearLayoutManager = LinearLayoutManager(requireContext())
 
@@ -99,25 +85,11 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
                 displayTextNotifyMorePosts(true)
                 displayTextWelcomeMessage(false)
 
-                postAdapter.setUsers(feedState.listFeedUsers.toMutableList())
-                postAdapter.setPosts(feedState.listFeedPosts.toMutableList())
+                postAdapter.setUsers(viewState.listFeedUsers.toMutableList())
+                postAdapter.setPosts(viewState.listFeedPosts.toMutableList())
 
-                var linearLayoutManager = LinearLayoutManager(requireContext())
-                recycler_feed.layoutManager?.run {
-                    linearLayoutManager = this as LinearLayoutManager
-                }
-
-                recycler_feed.adapter?.itemCount?.also { itemCount ->
-                    val pos = linearLayoutManager.findLastCompletelyVisibleItemPosition()
-
-                    if (pos >= itemCount - 1) {
-                        animationNotifyPostsBounceAndFadeOut()
-                    } else {
-                        animationNotifyBounce()
-                    }
-                } ?: kotlin.run {
-                    animationNotifyPostsBounceAndFadeOut()
-                }
+                val linearLayoutManager = getLinearLayoutManagerFromRecycler(recycler_feed)
+                setAnimationNotifyWithLinearLayout(linearLayoutManager)
                 setAdapterToRecyclerFeed(linearLayoutManager)
 
                 mHasPullRefresh = false
@@ -127,7 +99,7 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             is FeedState.StopRequestNewPosts -> {
                 mHasPullRefresh = false
 
-                feedState.messageUtil?.run {
+                viewState.messageUtil?.run {
                     Toast.makeText(
                         requireContext(),
                         message + getEmoji(ANGUISHED_FACE),
@@ -141,21 +113,17 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             is FeedState.LoadOldPosts -> {
                 displayProgressBarMorePosts(false)
                 loadOldPosts(
-                    feedState.listFeedPosts,
-                    feedState.listFeedUsers,
-                    feedState.scrollToPosition,
-                    feedState.endOfTimeline
+                    viewState.listFeedPosts,
+                    viewState.listFeedUsers,
+                    viewState.scrollToPosition,
+                    viewState.endOfTimeline
                 )
-                if (feedState.endOfTimeline)
+                if (viewState.endOfTimeline)
                     viewModel.setIntention(FeedFragmentEvent.StopRequestOldPosts)
             }
 
             is FeedState.StopRequestOldPosts -> {
-                Toast.makeText(
-                    requireContext(),
-                    "Sorry, there aren't more posts from the people you follow",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("Sorry, there aren't more posts from the people you follow")
                 onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = true
                 viewModel.setIntention(FeedFragmentEvent.Idle)
             }
@@ -167,11 +135,11 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             }
 
             is FeedState.GoToPostDetailsFragment -> {
-                goToPostDetailsFragment(feedState.post)
+                goToPostDetailsFragment(viewState.post)
             }
 
             is FeedState.GoToProfileDetailsFragment -> {
-                goToProfileDetailsFragment(feedState.user_id)
+                goToProfileDetailsFragment(viewState.user_id)
             }
 
             is FeedState.Loading -> {
@@ -190,11 +158,10 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             }
 
             is FeedState.Error -> {
-                Toast.makeText(requireContext(), feedState.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), viewState.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
-
 
 
     private fun setUserDetails(user: User) {
@@ -238,7 +205,12 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         }
     }
 
-    private fun loadOldPosts(listPosts: List<Post>, listUsers: List<User>, scrollToPosition: Int, endOfTimeline: Boolean) {
+    private fun loadOldPosts(
+        listPosts: List<Post>,
+        listUsers: List<User>,
+        scrollToPosition: Int,
+        endOfTimeline: Boolean
+    ) {
         postAdapter.setUsers(listUsers.toMutableList())
         postAdapter.setPosts(listPosts.toMutableList())
         onScrollListenerHelper?.hasUserReachedBottomAndDraggingBefore = endOfTimeline
@@ -249,7 +221,7 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         }
     }
 
-    private fun setupListeners() {
+    override fun setupListeners() {
         fab_to_post_add.setOnClickListener {
             goToPostAdd()
         }
@@ -275,7 +247,7 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         }
     }
 
-    private fun setupView() {
+    override fun setupViewDesign() {
         feed_swipe_refresh_layout.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
                 requireContext(),
@@ -295,7 +267,30 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         navController.navigate(R.id.action_feedFragment_to_postAddFragment)
     }
 
-    private fun animationNotifyPostsBounceAndFadeOut(){
+    private fun getLinearLayoutManagerFromRecycler(recyclerView: RecyclerView): LinearLayoutManager {
+        var linearLayoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager?.run {
+            linearLayoutManager = this as LinearLayoutManager
+        }
+
+        return linearLayoutManager
+    }
+
+    private fun setAnimationNotifyWithLinearLayout(linearLayoutManager: LinearLayoutManager) {
+        recycler_feed.adapter?.itemCount?.also { itemCount ->
+            val pos = linearLayoutManager.findLastCompletelyVisibleItemPosition()
+
+            if (pos >= itemCount - 1) {
+                animationNotifyPostsBounceAndFadeOut()
+            } else {
+                animationNotifyBounce()
+            }
+        } ?: kotlin.run {
+            animationNotifyPostsBounceAndFadeOut()
+        }
+    }
+
+    private fun animationNotifyPostsBounceAndFadeOut() {
         displayTextNotifyMorePosts(true)
         animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
         feed_text_notify_new_posts.startAnimation(animation)
@@ -306,7 +301,7 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
         }
     }
 
-    private fun animationNotifyBounce(){
+    private fun animationNotifyBounce() {
         isBounceAnimationVisible = true
         animation = AnimationUtils.loadAnimation(context, R.anim.bounce_animation)
         feed_text_notify_new_posts.startAnimation(animation)
@@ -325,6 +320,10 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
 
     override fun clickListenerOnUser(positionAdapter: Int) {
         viewModel.setIntention(FeedFragmentEvent.GoToProfileDetailsFragment(positionAdapter))
+    }
+
+    override fun clickListenerOnSettings(positionAdapter: Int) {
+        //
     }
 
     private fun goToProfileDetailsFragment(user_id: String) {
@@ -348,11 +347,6 @@ class FeedFragment : BaseFragment(), RecyclerViewActionInterface, OnMoveRecycler
             }
         }
     }
-
-    override fun onResume() {
-        super.onResume()
-        Log.i("CheckFirebaseBug", "We on resume check everything")
-    }
 }
 
 sealed class FeedFragmentEvent {
@@ -369,5 +363,5 @@ sealed class FeedFragmentEvent {
     data class GoToProfileDetailsFragment(val positionAdapter: Int) : FeedFragmentEvent()
 
     object Idle : FeedFragmentEvent()
-    object SignOut: FeedFragmentEvent()
+    object SignOut : FeedFragmentEvent()
 }

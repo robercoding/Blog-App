@@ -2,31 +2,21 @@ package com.rober.blogapp.ui.main.profile.profileedit
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.profile.profileedit.util.IntentImageCodes
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 
 class ProfileEditViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository
-) : ViewModel() {
-    private val TAG = "ProfileEditViewModel"
-
-    private var _profileEditState: MutableLiveData<ProfileEditState> = MutableLiveData()
-
-    val profileEditState: LiveData<ProfileEditState>
-        get() = _profileEditState
+) : BaseViewModel<ProfileEditState, ProfileEditFragmentEvent>() {
 
     private lateinit var user: User
     private var profileImageUri: Uri? = null
@@ -40,25 +30,25 @@ class ProfileEditViewModel @ViewModelInject constructor(
 
     private var messageError = ""
 
-    fun setIntention(event: ProfileEditFragmentEvent) {
+    override fun setIntention(event: ProfileEditFragmentEvent) {
         when (event) {
             is ProfileEditFragmentEvent.NavigateToProfileDetail -> {
-                _profileEditState.value = ProfileEditState.NavigateToProfileDetail
+                viewState = ProfileEditState.NavigateToProfileDetail
             }
 
-            is ProfileEditFragmentEvent.LoadingUser -> _profileEditState.value = ProfileEditState.LoadingUser
+            is ProfileEditFragmentEvent.LoadingUser -> viewState = ProfileEditState.LoadingUser
 
             is ProfileEditFragmentEvent.LoadUser -> {
                 user = event.user
-                _profileEditState.value = ProfileEditState.LoadUser(user)
+                viewState = ProfileEditState.LoadUser(user)
             }
 
             is ProfileEditFragmentEvent.CheckIfUsernameAvailable -> checkIfUsernameIsAvailable(event.username)
 
-            is ProfileEditFragmentEvent.GetImageFromGalleryForProfile -> _profileEditState.value =
+            is ProfileEditFragmentEvent.GetImageFromGalleryForProfile -> viewState =
                 ProfileEditState.GetImageFromGallery(IntentImageCodes.PROFILE_IMAGE_CODE)
 
-            is ProfileEditFragmentEvent.GetImageFromGalleryForBackground -> _profileEditState.value =
+            is ProfileEditFragmentEvent.GetImageFromGalleryForBackground -> viewState =
                 ProfileEditState.GetImageFromGallery(IntentImageCodes.BACKGROUND_IMAGE_CODE)
 
             is ProfileEditFragmentEvent.SaveUriAndPreviewNewImage -> {
@@ -68,18 +58,18 @@ class ProfileEditViewModel @ViewModelInject constructor(
                     IntentImageCodes.BACKGROUND_IMAGE_CODE -> backgroundImageUri = event.uri
                 }
                 Log.i(TAG, "Background now = ${backgroundImageUri}")
-                _profileEditState.value = ProfileEditState.PreviewImage(event.uri)
+                viewState = ProfileEditState.PreviewImage(event.uri)
             }
 
             is ProfileEditFragmentEvent.ValidateChanges -> {
                 if (event.username == user.username && event.biography == user.biography && event.location == user.location && profileImageUri == null && backgroundImageUri == null) {
-                    _profileEditState.value = ProfileEditState.NavigateToProfileDetail
+                    viewState = ProfileEditState.NavigateToProfileDetail
                 } else
-                    _profileEditState.value = ProfileEditState.ValidateChanges
+                    viewState = ProfileEditState.ValidateChanges
             }
 
             is ProfileEditFragmentEvent.NotifyErrorValidate -> {
-                _profileEditState.value = ProfileEditState.NotifyErrorValidate(
+                viewState = ProfileEditState.NotifyErrorValidate(
                     event.isUsernameAvailable,
                     event.isUsernameLengthOk,
                     event.isBiographyOk,
@@ -88,14 +78,14 @@ class ProfileEditViewModel @ViewModelInject constructor(
             }
 
             is ProfileEditFragmentEvent.SaveChanges -> {
-                _profileEditState.value = ProfileEditState.SavingChanges
+                viewState = ProfileEditState.SavingChanges
 
                 viewModelScope.launch {
                     val success = saveChanges(event.username, event.biography, event.location)
                     if (success)
-                        _profileEditState.value = ProfileEditState.SuccessSave
+                        viewState = ProfileEditState.SuccessSave
                     else
-                        _profileEditState.value = ProfileEditState.ErrorSave(messageError)
+                        viewState = ProfileEditState.ErrorSave(messageError)
                 }
             }
         }
@@ -113,14 +103,14 @@ class ProfileEditViewModel @ViewModelInject constructor(
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                _profileEditState.value = ProfileEditState.NotifyUsernameAvailable(resultData.data!!)
+                                viewState = ProfileEditState.NotifyUsernameAvailable(resultData.data!!)
                             }
-                            is ResultData.Error -> _profileEditState.value = ProfileEditState.Idle
+                            is ResultData.Error -> viewState = ProfileEditState.Idle
                         }
                     }
             }
         } else {
-            _profileEditState.value = ProfileEditState.Idle
+            viewState = ProfileEditState.Idle
         }
     }
 

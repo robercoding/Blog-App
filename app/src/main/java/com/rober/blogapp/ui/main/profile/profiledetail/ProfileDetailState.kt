@@ -23,6 +23,7 @@ sealed class ProfileDetailState {
 
     data class NavigateToPostDetail(val post: Post): ProfileDetailState()
     data class NavigateToProfileEdit(val user: User): ProfileDetailState()
+    object NavigateToSettings : ProfileDetailState()
     object PopBackStack: ProfileDetailState()
     object Idle : ProfileDetailState()
 

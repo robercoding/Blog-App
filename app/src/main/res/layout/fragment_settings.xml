@@ -1,9 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.settings.SettingsFragment"
-    android:background="@color/background">
+    android:background="@color/background"
+    tools:context=".ui.main.settings.SettingsFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/settings_app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/settings_material_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:navigationIcon="@drawable/ic_arrow_left"
+            app:title="Settings" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <TextView
+        android:id="@+id/settings_text_username"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#10171F"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Username"
+        android:textColor="@color/grayLight"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_app_bar_layout" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settings_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_text_username" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

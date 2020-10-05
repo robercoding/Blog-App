@@ -9,6 +9,7 @@ import com.rober.blogapp.data.network.repository.FirebaseRepository
 //import com.rober.blogapp.data.room.repository.RoomRepository
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.util.MessageUtil
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
@@ -19,25 +20,14 @@ class FeedViewModel
 @ViewModelInject
 constructor(
     private val firebaseRepository: FirebaseRepository
-) : ViewModel() {
-    private val TAG = "FeedViewModel"
-
-    private val _feedState: MutableLiveData<FeedState> = MutableLiveData<FeedState>()
-
-    val feedState: LiveData<FeedState>
-        get() = _feedState
+) : BaseViewModel<FeedState, FeedFragmentEvent>() {
 
     var scrollToPosition = 0
     var user: User? = null
     private var feedListPosts = mutableListOf<Post>()
     private var feedListUsers = mutableListOf<User>()
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.i("CheckFirebaseBug", "OnCleared ViewModel")
-    }
-
-    fun setIntention(event: FeedFragmentEvent) {
+    override fun setIntention(event: FeedFragmentEvent) {
         when (event) {
             is FeedFragmentEvent.GetUserPicture -> getUserPicture()
 
@@ -62,14 +52,14 @@ constructor(
 //                retrieveSavedLocalPosts()
             }
             is FeedFragmentEvent.StopRequestOldPosts -> {
-                _feedState.value = FeedState.StopRequestOldPosts
+                viewState = FeedState.StopRequestOldPosts
             }
             is FeedFragmentEvent.Idle -> {
-                _feedState.value = FeedState.Idle
+                viewState = FeedState.Idle
             }
             is FeedFragmentEvent.SignOut ->{
                 clearListsAndMapsLocalDatabase()
-                _feedState.value = FeedState.SignOut
+                viewState = FeedState.SignOut
             }
         }
     }
@@ -78,12 +68,12 @@ constructor(
         user = firebaseRepository.getCurrentUser()
 
         user?.run {
-            _feedState.value = FeedState.SetUserDetails(this)
+            viewState = FeedState.SetUserDetails(this)
         }
     }
 
     private fun retrieveInitPosts() {
-        _feedState.value = FeedState.Loading
+        viewState = FeedState.Loading
 
         viewModelScope.launch {
             firebaseRepository.retrieveInitFeedPosts()
@@ -95,14 +85,14 @@ constructor(
 
                         }
                         is ResultData.Error -> {
-                            _feedState.value = FeedState.Error(resultData.exception.message)
+                            viewState = FeedState.Error(resultData.exception.message)
                         }
                     }
                 }
 
             user?.let { feedListUsers.add(it) }
             if(feedListPosts.size == 0){
-                _feedState.value = FeedState.LoadMessageZeroPosts
+                viewState = FeedState.LoadMessageZeroPosts
                 return@launch
             }
 
@@ -114,7 +104,7 @@ constructor(
                                 feedListUsers.addAll(newListUsers)
                                 addEndOfTimelineToMutableListPosts()
 
-                                _feedState.value = FeedState.SetListPosts(feedListPosts, feedListUsers)
+                                viewState = FeedState.SetListPosts(feedListPosts, feedListUsers)
                             }
                         }
                     }
@@ -134,12 +124,12 @@ constructor(
                             newListPosts = resultData.data!!
                         }
                         is ResultData.Error -> {
-                            _feedState.value = FeedState.Error(resultData.exception.message!!)
+                            viewState = FeedState.Error(resultData.exception.message!!)
                         }
                     }
                 }
             if(newListPosts.isEmpty()){
-                _feedState.value =
+                viewState =
                     FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now "))
                 return@launch
             }
@@ -166,7 +156,7 @@ constructor(
     private fun sendNewFeedPosts(newListPosts: List<Post>, newListUsers: List<User>) {
 
         if(feedListPosts.size == 0 && newListPosts.size == 0){
-            _feedState.value = FeedState.LoadMessageZeroPosts
+            viewState = FeedState.LoadMessageZeroPosts
             return
         }
 
@@ -189,7 +179,7 @@ constructor(
         }
 
         //Where's user now?
-        _feedState.value = FeedState.LoadNewPosts(feedListPosts, feedListUsers, positionOfTheFirstPost - 1)
+        viewState = FeedState.LoadNewPosts(feedListPosts, feedListUsers, positionOfTheFirstPost - 1)
     }
 
     private fun retrieveOldFeedPosts(actualRecyclerViewPosition: Int) {
@@ -198,7 +188,7 @@ constructor(
         var newListUsers = listOf<User>()
 
         if (!endOfTimeline) {
-            _feedState.value = FeedState.LoadingMorePosts
+            viewState = FeedState.LoadingMorePosts
             viewModelScope.launch {
                 firebaseRepository.retrieveOldFeedPosts()
                     .collect { resultData ->
@@ -209,7 +199,7 @@ constructor(
                                 }
                             }
                             is ResultData.Error -> {
-                                _feedState.value = FeedState.Error(resultData.exception.message)
+                                viewState = FeedState.Error(resultData.exception.message)
                             }
                         }
                     }
@@ -233,7 +223,7 @@ constructor(
             }
 
         } else {
-            _feedState.value = FeedState.StopRequestOldPosts
+            viewState = FeedState.StopRequestOldPosts
         }
     }
 
@@ -252,14 +242,14 @@ constructor(
                 addEndOfTimelineToMutableListPosts()
 
 
-            _feedState.value = FeedState.LoadOldPosts(
+            viewState = FeedState.LoadOldPosts(
                 feedListPosts,
                 feedListUsers,
                 actualRecyclerViewPosition,
                 endOfTimeline
             )
         } else {
-            _feedState.value = FeedState.StopRequestOldPosts
+            viewState = FeedState.StopRequestOldPosts
         }
     }
 
@@ -281,12 +271,12 @@ constructor(
 
     private fun goToPostDetails(positionAdapter: Int) {
         val post = feedListPosts[positionAdapter]
-        _feedState.value = FeedState.GoToPostDetailsFragment(post)
+        viewState = FeedState.GoToPostDetailsFragment(post)
     }
 
     private fun goToProfileDetailsFragment(positionAdapter: Int) {
         val user_id = feedListPosts[positionAdapter].userCreatorId
-        _feedState.value = FeedState.GoToProfileDetailsFragment(user_id)
+        viewState = FeedState.GoToProfileDetailsFragment(user_id)
     }
 
     private fun clearListsAndMapsLocalDatabase(){
@@ -298,9 +288,9 @@ constructor(
             firebaseRepository.signOut()
                 .collect {
                     when(it){
-                        is ResultAuth.Success -> _feedState.value = FeedState.SignOut
+                        is ResultAuth.Success -> viewState = FeedState.SignOut
 
-                        is ResultAuth.Error -> _feedState.value = FeedState.Idle
+                        is ResultAuth.Error -> viewState = FeedState.Idle
                     }
                 }
         }

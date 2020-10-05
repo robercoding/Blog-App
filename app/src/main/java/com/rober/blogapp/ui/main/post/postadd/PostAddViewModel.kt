@@ -9,44 +9,40 @@ import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.util.MessageUtil
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class PostAddViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository
-): ViewModel() {
-
-    private val _statePost: MutableLiveData<PostAddState> = MutableLiveData()
-
-    val statePost : LiveData<PostAddState>
-        get() = _statePost
-
+): BaseViewModel<PostAddState, PostAddEvent>() {
+    
     var user : User? = null
     var post: Post? = null
 
     var isPostToUpdate = false
 
-    fun setIntention(event: PostAddEvent){
+    override fun setIntention(event: PostAddEvent){
         when(event) {
             is PostAddEvent.LoadUserDetails -> getCurrentUser()
 
             is PostAddEvent.GetPostToEdit -> {
-                _statePost.value = PostAddState.GetPostToEdit
+                viewState = PostAddState.GetPostToEdit
             }
 
             is PostAddEvent.RenderPostToEditInView -> {
                 post = event.post
                 isPostToUpdate = true
-                _statePost.value = PostAddState.RenderPostToEditInView(event.post)
+                viewState = PostAddState.RenderPostToEditInView(event.post)
             }
 
             is PostAddEvent.ReadyToWrite -> {
-                _statePost.value = PostAddState.ReadyToWrite
+                viewState = PostAddState.ReadyToWrite
             }
 
             is PostAddEvent.ReadyToSaveOrUpdatePost -> {
-                _statePost.value = PostAddState.SaveOrUpdatePost(isPostToUpdate)
+                viewState = PostAddState.SaveOrUpdatePost(isPostToUpdate)
             }
 
             is PostAddEvent.UpdatePost ->{
@@ -54,9 +50,9 @@ class PostAddViewModel @ViewModelInject constructor(
                     tempPost.title = event.title
                     tempPost.text = event.text
 
-                    _statePost.value = PostAddState.GoToPostDetailAndUpdatePost(tempPost)
+                    viewState = PostAddState.GoToPostDetailAndUpdatePost(tempPost)
                 }?: kotlin.run {
-                    _statePost.value = PostAddState.Idle
+                    viewState = PostAddState.Idle
                 }
             }
 
@@ -65,11 +61,11 @@ class PostAddViewModel @ViewModelInject constructor(
             }
 
             is PostAddEvent.NotifyErrorFieldValidation -> {
-                _statePost.value = PostAddState.NotifyErrorFieldValidation
+                viewState = PostAddState.NotifyErrorFieldValidation
             }
 
             PostAddEvent.Idle -> {
-                _statePost.value = PostAddState.Idle
+                viewState = PostAddState.Idle
             }
         }
     }
@@ -78,7 +74,7 @@ class PostAddViewModel @ViewModelInject constructor(
         user = firebaseRepository.getCurrentUser()
 
         user?.run {
-            _statePost.value = PostAddState.SetUserDetail(this)
+            viewState = PostAddState.SetUserDetail(this)
         }
     }
 
@@ -88,13 +84,13 @@ class PostAddViewModel @ViewModelInject constructor(
                 .collect {resultData ->
                     when(resultData){
                         is ResultData.Success ->{
-                            _statePost.value = PostAddState.PostHasBeenSaved(MessageUtil("Post has been succesfully saved!"))
+                            viewState = PostAddState.PostHasBeenSaved(MessageUtil("Post has been succesfully saved!"))
                         }
                         is ResultData.Error -> {
-                            _statePost.value = PostAddState.Error(resultData.exception)
+                            viewState = PostAddState.Error(resultData.exception)
                         }
                         is ResultData.Loading -> {
-                            _statePost.value = PostAddState.Idle
+                            viewState = PostAddState.Idle
                         }
                     }
                 }

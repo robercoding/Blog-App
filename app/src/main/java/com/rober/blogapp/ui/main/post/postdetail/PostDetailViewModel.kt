@@ -14,6 +14,7 @@ import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.DELETE_POST
@@ -29,12 +30,7 @@ import kotlinx.coroutines.launch
 class PostDetailViewModel @ViewModelInject constructor(
     val firebaseRepository: FirebaseRepository,
     val application: Application
-) : ViewModel() {
-
-    private val _postDetailState: MutableLiveData<PostDetailState> = MutableLiveData()
-
-    val postDetailState: LiveData<PostDetailState>
-        get() = _postDetailState
+) : BaseViewModel<PostDetailState, PostDetailFragmentEvent>() {
 
     private var userPost: User? = null
     private var post: Post? = null
@@ -46,7 +42,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     private var listOptions = listOf<Option>()
 
 
-    fun setIntention(event: PostDetailFragmentEvent) {
+    override fun setIntention(event: PostDetailFragmentEvent) {
         when (event) {
             is PostDetailFragmentEvent.SetPost -> {
                 post = event.post
@@ -57,17 +53,17 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             is PostDetailFragmentEvent.GoToProfileFragment -> {
                 userPost?.run {
-                    _postDetailState.value = PostDetailState.GoToProfileFragment(this)
-                } ?: kotlin.run { _postDetailState.value = PostDetailState.Idle }
+                    viewState = PostDetailState.GoToProfileFragment(this)
+                } ?: kotlin.run { viewState = PostDetailState.Idle }
             }
 
             is PostDetailFragmentEvent.GoBackToPreviousFragment -> {
-                _postDetailState.value = PostDetailState.BackToPreviousFragment
+                viewState = PostDetailState.BackToPreviousFragment
             }
 
             is PostDetailFragmentEvent.ShowPostOptions -> {
                 if (isOptionsVisible) {
-                    _postDetailState.value = PostDetailState.Idle
+                    viewState = PostDetailState.Idle
                     return
                 }
 
@@ -86,12 +82,12 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             is PostDetailFragmentEvent.HideOptions -> {
                 isOptionsVisible = false
-                _postDetailState.value = PostDetailState.HideOptions
+                viewState = PostDetailState.HideOptions
             }
 
             is PostDetailFragmentEvent.ExecuteOption -> {
                 isOptionsVisible = false
-                _postDetailState.value = PostDetailState.HideOptions
+                viewState = PostDetailState.HideOptions
                 val optionPositionIndex = event.optionPositionIndex
                 val option = listOptions[optionPositionIndex]
 
@@ -107,7 +103,7 @@ class PostDetailViewModel @ViewModelInject constructor(
             }
 
             is PostDetailFragmentEvent.SendReport -> {
-                post?.also {tempPost->
+                post?.also { tempPost ->
                     reportPost(tempPost, event.reportCause, event.message)
                 }
 
@@ -115,15 +111,15 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             is PostDetailFragmentEvent.CancelReport -> {
                 isOptionReportDialogOpen = false
-                _postDetailState.value = PostDetailState.Idle
+                viewState = PostDetailState.Idle
             }
 
             is PostDetailFragmentEvent.GetParcelableUpdatedPost -> {
-                _postDetailState.value = PostDetailState.GetParcelableUpdatedPost
+                viewState = PostDetailState.GetParcelableUpdatedPost
             }
 
             is PostDetailFragmentEvent.GetParcelablePost -> {
-                _postDetailState.value = PostDetailState.GetParcelablePost
+                viewState = PostDetailState.GetParcelablePost
             }
 
             is PostDetailFragmentEvent.SaveUpdatedPost -> {
@@ -141,9 +137,9 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             userProfile?.also { tempUserProfile ->
                 userPost = tempUserProfile
-                _postDetailState.value = PostDetailState.SetPostDetails(post, tempUserProfile)
+                viewState = PostDetailState.SetPostDetails(post, tempUserProfile)
             } ?: kotlin.run {
-                _postDetailState.value = PostDetailState.BackToPreviousFragment
+                viewState = PostDetailState.BackToPreviousFragment
             }
         }
     }
@@ -186,27 +182,31 @@ class PostDetailViewModel @ViewModelInject constructor(
 
                 if (doesUserFollowPostCreatorUser) {
                     //Text
-                    val optionTextArray = application.applicationContext.resources.getStringArray(textResourceId) //Get array
+                    val optionTextArray =
+                        application.applicationContext.resources.getStringArray(textResourceId) //Get array
                     val optionTextResource = optionTextArray[ArrayUtils.UNFOLLOW] //Get item string from array
                     tempListOptionsText.add(optionTextResource)
 
                     //Icon
                     val optionIconArray =
                         application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
-                    val optionIconResource = optionIconArray.getResourceId(ArrayUtils.UNFOLLOW, -1) //Get item int from array
+                    val optionIconResource =
+                        optionIconArray.getResourceId(ArrayUtils.UNFOLLOW, -1) //Get item int from array
                     tempListOptionsIcons.add(optionIconResource)
 
                     optionIconArray.recycle()
                 } else {
                     //Text
-                    val optionTextArray = application.applicationContext.resources.getStringArray(textResourceId) //Get array
+                    val optionTextArray =
+                        application.applicationContext.resources.getStringArray(textResourceId) //Get array
                     val optionTextResource = optionTextArray[ArrayUtils.FOLLOW] //Get item string from array
                     tempListOptionsText.add(optionTextResource)
 
                     //Icon
                     val optionIconArray =
                         application.applicationContext.resources.obtainTypedArray(iconResourceId) //Get typed array
-                    val optionIconResource = optionIconArray.getResourceId(ArrayUtils.FOLLOW, -1) //Get item int from array
+                    val optionIconResource =
+                        optionIconArray.getResourceId(ArrayUtils.FOLLOW, -1) //Get item int from array
                     tempListOptionsIcons.add(optionIconResource)
                     optionIconArray.recycle()
                 }
@@ -230,7 +230,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
 
         listOptions = tempListOptions
-        _postDetailState.value = PostDetailState.ShowPostOptions(listOptions)
+        viewState = PostDetailState.ShowPostOptions(listOptions)
     }
 
     private suspend fun doesCurrentUserFollowsUserPost(): Boolean {
@@ -281,17 +281,17 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
 
         listOptions = tempListOptions
-        _postDetailState.value = PostDetailState.ShowPostOptions(listOptions)
+        viewState = PostDetailState.ShowPostOptions(listOptions)
     }
 
     private fun redirectToEditPostFragment() {
         if (userPost?.user_id != post?.userCreatorId) {
-            _postDetailState.value = PostDetailState.ErrorExecuteOption
+            viewState = PostDetailState.ErrorExecuteOption
             return
         }
 
         post?.run {
-            _postDetailState.value = PostDetailState.RedirectToEditPost(this)
+            viewState = PostDetailState.RedirectToEditPost(this)
         }
     }
 
@@ -314,10 +314,10 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
         job.join()
 
-        if(hasPostBeenUpdated)
-            _postDetailState.value = PostDetailState.NotifyUser("Post has been updated!")
+        if (hasPostBeenUpdated)
+            viewState = PostDetailState.NotifyUser("Post has been updated!")
         else
-            _postDetailState.value = PostDetailState.NotifyUser("Sorry, post coudln't been updated.")
+            viewState = PostDetailState.NotifyUser("Sorry, post coudln't been updated.")
     }
 
     private suspend fun deletePost() {
@@ -341,15 +341,15 @@ class PostDetailViewModel @ViewModelInject constructor(
         job.join()
 
         if (deletedPost)
-            _postDetailState.value = PostDetailState.PostDeleted
+            viewState = PostDetailState.PostDeleted
         else
-            _postDetailState.value = PostDetailState.ErrorExecuteOption
+            viewState = PostDetailState.ErrorExecuteOption
     }
 
-    private fun openReportDialog(){
-        if(!isOptionReportDialogOpen){
+    private fun openReportDialog() {
+        if (!isOptionReportDialogOpen) {
             isOptionReportDialogOpen = true
-            _postDetailState.value = PostDetailState.OpenDialogReport
+            viewState = PostDetailState.OpenDialogReport
         }
 
     }
@@ -357,15 +357,15 @@ class PostDetailViewModel @ViewModelInject constructor(
     private fun reportPost(post: Post, reportCause: String, message: String) {
         viewModelScope.launch {
             firebaseRepository.reportPost(post, reportCause, message)
-                .collect {resultData ->
-                    when(resultData){
+                .collect { resultData ->
+                    when (resultData) {
                         is ResultData.Success -> {
-                            _postDetailState.value = PostDetailState.NotifyUser("Post has been successfully reported!")
+                            viewState = PostDetailState.NotifyUser("Post has been successfully reported!")
                         }
 
                         is ResultData.Error -> {
                             val exception = resultData.exception
-                            _postDetailState.value = PostDetailState.Error(exception)
+                            viewState = PostDetailState.Error(exception)
                         }
                     }
                 }
@@ -375,60 +375,61 @@ class PostDetailViewModel @ViewModelInject constructor(
 
     private suspend fun followUser(userToFollow: User?) {
 
-        if(userToFollow == null){
-            _postDetailState.value = PostDetailState.Error(Exception("There was an error when trying to follow the user"))
+        if (userToFollow == null) {
+            viewState = PostDetailState.Error(Exception("There was an error when trying to follow the user"))
             return
         }
 
         var followedUser = false
         val job = viewModelScope.launch {
             firebaseRepository.followOtherUser(userToFollow)
-                .collect {resultData ->
-                    when(resultData){
+                .collect { resultData ->
+                    when (resultData) {
                         is ResultData.Success -> {
                             followedUser = resultData.data!!
                         }
                         is ResultData.Error -> {
-                            _postDetailState.value = PostDetailState.Idle
+                            viewState = PostDetailState.Idle
                         }
                     }
                 }
         }
         job.join()
 
-        if(followedUser) {
-            _postDetailState.value = PostDetailState.NotifyUser("Succesfully followed")
-        }else{
-            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to follow the user")
+        if (followedUser) {
+            viewState = PostDetailState.NotifyUser("Succesfully followed")
+        } else {
+            viewState = PostDetailState.NotifyUser("Sorry, there was an error trying to follow the user")
         }
     }
 
     private suspend fun unfollowUser(userToUnfollow: User?) {
-        if(userToUnfollow == null){
-            _postDetailState.value = PostDetailState.Error(Exception("There was an error when trying to unfollow the user"))
+        if (userToUnfollow == null) {
+            viewState =
+                PostDetailState.Error(Exception("There was an error when trying to unfollow the user"))
             return
         }
 
         var unfollowedUser = false
         val job = viewModelScope.launch {
             firebaseRepository.unfollowOtherUser(userToUnfollow)
-                .collect {resultData ->
-                    when(resultData){
+                .collect { resultData ->
+                    when (resultData) {
                         is ResultData.Success -> {
                             unfollowedUser = resultData.data!!
                         }
                         is ResultData.Error -> {
-                            _postDetailState.value = PostDetailState.Idle
+                            viewState = PostDetailState.Idle
                         }
                     }
                 }
         }
         job.join()
 
-        if(unfollowedUser) {
-            _postDetailState.value = PostDetailState.NotifyUser("Succesfully unfollowed")
-        }else{
-            _postDetailState.value = PostDetailState.NotifyUser("Sorry, there was an error trying to unfollow the user")
+        if (unfollowedUser) {
+            viewState = PostDetailState.NotifyUser("Succesfully unfollowed")
+        } else {
+            viewState = PostDetailState.NotifyUser("Sorry, there was an error trying to unfollow the user")
         }
     }
 
