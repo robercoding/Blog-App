@@ -5,53 +5,35 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.profile.profileedit.util.IntentImageCodes
 import com.rober.blogapp.util.ColorUtils
 import com.theartofdev.edmodo.cropper.CropImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_profile_edit.*
 
-
 @AndroidEntryPoint
-class ProfileEditFragment : Fragment() {
-    private val TAG = "ProfileEditFragment"
+class ProfileEditFragment :
+    BaseFragment<ProfileEditState, ProfileEditFragmentEvent, ProfileEditViewModel>(R.layout.fragment_profile_edit) {
 
-    private val profileEditViewModel: ProfileEditViewModel by viewModels()
+    override val viewModel: ProfileEditViewModel by viewModels()
 
     private var INTENT_IMAGE_CODE = 0
     private var usernameAvailable = true
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_profile_edit, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupListeners()
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        observeViewModel()
-        profileEditViewModel.setIntention(ProfileEditFragmentEvent.LoadingUser)
-
+        viewModel.setIntention(ProfileEditFragmentEvent.LoadingUser)
         getArgs()
     }
 
@@ -59,37 +41,31 @@ class ProfileEditFragment : Fragment() {
         val userArg = arguments?.get("user") as User?
 
         userArg?.let { user ->
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.LoadUser(user))
+            viewModel.setIntention(ProfileEditFragmentEvent.LoadUser(user))
         } ?: kotlin.run {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
+            viewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
         }
     }
 
-    private fun observeViewModel() {
-        profileEditViewModel.profileEditState.observe(viewLifecycleOwner, Observer { profileEditState ->
-            render(profileEditState)
-        })
-    }
-
-    private fun render(profileEditState: ProfileEditState) {
-        when (profileEditState) {
+    override fun render(viewState: ProfileEditState) {
+        when (viewState) {
             is ProfileEditState.LoadUser -> {
-                setUserDetailsView(profileEditState.user)
-                loadingUserView(false)
+                setUserDetailsView(viewState.user)
+                displayLoadingFragment(false)
             }
 
-            is ProfileEditState.NotifyUsernameAvailable -> isUsernameAvailable(profileEditState.isUsernameAvailable)
+            is ProfileEditState.NotifyUsernameAvailable -> isUsernameAvailable(viewState.isUsernameAvailable)
 
             is ProfileEditState.NavigateToProfileDetail -> navigateToProfileDetail()
 
-            is ProfileEditState.LoadingUser -> loadingUserView(true)
+            is ProfileEditState.LoadingUser -> displayLoadingFragment(true)
 
             is ProfileEditState.GetImageFromGallery -> {
-                INTENT_IMAGE_CODE = profileEditState.INTENT_IMAGE_CODE
+                INTENT_IMAGE_CODE = viewState.INTENT_IMAGE_CODE
                 getImageFromGallery()
             }
 
-            is ProfileEditState.PreviewImage -> setPreviewImage(profileEditState.uri)
+            is ProfileEditState.PreviewImage -> setPreviewImage(viewState.uri)
 
             is ProfileEditState.ValidateChanges -> {
                 val saveChanges = validateChanges()
@@ -101,10 +77,10 @@ class ProfileEditFragment : Fragment() {
 
             is ProfileEditState.NotifyErrorValidate -> {
                 setErrors(
-                    profileEditState.isUsernameAvailable,
-                    profileEditState.isUsernameLengthOk,
-                    profileEditState.isBiographyOk,
-                    profileEditState.isLocationOk
+                    viewState.isUsernameAvailable,
+                    viewState.isUsernameLengthOk,
+                    viewState.isBiographyOk,
+                    viewState.isLocationOk
                 )
             }
 
@@ -114,7 +90,7 @@ class ProfileEditFragment : Fragment() {
 
             is ProfileEditState.ErrorSave -> {
                 displayProgressBarSaveChanges(false)
-                profileEditState.messageError?.also { messageError ->
+                viewState.messageError?.also { messageError ->
                     Toast.makeText(requireContext(), messageError, Toast.LENGTH_SHORT).show()
                 } ?: kotlin.run {
                     Toast.makeText(
@@ -160,16 +136,6 @@ class ProfileEditFragment : Fragment() {
             .into(profile_edit_image_background)
     }
 
-    private fun loadingUserView(display: Boolean) {
-        if (display) {
-            displayProgressBar(display)
-            profile_edit_layout_user_details.visibility = View.GONE
-        } else {
-            displayProgressBar(display)
-            profile_edit_layout_user_details.visibility = View.VISIBLE
-        }
-    }
-
     private fun isUsernameAvailable(isUsernameAvailable: Boolean) {
         if (isUsernameAvailable) {
             profile_text_layout_username.isEndIconVisible = true
@@ -182,7 +148,8 @@ class ProfileEditFragment : Fragment() {
             }
 
             profile_text_layout_username.endIconDrawable = drawable
-            profile_text_layout_username.boxStrokeColor = ContextCompat.getColor(requireContext(), R.color.blueTwitter)
+            profile_text_layout_username.boxStrokeColor =
+                ContextCompat.getColor(requireContext(), R.color.blueTwitter)
 
             usernameAvailable = true
         } else {
@@ -244,11 +211,12 @@ class ProfileEditFragment : Fragment() {
 
     private fun saveActualChanges() {
         displayProgressBarSaveChanges(true)
-        val username = profile_text_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
+        val username =
+            profile_text_edit_username.text.toString().replace("\\s".toRegex(), "") //remove whitespaces
         val biography = profile_text_edit_biography.text.toString()
         val location = profile_text_edit_location.text.toString()
 
-        profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveChanges(username, biography, location))
+        viewModel.setIntention(ProfileEditFragmentEvent.SaveChanges(username, biography, location))
     }
 
     private fun validateChanges(): Boolean {
@@ -271,7 +239,7 @@ class ProfileEditFragment : Fragment() {
         }
 
         return if (!notifyErrorEvent.isBiographyOk || !notifyErrorEvent.isLocationOk || !notifyErrorEvent.isUsernameAvailable || !notifyErrorEvent.isUsernameLengthOk) {
-            profileEditViewModel.setIntention(notifyErrorEvent)
+            viewModel.setIntention(notifyErrorEvent)
             false
         } else {
             true
@@ -304,14 +272,15 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun saveUri(uri: Uri) {
-        profileEditViewModel.setIntention(ProfileEditFragmentEvent.SaveUriAndPreviewNewImage(uri, INTENT_IMAGE_CODE))
+        viewModel.setIntention(ProfileEditFragmentEvent.SaveUriAndPreviewNewImage(uri, INTENT_IMAGE_CODE))
     }
 
     private fun setPreviewImage(uri: Uri) {
         when (INTENT_IMAGE_CODE) {
             IntentImageCodes.PROFILE_IMAGE_CODE -> profile_edit_image_profile.setImageURI(uri)
 
-            IntentImageCodes.BACKGROUND_IMAGE_CODE -> Glide.with(requireView()).load(uri).into(profile_edit_image_background)
+            IntentImageCodes.BACKGROUND_IMAGE_CODE -> Glide.with(requireView()).load(uri)
+                .into(profile_edit_image_background)
         }
     }
 
@@ -320,13 +289,23 @@ class ProfileEditFragment : Fragment() {
             View.VISIBLE else profile_edit_progress_bar_save_changes.visibility = View.GONE
     }
 
-    private fun setupListeners() {
+    override fun displayLoadingFragment(display: Boolean) {
+        if (display) {
+            displayProgressBar(display)
+            profile_edit_layout_user_details.visibility = View.GONE
+        } else {
+            displayProgressBar(display)
+            profile_edit_layout_user_details.visibility = View.VISIBLE
+        }
+    }
+
+    override fun setupListeners() {
         profile_text_edit_username.addTextChangedListener {
             val usernameText = profile_text_edit_username.text.toString()
             if (usernameText.length < 5 || usernameText.length > 15) {
-                profileEditViewModel.setIntention(ProfileEditFragmentEvent.NotifyErrorValidate(false, false, true, true))
+                viewModel.setIntention(ProfileEditFragmentEvent.NotifyErrorValidate(false, false, true, true))
             } else {
-                profileEditViewModel.setIntention(
+                viewModel.setIntention(
                     ProfileEditFragmentEvent.CheckIfUsernameAvailable(
                         profile_text_edit_username.text.toString()
                     )
@@ -335,21 +314,21 @@ class ProfileEditFragment : Fragment() {
         }
 
         profile_edit_material_toolbar.setNavigationOnClickListener {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
+            viewModel.setIntention(ProfileEditFragmentEvent.NavigateToProfileDetail)
         }
 
         profile_edit_image_profile_add.setOnClickListener {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForProfile)
+            viewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForProfile)
         }
 
         profile_edit_image_background_add.setOnClickListener {
-            profileEditViewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
+            viewModel.setIntention(ProfileEditFragmentEvent.GetImageFromGalleryForBackground)
         }
 
         profile_edit_material_toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.toolbar_profile_edit_save -> {
-                    profileEditViewModel.setIntention(
+                    viewModel.setIntention(
                         ProfileEditFragmentEvent.ValidateChanges(
                             profile_text_edit_username.text.toString(),
                             profile_text_edit_biography.text.toString(),
@@ -397,7 +376,8 @@ sealed class ProfileEditFragmentEvent {
     data class ValidateChanges(val username: String, val biography: String, val location: String) :
         ProfileEditFragmentEvent()
 
-    data class SaveChanges(val username: String, val biography: String, val location: String) : ProfileEditFragmentEvent()
+    data class SaveChanges(val username: String, val biography: String, val location: String) :
+        ProfileEditFragmentEvent()
 
     object LoadingUser : ProfileEditFragmentEvent()
 }

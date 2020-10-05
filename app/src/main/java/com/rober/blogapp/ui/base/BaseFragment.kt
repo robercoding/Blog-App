@@ -19,6 +19,8 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
 
     abstract val viewModel: VM
 
+    val TAG = javaClass.simpleName
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.viewStates().observe(this, Observer {
@@ -34,15 +36,28 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
         return LayoutInflater.from(requireContext()).inflate(fragmentView, container, false)
     }
 
-    abstract fun render(viewState: STATE)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupListeners()
+        setupViewDesign()
+    }
 
-    abstract fun displayLoadingFragment(display: Boolean)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupObjects()
+    }
+
+    abstract fun render(viewState: STATE)
 
     abstract fun setupListeners()
 
-    open fun displayLoadingView(display: Boolean) {}
+    open fun setupObjects(){}
 
     open fun setupViewDesign() {}
+
+    open fun displayLoadingFragment(display: Boolean){}
+
+    open fun displayLoadingView(display: Boolean) {}
 
     fun getColor(color: Int): Int {
         return ContextCompat.getColor(requireContext(), color)

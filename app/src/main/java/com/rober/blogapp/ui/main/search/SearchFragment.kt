@@ -1,69 +1,43 @@
 package com.rober.blogapp.ui.main.search
 
-import android.app.Activity
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.search.adapter.UserSearchAdapter
 import com.rober.blogapp.util.RecyclerViewActionInterface
-import com.rober.blogapp.util.state.DataState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_search.*
 
-
 @AndroidEntryPoint
-class SearchFragment : Fragment(), RecyclerViewActionInterface {
-    private val TAG = "SearchFragment"
+class SearchFragment :
+    BaseFragment<SearchState, SearchFragmentEvent, SearchViewModel>(R.layout.fragment_search),
+    RecyclerViewActionInterface {
 
-    private val viewModel: SearchViewModel by viewModels()
+    override val viewModel: SearchViewModel by viewModels()
     lateinit var userSearchAdapter: UserSearchAdapter
     private var textSearch = ""
     private var alreadyFocusOnSearchText = false
 
     private var listUsers = mutableListOf<User>()
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_search, container, false)
-    }
-
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.setIntention(SearchFragmentEvent.LoadUserDetails)
-
-        userSearchAdapter = UserSearchAdapter(requireView(), R.layout.adapter_search_viewholder_user, this)
-        subscribeObservers()
     }
 
-    private fun subscribeObservers() {
-        viewModel.searchState.observe(viewLifecycleOwner, Observer { searchState ->
-            render(searchState)
-        })
-    }
-
-    private fun render(searchState: SearchState) {
-        when (searchState) {
+    override fun render(viewState: SearchState) {
+        when (viewState) {
             is SearchState.SetUserDetails -> {
-                setUserDetails(searchState.user)
+                setUserDetails(viewState.user)
                 setupListeners()
             }
 
@@ -81,7 +55,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
 
                 recycler_user_search.visibility = View.VISIBLE
 
-                listUsers = searchState.listUsers.toMutableList()
+                listUsers = viewState.listUsers.toMutableList()
                 userSearchAdapter.setUsers(listUsers)
                 recyclerAdapterApply()
             }
@@ -90,13 +64,13 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
                 recycler_user_search.visibility = View.INVISIBLE
                 listUsers = mutableListOf()
 
-                search_text_cant_find_user.text = "@${searchState.searchUsername}"
+                search_text_cant_find_user.text = "@${viewState.searchUsername}"
                 search_text_cant_find_user.visibility = View.VISIBLE
             }
 
             is SearchState.GoToProfileFragment -> {
                 textSearch = search_user_text.text.toString()
-                goToProfileFragment(searchState.user)
+                goToProfileFragment(viewState.user)
             }
 
             is SearchState.Loading -> {
@@ -118,7 +92,7 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
         }
     }
 
-    private fun setupListeners() {
+    override fun setupListeners() {
         search_user_text.setOnClickListener {
             if (!alreadyFocusOnSearchText)
                 viewModel.setIntention(SearchFragmentEvent.ReadySearchUser)
@@ -150,6 +124,11 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
                 else -> true
             }
         }
+    }
+
+    override fun setupObjects() {
+        super.setupObjects()
+        userSearchAdapter = UserSearchAdapter(requireView(), R.layout.adapter_search_viewholder_user, this)
     }
 
     private fun readySearchUser() {
@@ -201,11 +180,6 @@ class SearchFragment : Fragment(), RecyclerViewActionInterface {
     private fun displayBottomNavigation(display: Boolean) {
         val navController = activity?.bottom_navigation ?: return
         if (display) navController.visibility = View.VISIBLE else navController.visibility = View.GONE
-    }
-
-    private fun hideKeyBoard() {
-        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {}

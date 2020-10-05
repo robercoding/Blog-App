@@ -19,27 +19,29 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 @AndroidEntryPoint
-class SettingsFragment : BaseFragment<SettingsViewState, SettingsFragmentEvent, SettingsViewModel>(R.layout.fragment_settings), RecyclerViewActionInterface{
+class SettingsFragment :
+    BaseFragment<SettingsViewState, SettingsFragmentEvent, SettingsViewModel>(R.layout.fragment_settings),
+    RecyclerViewActionInterface {
 
     override val viewModel: SettingsViewModel by viewModels()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        setupViewDesign()
-        setupListeners()
         viewModel.setIntention(SettingsFragmentEvent.LoadSettings)
-
     }
 
     override fun render(viewState: SettingsViewState) {
-        when(viewState){
-            is SettingsViewState.LoadSettingsMenu -> renderSettingsView(viewState.user, viewState.listSettings)
+        when (viewState) {
+            is SettingsViewState.LoadSettingsMenu -> renderSettingsView(
+                viewState.user,
+                viewState.listSettings
+            )
 
         }
         Log.i("SeeSettingsRender", "This renders ${viewState}")
     }
 
-    private fun renderSettingsView(user: User, listSettingsOption: List<Option>){
+    private fun renderSettingsView(user: User, listSettingsOption: List<Option>) {
 
         settings_text_username.text = "@${user.username}"
 
@@ -60,16 +62,14 @@ class SettingsFragment : BaseFragment<SettingsViewState, SettingsFragmentEvent, 
         }
     }
 
-    override fun setupViewDesign(){
+    override fun setupViewDesign() {
         val backArrow = resources.getDrawable(R.drawable.ic_arrow_left, null)
-        backArrow.colorFilter = PorterDuffColorFilter(ContextCompat.getColor(requireContext(), R.color.blueTwitter), PorterDuff.Mode.SRC_ATOP)
+        backArrow.colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+            PorterDuff.Mode.SRC_ATOP
+        )
         settings_material_toolbar.navigationIcon = backArrow
     }
-
-    override fun displayLoadingFragment(display: Boolean) {
-        //
-    }
-
 
     override fun clickListenerOnPost(positionAdapter: Int) {
         //Nothing
@@ -90,5 +90,5 @@ class SettingsFragment : BaseFragment<SettingsViewState, SettingsFragmentEvent, 
 
 sealed class SettingsFragmentEvent {
     object SayHello : SettingsFragmentEvent()
-    object LoadSettings: SettingsFragmentEvent()
+    object LoadSettings : SettingsFragmentEvent()
 }

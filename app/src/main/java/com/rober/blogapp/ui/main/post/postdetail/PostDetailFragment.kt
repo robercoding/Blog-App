@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.DisplayMetrics
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -24,6 +22,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
@@ -35,44 +34,26 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 
 @AndroidEntryPoint
-class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
+class PostDetailFragment :
+    BaseFragment<PostDetailState, PostDetailFragmentEvent, PostDetailViewModel>(R.layout.fragment_post_detail),
+    OnListOptionsClickInterface {
 
-    private val viewModel: PostDetailViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_post_detail, container, false)
-    }
+    override val viewModel: PostDetailViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupListeners()
-        post_detail_toolbar.navigationIcon?.colorFilter =
-            PorterDuffColorFilter(
-                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
-                PorterDuff.Mode.SRC_ATOP
-            )
+        setupViewDesign()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         AndroidThreeTen.init(requireContext())
-        setupObservers()
 
         viewModel.setIntention(PostDetailFragmentEvent.GetParcelableUpdatedPost)
     }
 
-    private fun setupObservers() {
-        viewModel.postDetailState.observe(viewLifecycleOwner, Observer { postDetailState ->
-            render(postDetailState)
-        })
-    }
-
-    private fun render(postDetailState: PostDetailState) {
-        when (postDetailState) {
+    override fun render(viewState: PostDetailState) {
+        when (viewState) {
 
             is PostDetailState.GetParcelableUpdatedPost -> {
                 enableLoadingPost(true)
@@ -84,13 +65,13 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             }
 
             is PostDetailState.SetPostDetails -> {
-                setPostDetails(postDetailState.post)
-                setUserDetails(postDetailState.user)
+                setPostDetails(viewState.post)
+                setUserDetails(viewState.user)
                 enableLoadingPost(false)
             }
 
             is PostDetailState.RedirectToEditPost -> {
-                goToPostAdd(postDetailState.post)
+                goToPostAdd(viewState.post)
             }
 
             is PostDetailState.BackToPreviousFragment -> {
@@ -98,11 +79,11 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             }
 
             is PostDetailState.GoToProfileFragment -> {
-                goToProfileFragment(postDetailState.user)
+                goToProfileFragment(viewState.user)
             }
 
             is PostDetailState.ShowPostOptions -> {
-                val listOptions = postDetailState.listOptions
+                val listOptions = viewState.listOptions
                 post_detail_options_list.adapter =
                     ListOptionsAdapter(requireContext(), listOptions, this)
 
@@ -134,11 +115,11 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             }
 
             is PostDetailState.NotifyUser -> {
-                Toast.makeText(requireContext(), "${postDetailState.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "${viewState.message}", Toast.LENGTH_SHORT).show()
             }
 
             is PostDetailState.Error -> {
-                Toast.makeText(requireContext(), "${postDetailState.exception.message}", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), "${viewState.exception.message}", Toast.LENGTH_SHORT)
                     .show()
             }
 
@@ -173,9 +154,6 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
         post_detail_heart_number.text = "${post.likes}"
         post_detail_text.text = post.text
         post_detail_title.text = post.title
-//        val dateSecondWithZoneId = Instant.ofEpochSecond(post.created_at).toEpochMilli()
-
-//        Log.i("ZoneId", "${z.getAvailableZoneIds()}")
 
         val instantDate = Instant.ofEpochSecond(post.created_at)
         val zdt = ZoneId.systemDefault()
@@ -244,7 +222,7 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
             .show()
     }
 
-    private fun setupListeners() {
+    override fun setupListeners() {
         post_detail_toolbar.setNavigationOnClickListener {
             viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
         }
@@ -281,6 +259,14 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
         })
     }
 
+    override fun setupViewDesign() {
+        post_detail_toolbar.navigationIcon?.colorFilter =
+            PorterDuffColorFilter(
+                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+                PorterDuff.Mode.SRC_ATOP
+            )
+    }
+
     override fun onClickListOption(position: Int) {
         viewModel.setIntention(PostDetailFragmentEvent.ExecuteOption(position))
         Log.i(
@@ -312,10 +298,6 @@ class PostDetailFragment : Fragment(), OnListOptionsClickInterface {
     private fun enableLoadingPost(display: Boolean) {
         if (display) post_detail_background_loading.visibility =
             View.VISIBLE else post_detail_background_loading.visibility = View.GONE
-    }
-
-    private fun getEmoji(codePoint: Int) {
-
     }
 }
 

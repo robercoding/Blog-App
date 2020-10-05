@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.feed.adapter.PostAdapter
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.IOnTouchListener
 import com.rober.blogapp.ui.main.profile.profiledetail.utils.MotionLayoutTransitionListener
@@ -34,9 +35,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_profile_detail.*
 
 @AndroidEntryPoint
-class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListener {
+class ProfileFragment :
+    BaseFragment<ProfileDetailState, ProfileDetailFragmentEvent, ProfileDetailViewModel>(R.layout.fragment_profile_detail),
+    RecyclerViewActionInterface, IOnTouchListener {
 
-    private val TAG = "ProfileDetailFragment"
+    override val viewModel: ProfileDetailViewModel by viewModels()
 
     private val profileDetailViewModel: ProfileDetailViewModel by viewModels()
     lateinit var postAdapter: PostAdapter
@@ -50,38 +53,9 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
     private lateinit var onTouchListener: OnTouchListener
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        Log.i(TAG, "ON CREATE VIEW")
-        return inflater.inflate(R.layout.fragment_profile_detail, container, false)
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        profile_detail_arrow_back.colorFilter =
-            PorterDuffColorFilter(
-                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
-                PorterDuff.Mode.SRC_ATOP
-            )
-
-        postAdapter = PostAdapter(requireView(), viewHolder, this)
-        onTouchListener = OnTouchListener(requireView(), this)
-
-        profile_detail_swipe_refresh_layout.setOnTouchListener(onTouchListener)
-
-        setupListeners()
-        subscribeObservers()
         getUserArgumentAndSetIntention()
-    }
-
-    private fun subscribeObservers() {
-        profileDetailViewModel.profileDetailState.observe(
-            viewLifecycleOwner,
-            Observer { profileDetailState ->
-                render(profileDetailState)
-            })
     }
 
     private fun getUserArgumentAndSetIntention() {
@@ -101,29 +75,28 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         }
     }
 
-    private fun render(profileDetailState: ProfileDetailState) {
-        Log.i(TAG, "State: $profileDetailState")
-        when (profileDetailState) {
+    override fun render(viewState: ProfileDetailState) {
+        when (viewState) {
             is ProfileDetailState.SetCurrentUserProfile -> {
                 showProfileDetailView(true)
 
-                val user = profileDetailState.user
+                val user = viewState.user
 
-                setViewForCurrentUser(user, profileDetailState.bitmap)
+                setViewForCurrentUser(user, viewState.bitmap)
                 setUserProfileData(user)
 
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.LoadUserPosts)
             }
 
             is ProfileDetailState.SetOtherUserProfile -> {
-                val user = profileDetailState.user
+                val user = viewState.user
 
                 displayBottomNavigation(false)
                 showProfileDetailView(true)
 
-                setFollowButtonViewForOtherUser(profileDetailState.currentUserFollowsOtherUser)
+                setFollowButtonViewForOtherUser(viewState.currentUserFollowsOtherUser)
 
-                val bitmap = profileDetailState.bitmap
+                val bitmap = viewState.bitmap
 
                 setViewForOtherUser(bitmap, user)
                 setOtherUserProfileData(user)
@@ -131,8 +104,8 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailState.SetUserPosts -> {
-                val listUserPosts = profileDetailState.listUserPosts
-                setUserPosts(listUserPosts.toMutableList(), profileDetailState.user)
+                val listUserPosts = viewState.listUserPosts
+                setUserPosts(listUserPosts.toMutableList(), viewState.user)
                 displayProgressBar(false)
                 stopSwipeRefresh()
                 profileDetailViewModel.setIntention(ProfileDetailFragmentEvent.Idle)
@@ -147,7 +120,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailState.LoadBackgroundImage -> {
-                val imageProfile = profileDetailState.backgroundImageUrl
+                val imageProfile = viewState.backgroundImageUrl
 
                 val images = mutableListOf<Any>()
                 if (imageProfile.isEmpty()) {
@@ -169,7 +142,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
 
             is ProfileDetailState.LoadProfileImage -> {
                 Toast.makeText(requireContext(), "Load image profile", Toast.LENGTH_SHORT).show()
-                val imageProfile = profileDetailState.profileImageUrl
+                val imageProfile = viewState.profileImageUrl
 
                 val images = mutableListOf<Any>()
                 if (imageProfile.isEmpty()) {
@@ -192,10 +165,10 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailState.Followed -> {
-                val follower = profileDetailState.user.follower
+                val follower = viewState.user.follower
                 Toast.makeText(
                     requireContext(),
-                    "Now you're following ${profileDetailState.user.username}",
+                    "Now you're following ${viewState.user.username}",
                     Toast.LENGTH_SHORT
                 ).show()
                 setFollowButtonViewForOtherUser(true)
@@ -214,11 +187,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailState.Unfollowed -> {
-                val follower = profileDetailState.user.follower
+                val follower = viewState.user.follower
                 Log.i("UserFollower", "Get $follower")
                 Toast.makeText(
                     requireContext(),
-                    "You stopped following ${profileDetailState.user.username}",
+                    "You stopped following ${viewState.user.username}",
                     Toast.LENGTH_SHORT
                 ).show()
                 setFollowButtonViewForOtherUser(false)
@@ -237,11 +210,11 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             }
 
             is ProfileDetailState.NavigateToPostDetail -> {
-                navigateToPostDetail(profileDetailState.post)
+                navigateToPostDetail(viewState.post)
             }
 
             is ProfileDetailState.NavigateToProfileEdit -> {
-                navigateToProfileEdit(profileDetailState.user)
+                navigateToProfileEdit(viewState.user)
             }
 
             is ProfileDetailState.NavigateToSettings -> {
@@ -255,7 +228,7 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
             is ProfileDetailState.Error -> {
                 Toast.makeText(
                     requireContext(),
-                    "${profileDetailState.exception.message}",
+                    "${viewState.exception.message}",
                     Toast.LENGTH_SHORT
                 ).show()
                 backToPreviousFragment()
@@ -473,7 +446,16 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
         }
     }
 
-    private fun setupListeners() {
+    override fun setupObjects() {
+        super.setupObjects()
+
+        postAdapter = PostAdapter(requireView(), viewHolder, this)
+        onTouchListener = OnTouchListener(requireView(), this)
+
+        profile_detail_swipe_refresh_layout.setOnTouchListener(onTouchListener)
+    }
+
+    override fun setupListeners() {
         profile_detail_button_follow.apply {
             setOnClickListener {
                 if (!isUserFollowingInAction && !isUserUnfollowingInAction) {
@@ -625,6 +607,15 @@ class ProfileFragment : Fragment(), RecyclerViewActionInterface, IOnTouchListene
                 }
             }
         }
+    }
+
+    override fun setupViewDesign() {
+        super.setupViewDesign()
+        profile_detail_arrow_back.colorFilter =
+            PorterDuffColorFilter(
+                ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+                PorterDuff.Mode.SRC_ATOP
+            )
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {

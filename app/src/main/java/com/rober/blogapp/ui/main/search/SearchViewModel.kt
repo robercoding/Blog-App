@@ -8,23 +8,18 @@ import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.base.BaseViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class SearchViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository
-): ViewModel() {
-    private val TAG = "SearchViewModel"
-
-    private val _searchState: MutableLiveData<SearchState> = MutableLiveData()
-
-    val searchState : LiveData<SearchState>
-        get() = _searchState
+): BaseViewModel<SearchState, SearchFragmentEvent>() {
 
     var user : User? = null
     var listUsers = mutableListOf<User>()
 
-    fun setIntention(event: SearchFragmentEvent){
+    override fun setIntention(event: SearchFragmentEvent){
         when(event){
             is SearchFragmentEvent.LoadUserDetails -> getCurrentUser()
 
@@ -33,16 +28,16 @@ class SearchViewModel @ViewModelInject constructor(
             }
 
             is SearchFragmentEvent.ReadySearchUser -> {
-                _searchState.value = SearchState.ReadySearchUser
+                viewState = SearchState.ReadySearchUser
             }
 
             is SearchFragmentEvent.GoToProfileFragment -> {
                 val user = listUsers[event.positionAdapter]
-                _searchState.value = SearchState.GoToProfileFragment(user)
+                viewState = SearchState.GoToProfileFragment(user)
             }
 
             is SearchFragmentEvent.StopSearchUser -> {
-                _searchState.value = SearchState.StopSearchUser
+                viewState = SearchState.StopSearchUser
             }
         }
     }
@@ -51,13 +46,13 @@ class SearchViewModel @ViewModelInject constructor(
         user = firebaseRepository.getCurrentUser()
 
         user?.run {
-            _searchState.value = SearchState.SetUserDetails(this)
+            viewState = SearchState.SetUserDetails(this)
         }
     }
 
     private fun searchUsersByUsername(searchUsername: String){
             if(searchUsername.isEmpty()){
-                _searchState.value = SearchState.ShowResultSearch(listOf())
+                viewState = SearchState.ShowResultSearch(listOf())
             } else{
                 viewModelScope.launch {
                     firebaseRepository.getUserByString(searchUsername)
@@ -66,16 +61,16 @@ class SearchViewModel @ViewModelInject constructor(
                                 is ResultData.Success -> {
                                     resultData.data?.let {resultListUsers ->
                                         if(resultListUsers.isEmpty())
-                                            _searchState.value = SearchState.EmptyResultsSearch(searchUsername)
+                                            viewState = SearchState.EmptyResultsSearch(searchUsername)
                                         else{
                                             listUsers = resultListUsers.toMutableList()
-                                            _searchState.value = SearchState.ShowResultSearch(resultListUsers)
+                                            viewState = SearchState.ShowResultSearch(resultListUsers)
                                         }
                                     }
                                 }
 
                                 is ResultData.Loading -> {
-                                    _searchState.value = SearchState.Loading
+                                    viewState = SearchState.Loading
                                 }
                             }
                         }

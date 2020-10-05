@@ -39,9 +39,7 @@
             android:layout_height="120dp"
             android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
             android:id="@+id/profile_detail_image_background_clear"
@@ -49,9 +47,7 @@
             android:layout_height="120dp"
             android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/profile_detail_app_bar_layout"
@@ -74,13 +70,14 @@
 
                     <ImageView
                         android:id="@+id/profile_detail_arrow_back"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:layout_marginStart="14dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="2dp"
                         android:clickable="true"
                         android:cropToPadding="true"
                         android:elevation="7dp"
                         android:focusable="true"
+                        android:padding="10dp"
                         android:src="@drawable/ic_arrow_back_black_24dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
