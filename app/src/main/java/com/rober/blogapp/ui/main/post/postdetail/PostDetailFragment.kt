@@ -75,7 +75,7 @@ class PostDetailFragment :
             }
 
             is PostDetailState.BackToPreviousFragment -> {
-                moveToFeedFragment()
+                goBackToPreviousFragment()
             }
 
             is PostDetailState.GoToProfileFragment -> {
@@ -99,7 +99,7 @@ class PostDetailFragment :
                     "Post has been successfully deleted! ${getEmoji(OK_HAND)}",
                     Toast.LENGTH_SHORT
                 ).show()
-                moveToFeedFragment()
+                goBackToPreviousFragment()
             }
 
             is PostDetailState.OpenDialogReport -> {
@@ -187,6 +187,10 @@ class PostDetailFragment :
         if (findNavController().currentDestination?.id == R.id.postDetailFragment) {
             findNavController().navigate(R.id.action_postDetailFragment_to_postAddFragment, postToEditBundle)
         }
+    }
+
+    private fun goBackToPreviousFragment(){
+        findNavController().popBackStack()
     }
 
     private fun moveToFeedFragment() {

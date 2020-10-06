@@ -14,9 +14,9 @@
         <action
             android:id="@+id/action_feedFragment_to_loginFragment"
             app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_graph"
             app:enterAnim="@anim/from_left"
             app:exitAnim="@anim/to_right"
+            app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_feedFragment_to_profileFragment"
@@ -107,7 +107,9 @@
         tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_loginFragment_to_feedFragment"
-            app:destination="@id/feedFragment" />
+            app:destination="@id/feedFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true"/>
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment"
@@ -142,13 +144,13 @@
             app:enterAnim="@anim/from_left"
             app:exitAnim="@anim/to_right"
             app:popEnterAnim="@anim/from_right"
-            app:popExitAnim="@anim/to_left" />
+            app:popExitAnim="@anim/to_left"/>
         <action
             android:id="@+id/action_postAddFragment_to_postDetailFragment"
             app:destination="@id/postDetailFragment"
             app:enterAnim="@anim/from_top"
             app:exitAnim="@anim/to_bottom"
-            app:popUpTo="@id/feedFragment"
+            app:popUpTo="@id/postDetailFragment"
             app:popUpToInclusive="true"/>
     </fragment>
     <fragment
