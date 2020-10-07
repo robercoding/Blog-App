@@ -200,5 +200,17 @@
         android:id="@+id/settingsFragment"
         android:name="com.rober.blogapp.ui.main.settings.SettingsFragment"
         android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_preferencesFragment"
+            app:destination="@id/preferencesFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/preferencesFragment"
+        android:name="com.rober.blogapp.ui.main.settings.preferences.PreferencesFragment"
+        android:label="PreferencesFragment" />
 </navigation>

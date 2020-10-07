@@ -8,7 +8,9 @@ import java.lang.Exception
 sealed class SettingsViewState {
 
     object Hello : SettingsViewState()
-    data class LoadSettingsMenu(val listSettings: List<Option>, val user: User): SettingsViewState()
+    data class LoadSettingsMenu(val listSettingsAccount: List<Option>, val listSettingsOptionOtherOptions: List<Option>, val user: User): SettingsViewState()
+
+    object GoToPreferences : SettingsViewState()
 
     data class Error(val exception: Exception) : SettingsViewState()
     object Loading : SettingsViewState()

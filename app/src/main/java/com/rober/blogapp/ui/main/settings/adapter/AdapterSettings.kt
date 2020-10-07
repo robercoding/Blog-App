@@ -10,7 +10,7 @@ import com.rober.blogapp.entity.Option
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import kotlinx.android.synthetic.main.adapter_settings_viewholder_option.view.*
 
-class AdapterSettings(newListSettings: List<Option>, val recyclerViewActionInterface: RecyclerViewActionInterface) : RecyclerView.Adapter<AdapterSettings.SettingsViewHolder>() {
+class AdapterSettings(newListSettings: List<Option>, val recyclerViewActionInterface: RecyclerViewActionInterface, val sumAdapterPositionToOtherOptions: Int) : RecyclerView.Adapter<AdapterSettings.SettingsViewHolder>() {
     var listSettingsUser = newListSettings
 
     inner class SettingsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -39,7 +39,7 @@ class AdapterSettings(newListSettings: List<Option>, val recyclerViewActionInter
             }
 
             setOnClickListener {
-                recyclerViewActionInterface.clickListenerOnSettings(position)
+                recyclerViewActionInterface.clickListenerOnSettings(position+sumAdapterPositionToOtherOptions)
             }
         }
     }

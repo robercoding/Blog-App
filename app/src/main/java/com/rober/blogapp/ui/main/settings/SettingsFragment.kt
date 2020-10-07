@@ -3,7 +3,6 @@ package com.rober.blogapp.ui.main.settings
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -34,22 +33,54 @@ class SettingsFragment :
         when (viewState) {
             is SettingsViewState.LoadSettingsMenu -> renderSettingsView(
                 viewState.user,
-                viewState.listSettings
+                viewState.listSettingsAccount,
+                viewState.listSettingsOptionOtherOptions
             )
 
+            is SettingsViewState.GoToPreferences -> {
+                findNavController().navigate(R.id.action_settingsFragment_to_preferencesFragment)
+            }
         }
-        Log.i("SeeSettingsRender", "This renders ${viewState}")
     }
 
-    private fun renderSettingsView(user: User, listSettingsOption: List<Option>) {
+    private fun renderSettingsView(
+        user: User,
+        listSettingsOptionAccount: List<Option>,
+        listSettingsOptionOtherOptions: List<Option>
+    ) {
+        renderSettingsViewAccount(user, listSettingsOptionAccount)
+        renderSettingsViewOtherOptions(listSettingsOptionOtherOptions, listSettingsOptionAccount.size)
+    }
 
+    private fun renderSettingsViewAccount(user: User, listSettingsOptionAccount: List<Option>) {
         settings_text_username.text = "@${user.username}"
 
-        val settingsAdapter = AdapterSettings(listSettingsOption, this)
+        val settingsAdapter = AdapterSettings(listSettingsOptionAccount, this, 0)
         val linearLayoutManager = LinearLayoutManager(requireContext())
         val decoration = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
 
-        settings_recycler.apply {
+        settings_recycler_account.apply {
+            layoutManager = linearLayoutManager
+            adapter = settingsAdapter
+            addItemDecoration(decoration)
+        }
+    }
+
+    /* There are 2 recyclerviews and I want the adapter position of the second recycler
+    // continuing the number of the first recycler view
+    // (First position of second recycler view equals to the total size of first Recycler view + position adapter second)
+    // When user click on option it will evaluate on the list of the options (Together in viewModel)
+     */
+    private fun renderSettingsViewOtherOptions(
+        listSettingsOptionOtherOptions: List<Option>,
+        sumAdapterPositionToOtherOptions: Int
+    ) {
+        val linearLayoutManager = LinearLayoutManager(requireContext())
+        val settingsAdapter =
+            AdapterSettings(listSettingsOptionOtherOptions, this, sumAdapterPositionToOtherOptions)
+        val decoration = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
+
+        settings_recycler_other_options.apply {
             layoutManager = linearLayoutManager
             adapter = settingsAdapter
             addItemDecoration(decoration)
@@ -80,7 +111,7 @@ class SettingsFragment :
     }
 
     override fun clickListenerOnSettings(positionAdapter: Int) {
-        Log.i("SeeSettings", "Clicked on settings position = ${positionAdapter}")
+        viewModel.setIntention(SettingsFragmentEvent.ClickEventOnSettingsOption(positionAdapter))
     }
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
@@ -91,4 +122,6 @@ class SettingsFragment :
 sealed class SettingsFragmentEvent {
     object SayHello : SettingsFragmentEvent()
     object LoadSettings : SettingsFragmentEvent()
+
+    data class ClickEventOnSettingsOption(val positionAdapter: Int) : SettingsFragmentEvent()
 }

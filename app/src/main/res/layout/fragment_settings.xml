@@ -21,7 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:navigationIcon="@drawable/ic_arrow_left"
-            app:title="Settings" />
+            app:title="Settings"
+            app:titleTextColor="@color/white"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -29,10 +30,10 @@
         android:id="@+id/settings_text_username"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="#10171F"
+        android:background="@color/background_pressed"
         android:gravity="center_vertical"
         android:paddingStart="16dp"
-        android:text="Username"
+        android:text="Account"
         android:textColor="@color/grayLight"
         android:textSize="16dp"
         android:textStyle="bold"
@@ -41,11 +42,37 @@
         app:layout_constraintTop_toBottomOf="@id/settings_app_bar_layout" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/settings_recycler"
+        android:id="@+id/settings_recycler_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/settings_text_username" />
+
+
+    <TextView
+        android:id="@+id/settins_text_visual"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="60dp"
+        android:background="@color/background_pressed"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="@string/settings_fragment_other_options"
+        android:textColor="@color/grayLight"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_recycler_account" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settings_recycler_other_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/settins_text_visual"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

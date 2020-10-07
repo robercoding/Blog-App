@@ -1,13 +1,19 @@
 package com.rober.blogapp.ui
 
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.ui.setupWithNavController
+import androidx.preference.PreferenceManager
 import com.rober.blogapp.R
+import com.rober.blogapp.ui.main.settings.preferences.utils.Keys
 import com.rober.blogapp.util.Destinations
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
@@ -21,10 +27,23 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var destinations: Destinations
 
+    @Inject
+    lateinit var keys: Keys
+
+    @Inject
+    lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val isNightModeOn = sharedPreferences.getBoolean(keys.PREFERENCE_DARK_THEME, true)
+
+        if (isNightModeOn) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
 
         navController = Navigation.findNavController(this, R.id.container_fragment)
         bottom_navigation.setupWithNavController(navController)

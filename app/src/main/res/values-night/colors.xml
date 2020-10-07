@@ -11,7 +11,7 @@
     <color name="grayDark">#343434</color>
     <color name="grayLight">#A5A5A5</color>
 
-    <color name="background">@color/white</color>
+    <color name="background">#14242c</color>
     <color name="background_opaque">#CC121B1F</color>
     <color name="background_pressed">#10171F</color>
 

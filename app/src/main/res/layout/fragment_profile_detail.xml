@@ -93,7 +93,7 @@
                         android:focusable="true"
                         android:padding="10dp"
                         android:src="@drawable/ic_settings_black_24dp"
-                        android:tint="@color/grayLight"
+                        android:tint="@color/blueTwitter"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
