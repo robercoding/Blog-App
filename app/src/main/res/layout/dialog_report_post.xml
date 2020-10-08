@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/background"
+    android:background="@color/primaryBackground"
     android:padding="10dp">
 
     <!--    <TextView-->
@@ -40,11 +40,11 @@
         style="@style/SpinnerThemeReport"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/blueLight"
         android:entries="@array/list_dialog_report"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_report_title_spinner"
-        android:backgroundTint="@color/blueLight"/>
+        app:layout_constraintTop_toBottomOf="@id/dialog_report_title_spinner" />
 
 
     <TextView
@@ -64,27 +64,27 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColorHint="@color/blueTwitter"
         app:boxStrokeColor="@color/text_input_box_stroke"
+        app:hintEnabled="true"
+        app:hintTextColor="@color/blueTwitter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dialog_report_title_message_box"
-        app:hintEnabled="true"
-        android:textColorHint="@color/blueTwitter"
-        app:hintTextColor="@color/blueTwitter">
+        app:layout_constraintTop_toBottomOf="@id/dialog_report_title_message_box">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dialog_report_message_box"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_marginTop="10dp"
-            android:background="@color/background"
+            android:background="@color/primaryBackground"
             android:gravity="top|start"
+            android:hint="Write your message here"
             android:maxLength="500"
             android:scrollbarSize="1dp"
-            android:hint="Write your message here"
             android:scrollbarThumbVertical="@color/blueTwitter"
             android:scrollbars="vertical"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryText"
             android:textSize="14sp" />
     </com.google.android.material.textfield.TextInputLayout>
 

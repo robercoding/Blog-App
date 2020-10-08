@@ -12,6 +12,7 @@ sealed class SearchState {
     object StopSearchUser : SearchState()
 
     data class GoToProfileFragment(val user: User) : SearchState()
+    object GoToSettingsFragment : SearchState()
 
     data class Error(val exception: Exception) : SearchState()
     object Loading : SearchState()

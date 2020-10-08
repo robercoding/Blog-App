@@ -251,7 +251,7 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
         feed_swipe_refresh_layout.setProgressBackgroundColorSchemeColor(
             ContextCompat.getColor(
                 requireContext(),
-                R.color.background
+                R.color.primaryBackground
             )
         )
         feed_swipe_refresh_layout.setColorSchemeColors(

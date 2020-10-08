@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/primaryBackground"
     tools:context=".ui.main.feed.FeedFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/feed_app_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         android:elevation="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -52,13 +52,13 @@
                     android:id="@+id/feed_fragment_toolbar_exit_app"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:layout_marginEnd="15dp"
                     android:background="@drawable/ic_exit_to_app_black_18dp"
                     android:backgroundTint="@color/black"
                     android:contentDescription="feed_user_profile"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginEnd="15dp"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -80,13 +80,13 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/feed_box_welcome"
-        app:layout_constraintTop_toBottomOf="@id/feed_app_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone">
+        app:layout_constraintTop_toBottomOf="@id/feed_app_bar">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/feed_text_wecolme"
@@ -94,9 +94,9 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_bold"
             android:text="Welcome to your timeline"
-            android:textColor="@color/white"
-            android:textSize="20dp"
             android:textAlignment="center"
+            android:textColor="@color/primaryText"
+            android:textSize="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -117,9 +117,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/feed_text_wecolme"
             app:layout_constraintWidth_percent="0.7" />
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -136,9 +133,9 @@
             android:id="@+id/recycler_feed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
             android:scrollbarSize="3dp"
-            android:scrollbarThumbVertical="@color/blueTwitter"/>
+            android:scrollbarThumbVertical="@color/blueTwitter"
+            android:scrollbars="vertical" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
@@ -148,11 +145,12 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="38dp"
         android:layout_marginBottom="38dp"
-        app:backgroundTint="@color/background"
+        android:backgroundTint="@color/blueTwitter"
+        app:backgroundTint="@color/primaryBackground"
         app:layout_constraintBottom_toBottomOf="@+id/feed_swipe_refresh_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_note_add_black_24dp_filled"
-        app:tint="@color/blueTwitter" />
+        app:tint="@color/white" />
 
     <ProgressBar
         android:id="@+id/feed_progress_bar_more_posts"
@@ -167,16 +165,15 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/feed_text_notify_new_posts"
+        style="@style/NotifyNewPosts"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintWidth_percent="0.4"
-        app:layout_constraintTop_toBottomOf="@id/feed_app_bar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="10dp"
-        style="@style/NotifyNewPosts"
         android:text="Scroll up to see new posts!"
         android:visibility="gone"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/feed_app_bar"
+        app:layout_constraintWidth_percent="0.4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

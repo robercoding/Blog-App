@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/primaryBackground"
     tools:context=".ui.main.post.postdetail.PostDetailFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/post_detail_app_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         app:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +21,7 @@
             android:id="@+id/post_detail_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/background"
+            android:background="@color/primaryBackground"
             app:navigationIcon="@drawable/ic_arrow_back_black_24dp" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -52,8 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="30dp"
+        android:background="@color/primaryBackground"
         android:padding="7dp"
-        android:background="@color/background"
         android:src="@drawable/ic_options_arrow_down"
         android:tint="@color/grayLight"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,6 +66,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:text="Title"
+        android:textColor="@color/secondaryText"
         android:textStyle="italic"
         app:layout_constraintStart_toEndOf="@id/post_detail_image_profile"
         app:layout_constraintTop_toBottomOf="@id/post_detail_username" />
@@ -82,7 +83,7 @@
         android:scrollbarThumbVertical="@color/blueTwitter"
         android:scrollbars="vertical"
         android:text="Text from user!"
-        android:textColor="@color/white"
+        android:textColor="@color/primaryText"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/post_detail_title" />
@@ -152,7 +153,7 @@
         android:layout_marginEnd="5dp"
         android:fontFamily="@font/roboto_bold"
         android:text="0"
-        android:textColor="@color/white"
+        android:textColor="@color/primaryText"
         app:layout_constraintEnd_toStartOf="@id/post_detail_heart_text"
         app:layout_constraintTop_toBottomOf="@id/post_detail_top_divider" />
 
@@ -200,8 +201,7 @@
         app:layoutDescription="@xml/fragment_post_detail_motion"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
+        app:layout_constraintStart_toStartOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/post_detail_container_options"
@@ -232,7 +232,7 @@
                 android:id="@+id/post_detail_options_list"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:background="@color/background"
+                android:background="@color/primaryBackground"
                 android:scrollbars="none"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -259,7 +259,7 @@
         android:id="@+id/post_detail_background_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -269,11 +269,11 @@
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:indeterminateTint="@color/blueTwitter"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:indeterminateTint="@color/blueTwitter"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/primaryBackground"
     tools:context=".ui.main.settings.SettingsFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/settings_app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             app:navigationIcon="@drawable/ic_arrow_left"
             app:title="Settings"
-            app:titleTextColor="@color/white"/>
+            app:titleTextColor="@color/primaryText" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,11 +30,11 @@
         android:id="@+id/settings_text_username"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@color/background_pressed"
+        android:background="@color/backgroundPressed"
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:text="Account"
-        android:textColor="@color/grayLight"
+        android:textColor="@color/secondaryText"
         android:textSize="16dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -55,11 +55,11 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginTop="60dp"
-        android:background="@color/background_pressed"
+        android:background="@color/backgroundPressed"
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:text="@string/settings_fragment_other_options"
-        android:textColor="@color/grayLight"
+        android:textColor="@color/secondaryText"
         android:textSize="16dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -70,9 +70,8 @@
         android:id="@+id/settings_recycler_other_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/settins_text_visual"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settins_text_visual" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

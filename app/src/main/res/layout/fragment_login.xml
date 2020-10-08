@@ -10,7 +10,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         android:fitsSystemWindows="true"
         android:gravity="center"
         android:orientation="vertical"
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:text="@string/forgot_password"
-                android:textColor="@color/grayLight"/>
+                android:textColor="@color/secondaryText" />
 
             <Button
                 android:id="@+id/btnLogin"
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/blueGray"
                 android:text="@string/login"
-                android:textColor="@color/white" />
+                android:textColor="@color/primaryText" />
         </LinearLayout>
 
         <ProgressBar
@@ -92,7 +92,7 @@
 
             android:padding="10dp"
             android:text="@string/sign_up_with_email"
-            android:textColor="@color/white" />
+            android:textColor="@color/primaryText" />
 
         <Button
             android:id="@+id/btnRegisterGoogle"
@@ -103,8 +103,8 @@
             android:backgroundTint="@color/blueGray"
             android:padding="10dp"
             android:text="@string/sign_up_with_google"
-            android:textColor="@color/white"
-            android:visibility="gone"/>
+            android:textColor="@color/primaryText"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

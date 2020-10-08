@@ -189,7 +189,7 @@ class PostDetailFragment :
         }
     }
 
-    private fun goBackToPreviousFragment(){
+    private fun goBackToPreviousFragment() {
         findNavController().popBackStack()
     }
 
@@ -209,7 +209,7 @@ class PostDetailFragment :
         val dialog = MaterialAlertDialogBuilder(requireContext())
 
         dialog.setView(viewLayout)
-            .setBackground(ContextCompat.getDrawable(requireContext(), R.color.background))
+            .setBackground(ContextCompat.getDrawable(requireContext(), R.color.primaryBackground))
             .setPositiveButton(R.string.dialog_positive_button, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface?, which: Int) {
                     val reportCause = viewLayout.dialog_report_spinner.selectedItem as String

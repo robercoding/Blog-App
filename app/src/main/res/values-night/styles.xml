@@ -7,7 +7,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionMenuTextColor">@color/blueTwitter</item>
         <item name="colorControlNormal">@color/grayLight</item>
-        <item name="android:windowDisablePreview">true</item>
+<!--        <item name="android:windowDisablePreview">true</item>-->
         <item name="preferenceTheme">@style/AppTheme.PreferenceThemeOverlay</item>
     </style>
 
@@ -18,12 +18,12 @@
     </style>
 
     <style name="PostBackground">
-        <item name="android:background">@color/background</item>
+        <item name="android:background">@color/primaryBackground</item>
     </style>
 
     <style name="PostUserName">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/primaryText</item>
         <item name="fontFamily">@font/roboto_bold</item>
     </style>
 
@@ -49,7 +49,7 @@
     <style name="ProfileDetailEditButtonEditProfile" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/grayLight</item>
         <item name="android:textSize">14sp</item>
-        <item name="backgroundTint">@color/background</item>
+        <item name="backgroundTint">@color/primaryBackground</item>
         <item name="cornerRadius">20dp</item>
         <item name="strokeColor">@color/grayLight</item>
         <item name="strokeWidth">1dp</item>
@@ -59,13 +59,14 @@
     <style name="ProfileDetailEditButtonFollow" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/blueGray</item>
         <item name="android:textSize">14sp</item>
+        <item name="backgroundTint">@color/blueTwitter</item>
     </style>
 
     <style name="AuthTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/text_input_box_stroke</item>
         <item name="hintTextColor">@color/text_input_text_hint</item>
         <item name="android:textColorHint">@color/text_input_text_hint</item>
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/primaryText</item>
     </style>
 
     <style name="NotifyNewPosts" parent="Widget.AppCompat.TextView">
@@ -80,13 +81,21 @@
         <item name="android:drawablePadding">5dp</item>
     </style>
 
+    <style name="EditTextAppCompatProfileEdit" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/grayLight</item>
+        <item name="colorControlActivated">@color/blueTwitter</item>
+        <item name="colorControlHighlight">@color/blueTwitter</item>
+
+        <item name="android:textColorHint">@color/grayLightText</item>
+    </style>
+
     <style name="SpinnerThemeReport">
-        <item name="background">@color/background</item>
+        <item name="background">@color/primaryBackground</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">12sp</item>
         <item name="android:spinnerMode">dialog</item>
-        <item name="android:popupBackground">@color/background</item>
+        <item name="android:popupBackground">@color/primaryBackground</item>
         <item name="android:layout_marginStart">5dp</item>
         <item name="android:layout_marginTop">5dp</item>
     </style>
@@ -97,6 +106,6 @@
     </style>
 
     <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
-        <item name="android:colorBackground">@color/background</item>
+        <item name="android:colorBackground">@color/primaryBackground</item>
     </style>
 </resources>

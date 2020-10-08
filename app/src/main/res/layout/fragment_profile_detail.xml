@@ -21,7 +21,7 @@
         android:id="@+id/profile_detail_motion_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
+        android:background="@color/primaryBackground"
         android:clickable="false"
         android:focusable="false"
         android:visibility="visible"
@@ -124,11 +124,11 @@
             android:layout_marginEnd="30dp"
             android:text="Edit profile"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/profile_detail_button_follow"
             style="@style/ProfileDetailEditButtonFollow"
             android:layout_width="120dp"
@@ -150,7 +150,7 @@
             android:layout_marginTop="10dp"
             android:gravity="start"
             android:text="Name"
-            android:textColor="@color/grayLight"
+            android:textColor="@color/grayTest"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -166,7 +166,7 @@
             android:maxHeight="60dp"
             android:maxLines="4"
             android:text="test"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryText"
             app:layout_constraintTop_toBottomOf="@id/uid_name" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -178,7 +178,7 @@
             android:layout_marginEnd="20dp"
             android:maxHeight="60dp"
             android:text="test"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryText"
             app:layout_constraintTop_toBottomOf="@id/uid_biography" />
 
 
@@ -198,6 +198,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="15dp"
             android:text="0 following"
+            android:textColor="@color/primaryText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/space" />
 
@@ -209,6 +210,7 @@
             android:layout_marginTop="15dp"
             android:layout_marginEnd="30dp"
             android:text="10 followers"
+            android:textColor="@color/primaryText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/space" />
 
@@ -227,7 +229,7 @@
             android:id="@+id/profile_detail_swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:backgroundTint="@color/background"
+            android:backgroundTint="@color/primaryBackground"
             android:clickable="false"
             android:focusable="false"
             android:outlineSpotShadowColor="@color/blueTwitter"
@@ -250,12 +252,12 @@
             android:id="@+id/container_user_tabs"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:background="@color/background"
+            android:background="@color/primaryBackground"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/profile_detail_app_bar_layout"
             app:tabIndicatorColor="@color/blueTwitter"
-            app:tabSelectedTextColor="@color/white"
+            app:tabSelectedTextColor="@color/primaryText"
             app:tabTextColor="@color/grayLight">
 
             <com.google.android.material.tabs.TabItem

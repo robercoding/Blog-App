@@ -9,15 +9,15 @@
         android:id="@+id/preferences_app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/background">
+        android:background="@color/primaryBackground">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/preferences_material_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/background"
+            android:background="@color/primaryBackground"
             app:navigationIcon="@drawable/ic_arrow_left"
             app:title="Preferences"
-            app:titleTextColor="@color/white" />
+            app:titleTextColor="@color/primaryText" />
     </com.google.android.material.appbar.AppBarLayout>
 </LinearLayout>

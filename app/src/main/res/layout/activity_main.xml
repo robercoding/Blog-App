@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/primaryBackground"
     tools:context=".ui.MainActivity">
 
     <fragment
@@ -22,9 +22,9 @@
         app:navGraph="@navigation/nav_graph" />
 
     <View
-        android:layout_height="1dp"
         android:id="@+id/view_top_border_bottom_navigation_view"
         style="@style/Divider"
+        android:layout_height="1dp"
         android:background="@drawable/bottom_navigation_view_top_line_color"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="center"
-        app:backgroundTint="@color/background"
+        app:backgroundTint="@color/primaryBackground"
         app:itemIconTint="@color/bottom_navigation_color"
         app:itemTextColor="@color/bottom_navigation_color"
         app:layout_constraintBottom_toBottomOf="parent"

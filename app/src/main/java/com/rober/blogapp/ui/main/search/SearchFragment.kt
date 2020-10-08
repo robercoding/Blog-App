@@ -38,7 +38,7 @@ class SearchFragment :
         when (viewState) {
             is SearchState.SetUserDetails -> {
                 setUserDetails(viewState.user)
-                setupListeners()
+                stopSearchUser()
             }
 
             is SearchState.ReadySearchUser -> {
@@ -71,6 +71,10 @@ class SearchFragment :
             is SearchState.GoToProfileFragment -> {
                 textSearch = search_user_text.text.toString()
                 goToProfileFragment(viewState.user)
+            }
+
+            is SearchState.GoToSettingsFragment -> {
+                findNavController().navigate(R.id.action_searchFragment_to_settingsFragment)
             }
 
             is SearchState.Loading -> {
@@ -117,7 +121,7 @@ class SearchFragment :
         search_top_app_bar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.icon_settings -> {
-                    findNavController().popBackStack()
+                    viewModel.setIntention(SearchFragmentEvent.GoToSettingsFragment)
                     true
                 }
 
@@ -191,13 +195,20 @@ class SearchFragment :
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
 
     override fun clickListenerOnSettings(positionAdapter: Int) {}
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setIntention(SearchFragmentEvent.LoadUserDetails)
+    }
 }
 
-sealed class SearchFragmentEvent() {
+sealed class SearchFragmentEvent {
     object LoadUserDetails : SearchFragmentEvent()
     data class RetrieveUserByUsername(val searchUsername: String) : SearchFragmentEvent()
+
     object ReadySearchUser : SearchFragmentEvent()
     object StopSearchUser : SearchFragmentEvent()
 
     data class GoToProfileFragment(val positionAdapter: Int) : SearchFragmentEvent()
+    object GoToSettingsFragment : SearchFragmentEvent()
 }

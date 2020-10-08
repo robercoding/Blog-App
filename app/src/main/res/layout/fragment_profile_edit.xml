@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.main.profile.profileedit.ProfileEditFragment"
-    android:background="@color/background">
+    android:background="@color/primaryBackground"
+    tools:context=".ui.main.profile.profileedit.ProfileEditFragment">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/profile_edit_app_bar_layout"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/profile_edit_app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primaryBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/profile_edit_material_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/background"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="match_parent"
+            app:menu="@menu/toolbar_profile_edit"
+            app:navigationIcon="@drawable/ic_arrow_back_black_24dp">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/profile_edit_material_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:menu="@menu/toolbar_profile_edit"
-                app:navigationIcon="@drawable/ic_arrow_back_black_24dp">
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="Edit Profile"
+                android:textColor="@color/primaryText"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:text="Edit Profile"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+            <!--            <TextView-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:textAlignment="textEnd"-->
+            <!--                android:text="SAVE"-->
+            <!--                android:textSize="14sp"-->
+            <!--                android:textStyle="bold"-->
+            <!--                android:textColor="@color/blueTwitter"/>-->
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
 
-                <!--            <TextView-->
-                <!--                android:layout_width="wrap_content"-->
-                <!--                android:layout_height="wrap_content"-->
-                <!--                android:textAlignment="textEnd"-->
-                <!--                android:text="SAVE"-->
-                <!--                android:textSize="14sp"-->
-                <!--                android:textStyle="bold"-->
-                <!--                android:textColor="@color/blueTwitter"/>-->
-            </com.google.android.material.appbar.MaterialToolbar>
-        </com.google.android.material.appbar.AppBarLayout>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        >
+        android:fillViewport="true">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,12 +68,13 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
             <Space
                 android:id="@+id/profile_edit_space_toolbar"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"/>
+                android:layout_height="?attr/actionBarSize"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/profile_edit_image_background"
@@ -105,7 +106,7 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/user_profile"
                 android:translationY="-30dp"
-                app:civ_border_color="@color/background"
+                app:civ_border_color="@color/primaryBackground"
                 app:civ_border_width="4dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/profile_edit_image_background" />
@@ -127,24 +128,25 @@
                 android:id="@+id/profile_text_layout_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/profile_edit_image_profile"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
+                app:boxBackgroundColor="@color/primaryBackground"
+                app:boxStrokeColor="@color/text_input_box_stroke"
+                app:endIconMode="custom"
                 app:helperTextEnabled="true"
-                app:boxStrokeColor="@color/blueTwitter"
                 app:hintTextColor="@color/blueTwitter"
-                app:boxBackgroundColor="@color/background"
-                app:endIconMode="custom">
+                app:layout_constraintTop_toBottomOf="@id/profile_edit_image_profile">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_text_edit_username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Name"
-                    android:maxLength="15"
                     android:lines="1"
+                    android:maxLength="15"
                     android:singleLine="true"
-                    android:textColor="@color/white"
+                    android:textColor="@color/primaryText"
+                    android:theme="@style/EditTextAppCompatProfileEdit"
                     app:layout_constraintTop_toBottomOf="@id/profile_edit_image_profile" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -153,50 +155,45 @@
                 android:id="@+id/profile_text_layout_biography"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/profile_text_layout_username"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
+                app:boxStrokeColor="@color/text_input_box_stroke"
                 app:hintTextColor="@color/blueTwitter"
-                app:boxStrokeColor="@color/blueTwitter">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/profile_text_layout_username">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_text_edit_biography"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/background"
                     android:hint="Biography"
                     android:maxLength="150"
-                    android:textColor="@color/white"
-                    />
-
+                    android:textColor="@color/primaryText"
+                    android:theme="@style/EditTextAppCompatProfileEdit" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/profile_text_layout_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/profile_text_layout_biography"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="20dp"
                 app:hintTextColor="@color/blueTwitter"
-                app:boxStrokeColor="@color/blueTwitter">
+                app:layout_constraintTop_toBottomOf="@id/profile_text_layout_biography">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profile_text_edit_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/background"
+                    android:hint="Location"
                     android:lines="1"
                     android:maxLength="25"
                     android:singleLine="true"
-                    android:hint="Location"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/grayLight"/>
-
+                    android:textColor="@color/primaryText"
+                    android:theme="@style/EditTextAppCompatProfileEdit" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <ProgressBar
@@ -211,5 +208,5 @@
                 app:layout_constraintTop_toBottomOf="@id/profile_text_layout_location" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

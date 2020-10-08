@@ -14,14 +14,21 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository
-): BaseViewModel<SearchState, SearchFragmentEvent>() {
+) : BaseViewModel<SearchState, SearchFragmentEvent>() {
 
-    var user : User? = null
+    var user: User? = null
     var listUsers = mutableListOf<User>()
 
-    override fun setIntention(event: SearchFragmentEvent){
-        when(event){
-            is SearchFragmentEvent.LoadUserDetails -> getCurrentUser()
+    override fun setIntention(event: SearchFragmentEvent) {
+        when (event) {
+            is SearchFragmentEvent.LoadUserDetails -> {
+                user?.run {
+                    viewState = SearchState.SetUserDetails(this)
+                } ?: kotlin.run {
+                    getCurrentUser()
+                }
+
+            }
 
             is SearchFragmentEvent.RetrieveUserByUsername -> {
                 searchUsersByUsername(event.searchUsername)
@@ -36,13 +43,17 @@ class SearchViewModel @ViewModelInject constructor(
                 viewState = SearchState.GoToProfileFragment(user)
             }
 
+            is SearchFragmentEvent.GoToSettingsFragment -> {
+                viewState = SearchState.GoToSettingsFragment
+            }
+
             is SearchFragmentEvent.StopSearchUser -> {
                 viewState = SearchState.StopSearchUser
             }
         }
     }
 
-    private fun getCurrentUser(){
+    private fun getCurrentUser() {
         user = firebaseRepository.getCurrentUser()
 
         user?.run {
@@ -50,32 +61,32 @@ class SearchViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun searchUsersByUsername(searchUsername: String){
-            if(searchUsername.isEmpty()){
-                viewState = SearchState.ShowResultSearch(listOf())
-            } else{
-                viewModelScope.launch {
-                    firebaseRepository.getUserByString(searchUsername)
-                        .collect {resultData ->
-                            when(resultData){
-                                is ResultData.Success -> {
-                                    resultData.data?.let {resultListUsers ->
-                                        if(resultListUsers.isEmpty())
-                                            viewState = SearchState.EmptyResultsSearch(searchUsername)
-                                        else{
-                                            listUsers = resultListUsers.toMutableList()
-                                            viewState = SearchState.ShowResultSearch(resultListUsers)
-                                        }
+    private fun searchUsersByUsername(searchUsername: String) {
+        if (searchUsername.isEmpty()) {
+            viewState = SearchState.ShowResultSearch(listOf())
+        } else {
+            viewModelScope.launch {
+                firebaseRepository.getUserByString(searchUsername)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                resultData.data?.let { resultListUsers ->
+                                    if (resultListUsers.isEmpty())
+                                        viewState = SearchState.EmptyResultsSearch(searchUsername)
+                                    else {
+                                        listUsers = resultListUsers.toMutableList()
+                                        viewState = SearchState.ShowResultSearch(resultListUsers)
                                     }
                                 }
+                            }
 
-                                is ResultData.Loading -> {
-                                    viewState = SearchState.Loading
-                                }
+                            is ResultData.Loading -> {
+                                viewState = SearchState.Loading
                             }
                         }
-                }
+                    }
             }
+        }
 
     }
 }
