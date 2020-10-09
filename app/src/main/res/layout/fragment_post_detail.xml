@@ -18,11 +18,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/post_detail_toolbar"
+            android:id="@+id/post_detail_material_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/primaryBackground"
-            app:navigationIcon="@drawable/ic_arrow_back_black_24dp" />
+            app:navigationIcon="@drawable/ic_arrow_left"
+            app:title="Post" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView

@@ -74,13 +74,16 @@ constructor(
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
 
     //PostDetail
-    suspend fun reportPost(post: Post, reportedCause: String, message: String): Flow<ResultData<Boolean>> =
+    fun reportPost(post: Post, reportedCause: String, message: String): Flow<ResultData<Boolean>> =
         firebasePostDetailManager.reportPost(post, reportedCause, message)
 
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.deletePost(post)
 
     suspend fun saveEditedPost(post: Post): Flow<ResultData<Boolean>> =
         firebasePostDetailManager.updateEditedPost(post)
+
+    suspend fun getPost(reportPost: ReportPost): Flow<ResultData<Post>> =
+        firebasePostDetailManager.getPost(reportPost)
 
     //Search
     suspend fun getUserByString(searchUsername: String) =

@@ -24,15 +24,21 @@ class FirebasePostDetailManager @Inject constructor(
             return@flow
         }
 
-        if(checkIfUserAlreadyReportedThePost(post.postId, user.user_id)){
-            emit(ResultData.Error(Exception("Thank you for submitting a report, but you already reported this post!"), false))
+        if (checkIfUserAlreadyReportedThePost(post.postId, user.user_id)) {
+            emit(
+                ResultData.Error(
+                    Exception("Thank you for submitting a report, but you already reported this post!"),
+                    false
+                )
+            )
             return@flow
         }
 
         val postDocumentRef = firebaseSource.db.collection(firebasePath.reports_col)
             .document(user.user_id).collection(firebasePath.posts_reports).document()
 
-        val reportPostObject = ReportPost(post.postId, user.user_id, reportedCause, message)
+        val reportPostObject =
+            ReportPost(post.postId, post.userCreatorId, user.user_id, reportedCause, message)
         var savedReport = false
         postDocumentRef.set(reportPostObject)
             .addOnSuccessListener {
@@ -50,7 +56,8 @@ class FirebasePostDetailManager @Inject constructor(
     private suspend fun checkIfUserAlreadyReportedThePost(postID: String, userID: String): Boolean {
 
         val reportUserCollection =
-            firebaseSource.db.collection(firebasePath.reports_col).document(userID).collection(firebasePath.posts_reports)
+            firebaseSource.db.collection(firebasePath.reports_col).document(userID)
+                .collection(firebasePath.posts_reports)
 
         var reportedPost = false
         reportUserCollection.whereEqualTo("reportedPostId", postID)
@@ -61,10 +68,10 @@ class FirebasePostDetailManager @Inject constructor(
                 }
 
                 task.result?.run {
-                    if(documents.size >= 1){
+                    if (documents.size >= 1) {
                         reportedPost = true
                     }
-                }?: kotlin.run {
+                } ?: kotlin.run {
                     reportedPost = false
                 }
             }
@@ -125,5 +132,33 @@ class FirebasePostDetailManager @Inject constructor(
             .await()
 
         emit(ResultData.Success(postUpdated))
+    }
+
+    suspend fun getPost(reportedPost: ReportPost): Flow<ResultData<Post>> = flow {
+        val postsDocumentUID =
+            firebaseSource.getUserDocumentUID(reportedPost.userIdOwnerReportedPost)?.postsDocumentUid
+
+        if (postsDocumentUID == null) {
+            emit(ResultData.Error(Exception("There was an error with the user"), null))
+            return@flow
+        }
+
+        val postDocument = firebaseSource.db
+            .collection(firebasePath.posts_col).document(postsDocumentUID)
+            .collection(firebasePath.user_posts).document(reportedPost.reportedPostId)
+
+        var post: Post? = null
+        postDocument
+            .get()
+            .addOnSuccessListener {
+                post = it.toObject(Post::class.java)
+            }
+            .await()
+
+        post?.run {
+            emit(ResultData.Success(this))
+        } ?: kotlin.run {
+            emit(ResultData.Error(Exception("We couldn't get the post, sorry"), null))
+        }
     }
 }

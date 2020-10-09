@@ -8,6 +8,8 @@ sealed class ReportedPostsState {
     data class SetTotalPostsAndList(val totalReportedPosts: String, val listReportPost: List<ReportPost>) :
         ReportedPostsState()
 
+    data class GoToPostReported(val postReported: ReportPost) : ReportedPostsState()
+
     data class Error(val message: String) : ReportedPostsState()
 
 }

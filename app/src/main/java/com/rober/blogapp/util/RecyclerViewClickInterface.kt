@@ -3,10 +3,11 @@ package com.rober.blogapp.util
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 
-interface RecyclerViewActionInterface{
+interface RecyclerViewActionInterface {
+    fun clickListenerOnItem(positionAdapter: Int)
+
     fun clickListenerOnPost(positionAdapter: Int)
     fun clickListenerOnUser(positionAdapter: Int)
-    fun clickListenerOnSettings(positionAdapter: Int)
 
     fun requestMorePosts(actualRecyclerViewPosition: Int)
 }

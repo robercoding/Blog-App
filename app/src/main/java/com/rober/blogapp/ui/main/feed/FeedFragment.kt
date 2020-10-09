@@ -318,7 +318,7 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
         viewModel.setIntention(FeedFragmentEvent.GoToProfileDetailsFragment(positionAdapter))
     }
 
-    override fun clickListenerOnSettings(positionAdapter: Int) {
+    override fun clickListenerOnItem(positionAdapter: Int) {
         //
     }
 

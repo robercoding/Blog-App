@@ -2,21 +2,17 @@ package com.rober.blogapp.ui.main.post.postdetail
 
 import android.app.Application
 import android.util.Log
-import android.widget.Toast
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.DELETE_POST
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.EDIT_POST
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.FOLLOW_USER
@@ -119,6 +115,17 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             is PostDetailFragmentEvent.GetParcelablePost -> {
                 viewState = PostDetailState.GetParcelablePost
+            }
+
+            is PostDetailFragmentEvent.GetParcelableReportedPost -> {
+                viewState = PostDetailState.GetParcelableReportedPost
+            }
+
+            is PostDetailFragmentEvent.GetReportedPostAndUser -> {
+                viewModelScope.launch {
+                    getReportedPostAndUser(event.reportedPost)
+                }
+
             }
 
             is PostDetailFragmentEvent.SaveUpdatedPost -> {
@@ -429,6 +436,46 @@ class PostDetailViewModel @ViewModelInject constructor(
             viewState = PostDetailState.NotifyUser("Succesfully unfollowed")
         } else {
             viewState = PostDetailState.NotifyUser("Sorry, there was an error trying to unfollow the user")
+        }
+    }
+
+    private suspend fun getReportedPostAndUser(reportedPost: ReportPost) {
+        job = viewModelScope.launch {
+            firebaseRepository.getPost(reportedPost)
+                .collect { resultData ->
+                    when (resultData) {
+                        is ResultData.Success -> {
+                            post = resultData.data
+                        }
+                        is ResultData.Error -> {
+                            Log.i(TAG, "Couldn't load the post of the Report Post")
+                            return@collect
+                        }
+                    }
+                }
+
+            firebaseRepository.getUserProfile(reportedPost.userIdOwnerReportedPost)
+                .collect { resultData ->
+                    when (resultData) {
+                        is ResultData.Success -> {
+                            userPost = resultData.data
+                        }
+
+                        is ResultData.Error -> {
+                            Log.i(TAG, "Couldn't load the user of the Report Post")
+                            return@collect
+                        }
+                    }
+                }
+        }
+
+        job?.join()
+
+        if (post != null && userPost != null) {
+            viewState = PostDetailState.SetReportPostDetails(post!!, userPost!!)
+        } else {
+            viewState =
+                PostDetailState.ErrorLoadingPost("Sorry, we couldn't load the post you've reported, try again later")
         }
     }
 

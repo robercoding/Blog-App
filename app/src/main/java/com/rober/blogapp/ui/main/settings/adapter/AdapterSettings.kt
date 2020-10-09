@@ -10,7 +10,11 @@ import com.rober.blogapp.entity.Option
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import kotlinx.android.synthetic.main.adapter_settings_viewholder_option.view.*
 
-class AdapterSettings(newListSettings: List<Option>, val recyclerViewActionInterface: RecyclerViewActionInterface, val sumAdapterPositionToOtherOptions: Int) : RecyclerView.Adapter<AdapterSettings.SettingsViewHolder>() {
+class AdapterSettings(
+    newListSettings: List<Option>,
+    val recyclerViewActionInterface: RecyclerViewActionInterface,
+    val sumAdapterPositionToOtherOptions: Int
+) : RecyclerView.Adapter<AdapterSettings.SettingsViewHolder>() {
     var listSettingsUser = newListSettings
 
     inner class SettingsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -33,18 +37,28 @@ class AdapterSettings(newListSettings: List<Option>, val recyclerViewActionInter
             adapter_settings_list_row_option_icon.setImageResource(optionSettings.icon)
 
             val context = adapter_settings_list_row_option_icon.context
-            if(optionSettings.text == "Delete account"){
-                adapter_settings_list_row_option_text.setTextColor(ContextCompat.getColor(context, R.color.red))
-                adapter_settings_list_row_option_icon.setColorFilter(ContextCompat.getColor(context, R.color.red))
+            if (optionSettings.text == "Delete account") {
+                adapter_settings_list_row_option_text.setTextColor(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.red
+                    )
+                )
+                adapter_settings_list_row_option_icon.setColorFilter(
+                    ContextCompat.getColor(
+                        context,
+                        R.color.red
+                    )
+                )
             }
 
             setOnClickListener {
-                recyclerViewActionInterface.clickListenerOnSettings(position+sumAdapterPositionToOtherOptions)
+                recyclerViewActionInterface.clickListenerOnItem(position + sumAdapterPositionToOtherOptions)
             }
         }
     }
 
-    fun setListSettings(newListSettings: List<Option>){
+    fun setListSettings(newListSettings: List<Option>) {
         listSettingsUser = newListSettings
     }
 

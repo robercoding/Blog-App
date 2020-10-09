@@ -194,7 +194,7 @@ class SearchFragment :
 
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {}
 
-    override fun clickListenerOnSettings(positionAdapter: Int) {}
+    override fun clickListenerOnItem(positionAdapter: Int) {}
 
     override fun onResume() {
         super.onResume()

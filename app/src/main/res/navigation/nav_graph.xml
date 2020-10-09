@@ -169,6 +169,12 @@
             android:name="postObject"
             app:argType="com.rober.blogapp.entity.Post"
             app:nullable="true" />
+
+        <argument
+            android:name="reportedPost"
+            app:argType="com.rober.blogapp.entity.ReportPost"
+            app:nullable="true" />
+
         <action
             android:id="@+id/action_postDetailFragment_to_profileDetailFragment"
             app:destination="@id/profileDetailFragment"
@@ -231,5 +237,13 @@
         android:id="@+id/reportedPostsFragment"
         android:name="com.rober.blogapp.ui.main.settings.reportedposts.ReportedPostsFragment"
         android:label="fragment_reported_posts"
-        tools:layout="@layout/fragment_reported_posts" />
+        tools:layout="@layout/fragment_reported_posts">
+        <action
+            android:id="@+id/action_reportedPostsFragment_to_postDetailFragment"
+            app:destination="@id/postDetailFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
+    </fragment>
 </navigation>

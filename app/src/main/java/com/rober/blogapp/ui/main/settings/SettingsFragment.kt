@@ -114,7 +114,7 @@ class SettingsFragment :
         //Nothing
     }
 
-    override fun clickListenerOnSettings(positionAdapter: Int) {
+    override fun clickListenerOnItem(positionAdapter: Int) {
         viewModel.setIntention(SettingsFragmentEvent.ClickEventOnSettingsOption(positionAdapter))
     }
 

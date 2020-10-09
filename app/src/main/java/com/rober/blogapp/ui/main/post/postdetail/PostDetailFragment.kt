@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
@@ -64,9 +65,21 @@ class PostDetailFragment :
                 getParcelablePostAndSetIntention()
             }
 
+            is PostDetailState.GetParcelableReportedPost -> {
+                getParcelableReportedPostAndSetIntention()
+            }
+
             is PostDetailState.SetPostDetails -> {
                 setPostDetails(viewState.post)
                 setUserDetails(viewState.user)
+                enableLoadingPost(false)
+            }
+
+            is PostDetailState.SetReportPostDetails -> {
+                setPostDetails(viewState.post)
+                setUserDetails(viewState.user)
+
+                displayViewReportPost()
                 enableLoadingPost(false)
             }
 
@@ -104,6 +117,11 @@ class PostDetailFragment :
 
             is PostDetailState.HideOptions -> {
                 enablePostDetailOptionsMode(false)
+            }
+
+            is PostDetailState.ErrorLoadingPost -> {
+                displayToast(viewState.message)
+                findNavController().popBackStack()
             }
 
             is PostDetailState.ErrorExecuteOption -> {
@@ -221,8 +239,21 @@ class PostDetailFragment :
             .show()
     }
 
+    private fun displayViewReportPost() {
+        post_detail_material_toolbar.title = "Reported Post"
+
+        post_detail_options.visibility = View.GONE
+        post_detail_top_divider.visibility = View.GONE
+        post_detail_bottom_divider.visibility = View.GONE
+        post_detail_comment_icon.visibility = View.GONE
+        post_detail_heart_icon.visibility = View.GONE
+        post_detail_heart_number.visibility = View.GONE
+        post_detail_heart_text.visibility = View.GONE
+
+    }
+
     override fun setupListeners() {
-        post_detail_toolbar.setNavigationOnClickListener {
+        post_detail_material_toolbar.setNavigationOnClickListener {
             viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
         }
         post_detail_text.movementMethod = ScrollingMovementMethod()
@@ -259,7 +290,7 @@ class PostDetailFragment :
     }
 
     override fun setupViewDesign() {
-        post_detail_toolbar.navigationIcon?.colorFilter =
+        post_detail_material_toolbar.navigationIcon?.colorFilter =
             PorterDuffColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.blueTwitter),
                 PorterDuff.Mode.SRC_ATOP
@@ -287,10 +318,20 @@ class PostDetailFragment :
     private fun getParcelablePostAndSetIntention() {
         val post = arguments?.getParcelable<Post>("post")
 
-        if (post == null) {
+        post?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.SetPost(this))
+        } ?: kotlin.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetParcelableReportedPost)
+        }
+    }
+
+    private fun getParcelableReportedPostAndSetIntention() {
+        val reportedPost = arguments?.getParcelable<ReportPost>("reportPost")
+
+        reportedPost?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetReportedPostAndUser(reportedPost))
+        } ?: kotlin.run {
             viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
-        } else {
-            viewModel.setIntention(PostDetailFragmentEvent.SetPost(post))
         }
     }
 
@@ -303,8 +344,10 @@ class PostDetailFragment :
 sealed class PostDetailFragmentEvent {
     object GetParcelableUpdatedPost : PostDetailFragmentEvent()
     object GetParcelablePost : PostDetailFragmentEvent()
+    object GetParcelableReportedPost : PostDetailFragmentEvent()
 
     data class SetPost(val post: Post) : PostDetailFragmentEvent()
+    data class GetReportedPostAndUser(val reportedPost: ReportPost) : PostDetailFragmentEvent()
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 

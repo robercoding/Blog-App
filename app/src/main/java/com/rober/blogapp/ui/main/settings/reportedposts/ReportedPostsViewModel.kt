@@ -24,6 +24,14 @@ class ReportedPostsViewModel @ViewModelInject constructor(
                 is ReportedPostsEvent.GetReportedPosts -> {
                     getReportedPosts()
                 }
+
+                is ReportedPostsEvent.ClickOnReportedPost -> {
+                    if (mutableListReportedPosts.isNotEmpty()) {
+                        viewState =
+                            ReportedPostsState.GoToPostReported(mutableListReportedPosts[event.positionAdapter])
+                    }
+
+                }
             }
         }
     }

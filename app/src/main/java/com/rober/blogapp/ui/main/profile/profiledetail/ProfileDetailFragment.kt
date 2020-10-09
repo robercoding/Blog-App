@@ -618,7 +618,7 @@ class ProfileFragment :
         //
     }
 
-    override fun clickListenerOnSettings(positionAdapter: Int) {
+    override fun clickListenerOnItem(positionAdapter: Int) {
         //
     }
 }
