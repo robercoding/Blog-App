@@ -2,6 +2,8 @@ package com.rober.blogapp.ui.main.profile.profileedit
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -293,6 +295,17 @@ class ProfileEditFragment :
             displayProgressBar(display)
             profile_edit_layout_user_details.visibility = View.VISIBLE
         }
+    }
+
+    override fun setupViewDesign() {
+        super.setupViewDesign()
+        val backArrow = resources.getDrawable(R.drawable.ic_arrow_left, null)
+        backArrow.colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        profile_edit_material_toolbar.navigationIcon = backArrow
     }
 
     override fun setupListeners() {

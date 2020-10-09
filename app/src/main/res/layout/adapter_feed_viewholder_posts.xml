@@ -3,94 +3,84 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/ripple_effect">
+    android:layout_height="wrap_content">
 
-    <com.andexert.library.RippleView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/feed_viewholder_container_post"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:rv_centered="true">
+        android:layout_height="match_parent"
+        android:background="@drawable/ripple_effect"
+        android:visibility="visible">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/feed_viewholder_container_post"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/primaryBackground"
-            android:visibility="visible">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/uid_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/user_profile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/uid_image"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/user_profile"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/uid_name"
+            style="@style/PostUserName"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="15dp"
+            android:maxWidth="150dp"
+            android:padding="5dp"
+            android:text="User"
+            android:textColor="@color/primaryText"
+            app:layout_constraintStart_toStartOf="@id/uid_image"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/uid_name"
-                style="@style/PostUserName"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="15dp"
-                android:maxWidth="150dp"
-                android:padding="5dp"
-                android:text="User"
-                android:textColor="@color/primaryText"
-                app:layout_constraintStart_toStartOf="@id/uid_image"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="10dp"
+            android:padding="5dp"
+            android:text="time"
+            android:textColor="@color/grayLight"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="10dp"
-                android:padding="5dp"
-                android:text="time"
-                android:textColor="@color/grayLight"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/title"
+            style="@style/PostTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:maxWidth="250dp"
+            android:padding="5dp"
+            android:text="Title"
+            android:textColor="@color/primaryText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/uid_name" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/title"
-                style="@style/PostTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="60dp"
-                android:maxWidth="250dp"
-                android:padding="5dp"
-                android:text="Title"
-                android:textColor="@color/primaryText"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/uid_name" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text"
+            style="@style/PostText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:ellipsize="end"
+            android:maxWidth="250dp"
+            android:maxHeight="100dp"
+            android:maxLines="3"
+            android:padding="5dp"
+            android:text="Text"
+            android:textColor="@color/primaryText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/text"
-                style="@style/PostText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="60dp"
-                android:ellipsize="end"
-                android:maxWidth="250dp"
-                android:maxHeight="100dp"
-                android:maxLines="3"
-                android:padding="5dp"
-                android:text="Text"
-                android:textColor="@color/primaryText"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/title" />
-
-            <View
-                style="@style/Divider"
-                tools:ignore="MissingConstraints" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.andexert.library.RippleView>
+        <View
+            style="@style/Divider"
+            tools:ignore="MissingConstraints" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/feed_viewholder_container_no_more_posts"

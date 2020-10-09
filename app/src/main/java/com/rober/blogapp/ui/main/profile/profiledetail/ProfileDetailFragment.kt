@@ -603,6 +603,8 @@ class ProfileFragment :
                 ContextCompat.getColor(requireContext(), R.color.blueTwitter),
                 PorterDuff.Mode.SRC_ATOP
             )
+
+        profile_detail_arrow_back.clipToOutline = true
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {

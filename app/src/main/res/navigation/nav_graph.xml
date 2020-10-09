@@ -91,7 +91,11 @@
             app:destination="@id/feedFragment" />
         <action
             android:id="@+id/action_profileDetailFragment_to_postDetailFragment"
-            app:destination="@id/postDetailFragment" />
+            app:destination="@id/postDetailFragment"
+            app:enterAnim="@anim/from_bottom"
+            app:exitAnim="@anim/to_top"
+            app:popEnterAnim="@anim/from_top"
+            app:popExitAnim="@anim/to_bottom" />
         <action
             android:id="@+id/action_profileDetailFragment_to_profileEditFragment"
             app:destination="@id/profileEditFragment"
