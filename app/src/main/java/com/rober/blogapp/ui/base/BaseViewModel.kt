@@ -3,10 +3,13 @@ package com.rober.blogapp.ui.base
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.Job
 
 abstract class BaseViewModel<STATE, EVENT> : ViewModel() {
 
     val TAG = javaClass.simpleName
+
+    var job: Job? = null
 
     private val _viewStates: MutableLiveData<STATE> = MutableLiveData()
 
@@ -22,4 +25,9 @@ abstract class BaseViewModel<STATE, EVENT> : ViewModel() {
         }
 
     abstract fun setIntention(event: EVENT)
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
+    }
 }

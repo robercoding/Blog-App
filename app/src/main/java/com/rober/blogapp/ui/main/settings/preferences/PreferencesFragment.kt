@@ -121,6 +121,11 @@ class PreferencesFragment :
             sharedPreferencesEdit.putBoolean(keys.PREFERENCE_DARK_THEME, false)
             sharedPreferencesEdit.apply()
         }
+
+        /* This works for the future doing a little transition
+         * when switching themes*/
+//        activity?.finish()
+//        activity?.startActivity(activity?.intent)
     }
 
 }

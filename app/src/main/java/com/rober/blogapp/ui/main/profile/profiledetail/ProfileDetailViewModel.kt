@@ -192,7 +192,7 @@ class ProfileDetailViewModel
     private suspend fun checkIfUserIsCurrentUser(userUID: String): Boolean {
         var isUserCurrentUser = false
 
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.getCurrentUserProfileDetail()
                 .collect { resultData ->
                     when (resultData) {
@@ -206,7 +206,7 @@ class ProfileDetailViewModel
                     }
                 }
         }
-        job.join()
+        job?.join()
         return isUserCurrentUser
     }
 

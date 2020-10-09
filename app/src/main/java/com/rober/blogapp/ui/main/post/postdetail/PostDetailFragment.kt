@@ -94,11 +94,7 @@ class PostDetailFragment :
             }
 
             is PostDetailState.PostDeleted -> {
-                Toast.makeText(
-                    requireContext(),
-                    "Post has been successfully deleted! ${getEmoji(OK_HAND)}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("Post has been successfully deleted! ${getEmoji(OK_HAND)}")
                 goBackToPreviousFragment()
             }
 
@@ -115,12 +111,11 @@ class PostDetailFragment :
             }
 
             is PostDetailState.NotifyUser -> {
-                Toast.makeText(requireContext(), "${viewState.message}", Toast.LENGTH_SHORT).show()
+                displayToast(viewState.message)
             }
 
             is PostDetailState.Error -> {
-                Toast.makeText(requireContext(), "${viewState.exception.message}", Toast.LENGTH_SHORT)
-                    .show()
+                viewState.exception.message?.let { displayToast(it) }
             }
 
             is PostDetailState.Idle -> {
@@ -248,10 +243,10 @@ class PostDetailFragment :
             override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
                 if (p0?.currentState == post_detail_motion_layout_container.startState) {
                     viewModel.setIntention(PostDetailFragmentEvent.HideOptions)
-                    Toast.makeText(requireContext(), "Is start", Toast.LENGTH_SHORT).show()
+                    displayToast("Is start")
                 }
                 if (p0?.currentState == post_detail_motion_layout_container.endState) {
-                    Toast.makeText(requireContext(), "Is end", Toast.LENGTH_SHORT).show()
+                    displayToast("Is end")
                 }
             }
 

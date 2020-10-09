@@ -40,6 +40,10 @@ class SettingsFragment :
             is SettingsViewState.GoToPreferences -> {
                 findNavController().navigate(R.id.action_settingsFragment_to_preferencesFragment)
             }
+
+            is SettingsViewState.GoToReportedPosts -> {
+                findNavController().navigate(R.id.action_settingsFragment_to_reportedPostsFragment)
+            }
         }
     }
 

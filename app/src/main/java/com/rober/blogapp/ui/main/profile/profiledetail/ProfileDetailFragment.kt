@@ -142,7 +142,7 @@ class ProfileFragment :
             }
 
             is ProfileDetailState.LoadProfileImage -> {
-                Toast.makeText(requireContext(), "Load image profile", Toast.LENGTH_SHORT).show()
+                displayToast("Load image profile")
                 val imageProfile = viewState.profileImageUrl
 
                 val images = mutableListOf<Any>()
@@ -167,11 +167,7 @@ class ProfileFragment :
 
             is ProfileDetailState.Followed -> {
                 val follower = viewState.user.follower
-                Toast.makeText(
-                    requireContext(),
-                    "Now you're following ${viewState.user.username}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("Now you're following ${viewState.user.username}")
                 setFollowButtonViewForOtherUser(true)
                 setFollowerText(follower)
                 isUserFollowingInAction = false
@@ -179,22 +175,14 @@ class ProfileFragment :
 
             is ProfileDetailState.FollowError -> {
                 isUserFollowingInAction = false
-                Toast.makeText(
-                    requireContext(),
-                    "Sorry we couldn't follow the user, try again later",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("Sorry we couldn't follow the user, try again later")
                 setFollowButtonViewForOtherUser(false)
             }
 
             is ProfileDetailState.Unfollowed -> {
                 val follower = viewState.user.follower
                 Log.i("UserFollower", "Get $follower")
-                Toast.makeText(
-                    requireContext(),
-                    "You stopped following ${viewState.user.username}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("You stopped following ${viewState.user.username}")
                 setFollowButtonViewForOtherUser(false)
                 setFollowerText(follower)
                 isUserUnfollowingInAction = false
@@ -202,11 +190,7 @@ class ProfileFragment :
 
             is ProfileDetailState.UnfollowError -> {
                 isUserUnfollowingInAction = false
-                Toast.makeText(
-                    requireContext(),
-                    "Sorry we couldn't unfollow the user, try again later",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("Sorry we couldn't unfollow the user, try again later")
                 setFollowButtonViewForOtherUser(true)
             }
 
@@ -227,11 +211,7 @@ class ProfileFragment :
             }
 
             is ProfileDetailState.Error -> {
-                Toast.makeText(
-                    requireContext(),
-                    "${viewState.exception.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                displayToast("${viewState.exception.message}")
                 backToPreviousFragment()
             }
 

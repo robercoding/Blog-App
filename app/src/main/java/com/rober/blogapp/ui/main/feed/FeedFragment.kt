@@ -100,11 +100,7 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
                 mHasPullRefresh = false
 
                 viewState.messageUtil?.run {
-                    Toast.makeText(
-                        requireContext(),
-                        message + getEmoji(ANGUISHED_FACE),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    displayToast(message + getEmoji(ANGUISHED_FACE))
                 }
                 stopSwipeRefresh()
                 viewModel.setIntention(FeedFragmentEvent.Idle)
@@ -158,7 +154,7 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
             }
 
             is FeedState.Error -> {
-                Toast.makeText(requireContext(), viewState.message, Toast.LENGTH_SHORT).show()
+                viewState.message?.let { displayToast(it) }
             }
         }
     }

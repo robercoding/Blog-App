@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundPressed"
+    android:padding="15dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/reported_posts_viewholder_cardview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/primaryBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardCornerRadius="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/reported_posts_viewholder_constraint_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/primaryBackground"
+            android:paddingBottom="10dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/reported_posts_viewholder_case_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="#1"
+                android:textColor="@color/options"
+                android:textSize="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/reported_posts_viewholder_reported_cause_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:text="Reported cause:"
+                android:textColor="@color/primaryText"
+                android:textSize="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/reported_posts_viewholder_reported_cause_content_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="5dp"
+                android:text="Here will go the sample message if there's any to show."
+                android:textColor="@color/secondaryText"
+                android:textSize="16dp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toStartOf="@id/reported_posts_viewholder_case_number"
+                app:layout_constraintStart_toEndOf="@id/reported_posts_viewholder_reported_cause_title_tv"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/reported_posts_viewholder_message_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="Message:"
+                android:textColor="@color/primaryText"
+                android:textSize="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reported_posts_viewholder_reported_cause_content_tv" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/reported_posts_viewholder_message_content_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:ellipsize="end"
+                android:maxLength="250"
+                android:text="Here will go the sample message if there's any to show."
+                android:textColor="@color/secondaryText"
+                android:textSize="16dp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/reported_posts_viewholder_message_title_tv"
+                app:layout_constraintTop_toBottomOf="@id/reported_posts_viewholder_reported_cause_content_tv" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

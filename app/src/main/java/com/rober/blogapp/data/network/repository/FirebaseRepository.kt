@@ -6,6 +6,7 @@ import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.entity.Post
+import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -34,12 +35,14 @@ constructor(
 
     suspend fun getCurrentUserRefreshed(): User = firebaseSource.getCurrentUserRefreshed()
 
-    suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> = firebaseSource.getUserProfile(userUID)
+    suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> =
+        firebaseSource.getUserProfile(userUID)
 
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
 
-    suspend fun login(email: String, password: String): Flow<ResultAuth> = firebaseAuthManager.login(email, password)
+    suspend fun login(email: String, password: String): Flow<ResultAuth> =
+        firebaseAuthManager.login(email, password)
 
     suspend fun signOut(): Flow<ResultAuth> = firebaseAuthManager.signOut()
 
@@ -71,14 +74,17 @@ constructor(
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = firebasePostAddManager.savePost(post)
 
     //PostDetail
-    suspend fun reportPost(post: Post, reportedCause: String, message: String): Flow<ResultData<Boolean>> = firebasePostDetailManager.reportPost(post, reportedCause, message)
-    
+    suspend fun reportPost(post: Post, reportedCause: String, message: String): Flow<ResultData<Boolean>> =
+        firebasePostDetailManager.reportPost(post, reportedCause, message)
+
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.deletePost(post)
 
-    suspend fun saveEditedPost(post: Post): Flow<ResultData<Boolean>> = firebasePostDetailManager.updateEditedPost(post)
+    suspend fun saveEditedPost(post: Post): Flow<ResultData<Boolean>> =
+        firebasePostDetailManager.updateEditedPost(post)
 
     //Search
-    suspend fun getUserByString(searchUsername: String) = firebaseSearchManager.getUsersByString(searchUsername)
+    suspend fun getUserByString(searchUsername: String) =
+        firebaseSearchManager.getUsersByString(searchUsername)
 
     //ProfileDetail
     suspend fun retrieveProfileUsersPosts(userID: String): Flow<ResultData<List<Post>>> =
@@ -92,7 +98,8 @@ constructor(
     suspend fun checkIfCurrentUserFollowsOtherUser(userID: String): Flow<ResultData<Boolean>> =
         firebaseProfileDetailManager.checkIfCurrentUserFollowsOtherUser(userID)
 
-    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> = firebaseProfileDetailManager.followOtherUser(user)
+    suspend fun followOtherUser(user: User): Flow<ResultData<Boolean>> =
+        firebaseProfileDetailManager.followOtherUser(user)
 
     suspend fun unfollowOtherUser(user: User): Flow<ResultData<Boolean>> =
         firebaseProfileDetailManager.unfollowOtherUser(user)
@@ -103,4 +110,9 @@ constructor(
 
     suspend fun saveImage(uri: Uri, intentImageCode: Int): Flow<ResultData<String>> =
         firebaseProfileEditManager.saveImage(uri, intentImageCode)
+
+    //General Settings
+    suspend fun getListReportedPosts(user: User): Flow<ResultData<List<ReportPost>>> =
+        firebaseSettingsManager.getListReportedPosts(user)
+
 }

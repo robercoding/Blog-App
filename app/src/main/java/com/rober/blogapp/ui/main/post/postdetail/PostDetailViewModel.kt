@@ -22,7 +22,6 @@ import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.EDIT_POST
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.FOLLOW_USER
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.REPORT_POST
 import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.UNFOLLOW_USER
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -146,7 +145,7 @@ class PostDetailViewModel @ViewModelInject constructor(
 
     private suspend fun getUserProfile(userUID: String): User? {
         var tempUser: User? = null
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.getUserProfile(userUID)
                 .collect { resultData ->
                     when (resultData) {
@@ -154,7 +153,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
         return tempUser
     }
 
@@ -235,7 +234,7 @@ class PostDetailViewModel @ViewModelInject constructor(
 
     private suspend fun doesCurrentUserFollowsUserPost(): Boolean {
         var doesUserFollowPostCreatorUser = false
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             post?.also { tempPost ->
                 firebaseRepository.checkIfCurrentUserFollowsOtherUser(tempPost.userCreatorId)
                     .collect { resultData ->
@@ -249,7 +248,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
             }
         }
-        job.join()
+        job?.join()
 
         return doesUserFollowPostCreatorUser
     }
@@ -299,7 +298,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         post = editedPost
 
         var hasPostBeenUpdated = false
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.saveEditedPost(editedPost)
                 .collect { resultData ->
                     when (resultData) {
@@ -312,7 +311,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
 
         if (hasPostBeenUpdated)
             viewState = PostDetailState.NotifyUser("Post has been updated!")
@@ -322,7 +321,7 @@ class PostDetailViewModel @ViewModelInject constructor(
 
     private suspend fun deletePost() {
         var deletedPost = false
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             post?.let { tempPost ->
                 firebaseRepository.deletePost(tempPost)
                     .collect { resultData ->
@@ -338,7 +337,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
             }
         }
-        job.join()
+        job?.join()
 
         if (deletedPost)
             viewState = PostDetailState.PostDeleted
@@ -381,7 +380,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
 
         var followedUser = false
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.followOtherUser(userToFollow)
                 .collect { resultData ->
                     when (resultData) {
@@ -394,7 +393,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
 
         if (followedUser) {
             viewState = PostDetailState.NotifyUser("Succesfully followed")
@@ -411,7 +410,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
 
         var unfollowedUser = false
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.unfollowOtherUser(userToUnfollow)
                 .collect { resultData ->
                     when (resultData) {
@@ -424,7 +423,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
 
         if (unfollowedUser) {
             viewState = PostDetailState.NotifyUser("Succesfully unfollowed")

@@ -175,7 +175,7 @@ class PostAddFragment :
         val title = post_add_title.text.toString()
         val text = post_add_text.text.toString()
         if (isEmpty(title, text)) {
-            Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
+            displayToast("Fields can't be empty")
             return
         }
 

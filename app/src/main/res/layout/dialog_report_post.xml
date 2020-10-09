@@ -80,7 +80,7 @@
             android:background="@color/primaryBackground"
             android:gravity="top|start"
             android:hint="Write your message here"
-            android:maxLength="500"
+            android:maxLength="200"
             android:scrollbarSize="1dp"
             android:scrollbarThumbVertical="@color/blueTwitter"
             android:scrollbars="vertical"

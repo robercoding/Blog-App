@@ -11,8 +11,6 @@ import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.util.MessageUtil
-import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -35,7 +33,7 @@ constructor(
                 retrieveInitPosts()
             }
             is FeedFragmentEvent.RetrieveOldFeedPosts -> {
-                if(feedListPosts.size > 30){
+                if (feedListPosts.size > 30) {
                     retrieveOldFeedPosts(event.actualRecyclerViewPosition)
                 }
             }
@@ -57,7 +55,7 @@ constructor(
             is FeedFragmentEvent.Idle -> {
                 viewState = FeedState.Idle
             }
-            is FeedFragmentEvent.SignOut ->{
+            is FeedFragmentEvent.SignOut -> {
                 clearListsAndMapsLocalDatabase()
                 viewState = FeedState.SignOut
             }
@@ -91,7 +89,7 @@ constructor(
                 }
 
             user?.let { feedListUsers.add(it) }
-            if(feedListPosts.size == 0){
+            if (feedListPosts.size == 0) {
                 viewState = FeedState.LoadMessageZeroPosts
                 return@launch
             }
@@ -128,7 +126,7 @@ constructor(
                         }
                     }
                 }
-            if(newListPosts.isEmpty()){
+            if (newListPosts.isEmpty()) {
                 viewState =
                     FeedState.StopRequestNewPosts(MessageUtil("Sorry, there aren't new posts right now "))
                 return@launch
@@ -155,7 +153,7 @@ constructor(
 
     private fun sendNewFeedPosts(newListPosts: List<Post>, newListUsers: List<User>) {
 
-        if(feedListPosts.size == 0 && newListPosts.size == 0){
+        if (feedListPosts.size == 0 && newListPosts.size == 0) {
             viewState = FeedState.LoadMessageZeroPosts
             return
         }
@@ -166,16 +164,17 @@ constructor(
 
 
         var firstPostBeforeLoadingNewPosts: Post? = null
-        if(feedListPosts.isNotEmpty())
+        if (feedListPosts.isNotEmpty())
             firstPostBeforeLoadingNewPosts = feedListPosts[0]
 
         feedListPosts.addAll(newListPosts.toMutableList())
-        feedListPosts = feedListPosts.sortedByDescending { post-> post.created_at }.toMutableList() //Is already ordered
+        feedListPosts =
+            feedListPosts.sortedByDescending { post -> post.created_at }.toMutableList() //Is already ordered
         feedListUsers.addAll(newListUsers.toMutableList())
 
         var positionOfTheFirstPost = 1
-        firstPostBeforeLoadingNewPosts?.also {tempFirstPostBeforeLoadingNewPosts->
-             positionOfTheFirstPost = feedListPosts.indexOf(tempFirstPostBeforeLoadingNewPosts)
+        firstPostBeforeLoadingNewPosts?.also { tempFirstPostBeforeLoadingNewPosts ->
+            positionOfTheFirstPost = feedListPosts.indexOf(tempFirstPostBeforeLoadingNewPosts)
         }
 
         //Where's user now?
@@ -194,7 +193,7 @@ constructor(
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                 resultData.data?.run {
+                                resultData.data?.run {
                                     newOldListPosts = this
                                 }
                             }
@@ -212,7 +211,11 @@ constructor(
                                 is ResultData.Success -> {
                                     resultData.data?.run {
                                         newListUsers = this
-                                        sendOldFeedPosts(actualRecyclerViewPosition, newOldListPosts, newListUsers)
+                                        sendOldFeedPosts(
+                                            actualRecyclerViewPosition,
+                                            newOldListPosts,
+                                            newListUsers
+                                        )
                                     }
                                 }
                             }
@@ -227,7 +230,11 @@ constructor(
         }
     }
 
-    private fun sendOldFeedPosts(actualRecyclerViewPosition: Int, newOldListPosts: List<Post>, newListUsers: List<User>) {
+    private fun sendOldFeedPosts(
+        actualRecyclerViewPosition: Int,
+        newOldListPosts: List<Post>,
+        newListUsers: List<User>
+    ) {
         //SaveScroll Position
         scrollToPosition = actualRecyclerViewPosition
 
@@ -279,15 +286,15 @@ constructor(
         viewState = FeedState.GoToProfileDetailsFragment(user_id)
     }
 
-    private fun clearListsAndMapsLocalDatabase(){
+    private fun clearListsAndMapsLocalDatabase() {
         firebaseRepository.clearListsAndMapsLocalDatabase()
     }
 
-    private fun signOut(){
+    private fun signOut() {
         viewModelScope.launch {
             firebaseRepository.signOut()
                 .collect {
-                    when(it){
+                    when (it) {
                         is ResultAuth.Success -> viewState = FeedState.SignOut
 
                         is ResultAuth.Error -> viewState = FeedState.Idle

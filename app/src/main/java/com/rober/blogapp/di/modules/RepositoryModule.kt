@@ -36,12 +36,18 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseAuthManager(firebaseSource: FirebaseSource, firebaseErrors: FirebaseErrors): FirebaseAuthManager =
+    fun provideFirebaseAuthManager(
+        firebaseSource: FirebaseSource,
+        firebaseErrors: FirebaseErrors
+    ): FirebaseAuthManager =
         FirebaseAuthManager(firebaseSource, firebaseErrors)
 
     @Singleton
     @Provides
-    fun provideFirebaseFeedManager(firebaseSource: FirebaseSource, firebasePath: FirebasePath): FirebaseFeedManager =
+    fun provideFirebaseFeedManager(
+        firebaseSource: FirebaseSource,
+        firebasePath: FirebasePath
+    ): FirebaseFeedManager =
         FirebaseFeedManager(firebaseSource, firebasePath)
 
     @Singleton
@@ -71,8 +77,11 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseSettingsManager(firebaseSource: FirebaseSource): FirebaseSettingsManager =
-        FirebaseSettingsManager(firebaseSource)
+    fun provideFirebaseSettingsManager(
+        firebaseSource: FirebaseSource,
+        firebasePath: FirebasePath
+    ): FirebaseSettingsManager =
+        FirebaseSettingsManager(firebaseSource, firebasePath)
 
     @Singleton
     @Provides

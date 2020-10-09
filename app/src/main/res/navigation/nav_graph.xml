@@ -215,9 +215,21 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+        <action
+            android:id="@+id/action_settingsFragment_to_reportedPostsFragment"
+            app:destination="@id/reportedPostsFragment"
+            app:enterAnim="@anim/from_right"
+            app:exitAnim="@anim/to_left"
+            app:popEnterAnim="@anim/from_left"
+            app:popExitAnim="@anim/to_right" />
     </fragment>
     <fragment
         android:id="@+id/preferencesFragment"
         android:name="com.rober.blogapp.ui.main.settings.preferences.PreferencesFragment"
         android:label="PreferencesFragment" />
+    <fragment
+        android:id="@+id/reportedPostsFragment"
+        android:name="com.rober.blogapp.ui.main.settings.reportedposts.ReportedPostsFragment"
+        android:label="fragment_reported_posts"
+        tools:layout="@layout/fragment_reported_posts" />
 </navigation>

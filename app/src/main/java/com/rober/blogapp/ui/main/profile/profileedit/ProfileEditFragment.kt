@@ -91,17 +91,13 @@ class ProfileEditFragment :
             is ProfileEditState.ErrorSave -> {
                 displayProgressBarSaveChanges(false)
                 viewState.messageError?.also { messageError ->
-                    Toast.makeText(requireContext(), messageError, Toast.LENGTH_SHORT).show()
+                    displayToast(messageError)
                 } ?: kotlin.run {
-                    Toast.makeText(
-                        requireContext(),
-                        "Sorry there was an error when trying to save the new information.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    displayToast("Sorry there was an error when trying to save the new information.")
                 }
             }
             is ProfileEditState.SuccessSave -> {
-                Toast.makeText(requireContext(), "Successfully updated!", Toast.LENGTH_SHORT).show()
+                displayToast("Successfully updated!")
                 navigateToProfileDetail()
             }
 

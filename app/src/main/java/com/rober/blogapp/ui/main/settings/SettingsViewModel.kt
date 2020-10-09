@@ -33,8 +33,9 @@ class SettingsViewModel @ViewModelInject constructor(
                 is SettingsFragmentEvent.ClickEventOnSettingsOption -> {
                     val option = listOptionsAccountAndOtherOptions[event.positionAdapter]
                     Log.i("SeeOption Clicked", "${listOptionsAccountAndOtherOptions[event.positionAdapter]}")
-                    when(option.text){
+                    when (option.text) {
                         "Preferences" -> viewState = SettingsViewState.GoToPreferences
+                        "Reported posts" -> viewState = SettingsViewState.GoToReportedPosts
                     }
 
                 }
@@ -43,13 +44,13 @@ class SettingsViewModel @ViewModelInject constructor(
     }
 
     private suspend fun loadSettings() {
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
 
             val user = firebaseRepository.getCurrentUser()
             currentUser = user
 
         }
-        job.join()
+        job?.join()
 
         //Account section
         val listSettingsTextAccount =

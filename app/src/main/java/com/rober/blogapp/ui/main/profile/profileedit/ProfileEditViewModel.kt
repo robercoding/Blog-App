@@ -26,7 +26,6 @@ class ProfileEditViewModel @ViewModelInject constructor(
     private var backgroundImageDownloadUrl: String = ""
 
     private var successSaveUserDetails = false
-    private var job: Job? = null
 
     private var messageError = ""
 
@@ -148,7 +147,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
             this.lastDateUsernameChange = lastDateUsernameChange
         }
 
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.updateUser(user, newUser)
                 .collect { resultData ->
                     when (resultData) {
@@ -165,7 +164,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
                 }
         }
 
-        job.join()
+        job?.join()
         return successSaveUserDetails
     }
 
@@ -186,7 +185,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
     }
 
     private suspend fun saveImageProfile(profileImageUri: Uri): Boolean {
-        val job = viewModelScope.launch {
+        job = viewModelScope.launch {
             firebaseRepository.saveImage(profileImageUri, IntentImageCodes.PROFILE_IMAGE_CODE)
                 .collect { resultData ->
                     when (resultData) {
@@ -199,14 +198,14 @@ class ProfileEditViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
         val success = profileImageDownloadUrl.isNotEmpty()
         return success
     }
 
     private suspend fun saveImageBackground(backgroundImageUri: Uri): Boolean {
 
-        val job = viewModelScope.launch {
+        viewModelScope.launch {
             firebaseRepository.saveImage(backgroundImageUri, IntentImageCodes.BACKGROUND_IMAGE_CODE)
                 .collect { resultData ->
                     when (resultData) {
@@ -219,7 +218,7 @@ class ProfileEditViewModel @ViewModelInject constructor(
                     }
                 }
         }
-        job.join()
+        job?.join()
         val success = backgroundImageDownloadUrl.isNotEmpty()
         return success
     }
