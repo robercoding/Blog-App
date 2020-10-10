@@ -13,9 +13,11 @@ import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.settings.adapter.AdapterSettings
+import com.rober.blogapp.ui.main.settings.utils.RowsNaming
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_settings.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment :
@@ -23,6 +25,9 @@ class SettingsFragment :
     RecyclerViewActionInterface {
 
     override val viewModel: SettingsViewModel by viewModels()
+
+    @Inject
+    lateinit var rowsNaming: RowsNaming
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -34,15 +39,21 @@ class SettingsFragment :
             is SettingsViewState.LoadSettingsMenu -> renderSettingsView(
                 viewState.user,
                 viewState.listSettingsAccount,
-                viewState.listSettingsOptionOtherOptions
+                viewState.listSettingsOptionOtherOptions,
+                viewState.totalNumberPosts
             )
 
             is SettingsViewState.GoToPreferences -> {
                 findNavController().navigate(R.id.action_settingsFragment_to_preferencesFragment)
+                viewModel.setIntention(SettingsFragmentEvent.Idle)
             }
 
             is SettingsViewState.GoToReportedPosts -> {
                 findNavController().navigate(R.id.action_settingsFragment_to_reportedPostsFragment)
+                viewModel.setIntention(SettingsFragmentEvent.Idle)
+            }
+
+            is SettingsViewState.Idle -> {
             }
         }
     }
@@ -50,16 +61,22 @@ class SettingsFragment :
     private fun renderSettingsView(
         user: User,
         listSettingsOptionAccount: List<Option>,
-        listSettingsOptionOtherOptions: List<Option>
+        listSettingsOptionOtherOptions: List<Option>,
+        totalNumberPosts: Int
     ) {
-        renderSettingsViewAccount(user, listSettingsOptionAccount)
+        renderSettingsViewAccount(user, listSettingsOptionAccount, totalNumberPosts)
         renderSettingsViewOtherOptions(listSettingsOptionOtherOptions, listSettingsOptionAccount.size)
     }
 
-    private fun renderSettingsViewAccount(user: User, listSettingsOptionAccount: List<Option>) {
+    private fun renderSettingsViewAccount(
+        user: User,
+        listSettingsOptionAccount: List<Option>,
+        totalNumberPosts: Int
+    ) {
         settings_text_username.text = "@${user.username}"
 
-        val settingsAdapter = AdapterSettings(listSettingsOptionAccount, this, 0)
+        val settingsAdapter =
+            AdapterSettings(listSettingsOptionAccount, this, 0, rowsNaming, totalNumberPosts)
         val linearLayoutManager = LinearLayoutManager(requireContext())
         val decoration = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
 
@@ -81,7 +98,13 @@ class SettingsFragment :
     ) {
         val linearLayoutManager = LinearLayoutManager(requireContext())
         val settingsAdapter =
-            AdapterSettings(listSettingsOptionOtherOptions, this, sumAdapterPositionToOtherOptions)
+            AdapterSettings(
+                listSettingsOptionOtherOptions,
+                this,
+                sumAdapterPositionToOtherOptions,
+                rowsNaming,
+                0
+            )
         val decoration = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
 
         settings_recycler_other_options.apply {
@@ -128,4 +151,5 @@ sealed class SettingsFragmentEvent {
     object LoadSettings : SettingsFragmentEvent()
 
     data class ClickEventOnSettingsOption(val positionAdapter: Int) : SettingsFragmentEvent()
+    object Idle : SettingsFragmentEvent()
 }

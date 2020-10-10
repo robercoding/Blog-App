@@ -4,13 +4,14 @@ import android.app.Application
 import android.content.res.TypedArray
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.R
+import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class SettingsViewModel @ViewModelInject constructor(
@@ -23,13 +24,16 @@ class SettingsViewModel @ViewModelInject constructor(
 
     init {
         viewState = SettingsViewState.Loading
+        currentUser = firebaseRepository.getCurrentUser()
     }
 
     override fun setIntention(event: SettingsFragmentEvent) {
         viewModelScope.launch {
             when (event) {
                 is SettingsFragmentEvent.SayHello -> viewState = SettingsViewState.Hello
+
                 is SettingsFragmentEvent.LoadSettings -> loadSettings()
+
                 is SettingsFragmentEvent.ClickEventOnSettingsOption -> {
                     val option = listOptionsAccountAndOtherOptions[event.positionAdapter]
                     Log.i("SeeOption Clicked", "${listOptionsAccountAndOtherOptions[event.positionAdapter]}")
@@ -37,7 +41,10 @@ class SettingsViewModel @ViewModelInject constructor(
                         "Preferences" -> viewState = SettingsViewState.GoToPreferences
                         "Reported posts" -> viewState = SettingsViewState.GoToReportedPosts
                     }
+                }
 
+                is SettingsFragmentEvent.Idle -> {
+                    viewState = SettingsViewState.Idle
                 }
             }
         }
@@ -85,10 +92,13 @@ class SettingsViewModel @ViewModelInject constructor(
         listOptionsAccountAndOtherOptions.addAll(listSettingsOptionAccount)
         listOptionsAccountAndOtherOptions.addAll(listSettingsOptionOtherOptions)
 
+        val totalNumberPosts = getTotalNumberPosts()
+
         viewState = SettingsViewState.LoadSettingsMenu(
             listSettingsOptionAccount,
             listSettingsOptionOtherOptions,
-            currentUser
+            currentUser,
+            totalNumberPosts
         )
     }
 
@@ -109,5 +119,27 @@ class SettingsViewModel @ViewModelInject constructor(
         }
 
         return listOptionsFromTypedArray
+    }
+
+    private suspend fun getTotalNumberPosts(): Int {
+        var totalNumberPosts = 0
+        job = viewModelScope.launch {
+            firebaseRepository.getTotalNumberPosts(currentUser)
+                .collect { resultData ->
+                    when (resultData) {
+                        is ResultData.Success -> {
+                            totalNumberPosts = resultData.data!!
+                        }
+
+                        is ResultData.Error -> {
+                            viewState =
+                                SettingsViewState.Error(Exception("Sorry we found an error getting the number of posts"))
+                        }
+                    }
+                }
+        }
+        job?.join()
+
+        return totalNumberPosts
     }
 }

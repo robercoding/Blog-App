@@ -118,4 +118,7 @@ constructor(
     suspend fun getListReportedPosts(user: User): Flow<ResultData<List<ReportPost>>> =
         firebaseSettingsManager.getListReportedPosts(user)
 
+    fun getTotalNumberPosts(user: User): Flow<ResultData<Int>> =
+        firebaseSettingsManager.getTotalNumberPosts(user)
+
 }

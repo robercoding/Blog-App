@@ -9,21 +9,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.rober.blogapp.R
-import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.base.BasePreferenceFragment
 import com.rober.blogapp.ui.main.settings.preferences.utils.Keys
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_preferences.*
-import kotlinx.android.synthetic.main.fragment_settings.*
 import javax.inject.Inject
 
 
@@ -127,7 +121,6 @@ class PreferencesFragment :
 //        activity?.finish()
 //        activity?.startActivity(activity?.intent)
     }
-
 }
 
 sealed class PreferenceFragmentEvent() {

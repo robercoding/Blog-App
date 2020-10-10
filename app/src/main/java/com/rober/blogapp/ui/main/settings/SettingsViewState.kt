@@ -11,7 +11,8 @@ sealed class SettingsViewState {
     data class LoadSettingsMenu(
         val listSettingsAccount: List<Option>,
         val listSettingsOptionOtherOptions: List<Option>,
-        val user: User
+        val user: User,
+        val totalNumberPosts: Int
     ) : SettingsViewState()
 
     object GoToReportedPosts : SettingsViewState()
