@@ -1,13 +1,16 @@
 package com.rober.blogapp.ui.main.settings
 
+import android.content.DialogInterface
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.User
@@ -51,6 +54,42 @@ class SettingsFragment :
             is SettingsViewState.GoToReportedPosts -> {
                 findNavController().navigate(R.id.action_settingsFragment_to_reportedPostsFragment)
                 viewModel.setIntention(SettingsFragmentEvent.Idle)
+            }
+
+            is SettingsViewState.AskUserToDisableAccount -> {
+                val materialAlertDialog =
+                    MaterialAlertDialogBuilder(requireContext(), R.style.Settings_MaterialDialogTheme)
+
+                materialAlertDialog.setTitle("Delete account")
+                    .setMessage("Are you sure that you want to delete the account? Account will be disabled and after 30 days will be deleted")
+                    .setBackground(ContextCompat.getDrawable(requireContext(), R.color.primaryBackground))
+                    .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                        dialog.dismiss()
+                    })
+                    .setPositiveButton("Disable account", DialogInterface.OnClickListener { dialog, which ->
+                        viewModel.setIntention(SettingsFragmentEvent.DisableAccountAction)
+                    })
+                    .show()
+            }
+
+            is SettingsViewState.DisableAccountAction -> {
+                displayOpaqueBackground(true)
+                displayProgressBar(settings_progress_bar_middle, true)
+                customActionOnBackPressed()
+            }
+
+            is SettingsViewState.SuccessDisabledAccount -> {
+                restoreDefaultOnBackPressed()
+                displayProgressBar(settings_progress_bar_middle, false)
+                displayOpaqueBackground(false)
+
+                findNavController().navigate(R.id.action_settingsFragment_to_loginFragment)
+            }
+
+            is SettingsViewState.ErrorDisablingAccount -> {
+                displayOpaqueBackground(false)
+                displayProgressBar(settings_progress_bar_middle, false)
+                displayToast("Sorry, there was an error when trying to delete the account")
             }
 
             is SettingsViewState.Idle -> {
@@ -144,11 +183,24 @@ class SettingsFragment :
     override fun requestMorePosts(actualRecyclerViewPosition: Int) {
         //Nothing
     }
+
+    //Block back button
+    override fun customActionOnBackPressed(action: Int) {
+        super.customActionOnBackPressed(action)
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+            }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
+    }
 }
 
 sealed class SettingsFragmentEvent {
     object SayHello : SettingsFragmentEvent()
     object LoadSettings : SettingsFragmentEvent()
+
+    object DisableAccountAction : SettingsFragmentEvent()
 
     data class ClickEventOnSettingsOption(val positionAdapter: Int) : SettingsFragmentEvent()
     object Idle : SettingsFragmentEvent()

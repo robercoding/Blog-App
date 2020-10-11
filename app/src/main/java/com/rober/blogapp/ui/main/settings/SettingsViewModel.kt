@@ -2,7 +2,6 @@ package com.rober.blogapp.ui.main.settings
 
 import android.app.Application
 import android.content.res.TypedArray
-import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.R
@@ -11,12 +10,14 @@ import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
+import com.rober.blogapp.ui.main.settings.utils.RowsNaming
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class SettingsViewModel @ViewModelInject constructor(
     private val firebaseRepository: FirebaseRepository,
-    private val application: Application
+    private val application: Application,
+    private val rowsNaming: RowsNaming
 ) : BaseViewModel<SettingsViewState, SettingsFragmentEvent>() {
 
     private lateinit var currentUser: User
@@ -36,12 +37,14 @@ class SettingsViewModel @ViewModelInject constructor(
 
                 is SettingsFragmentEvent.ClickEventOnSettingsOption -> {
                     val option = listOptionsAccountAndOtherOptions[event.positionAdapter]
-                    Log.i("SeeOption Clicked", "${listOptionsAccountAndOtherOptions[event.positionAdapter]}")
                     when (option.text) {
-                        "Preferences" -> viewState = SettingsViewState.GoToPreferences
-                        "Reported posts" -> viewState = SettingsViewState.GoToReportedPosts
+                        rowsNaming.PREFERENCES -> viewState = SettingsViewState.GoToPreferences
+                        rowsNaming.REPORTED_POSTS -> viewState = SettingsViewState.GoToReportedPosts
+                        rowsNaming.DELETE_ACCOUNT -> viewState = SettingsViewState.AskUserToDisableAccount
                     }
                 }
+
+                is SettingsFragmentEvent.DisableAccountAction -> disableAccount()
 
                 is SettingsFragmentEvent.Idle -> {
                     viewState = SettingsViewState.Idle
@@ -141,5 +144,26 @@ class SettingsViewModel @ViewModelInject constructor(
         job?.join()
 
         return totalNumberPosts
+    }
+
+    private suspend fun disableAccount() {
+        viewState = SettingsViewState.DisableAccountAction
+
+        firebaseRepository.disableAccount()
+            .collect { resultData ->
+                when (resultData) {
+                    is ResultData.Success -> {
+                        val hasAccountBeenDisabled = resultData.data!!
+                        viewState = if (hasAccountBeenDisabled)
+                            SettingsViewState.SuccessDisabledAccount
+                        else
+                            SettingsViewState.ErrorDisablingAccount
+                    }
+
+                    is ResultData.Error -> {
+                        viewState = SettingsViewState.ErrorDisablingAccount
+                    }
+                }
+            }
     }
 }

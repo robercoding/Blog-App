@@ -1,5 +1,6 @@
 package com.rober.blogapp.data.network.firebase
 
+import android.util.Log
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.CountsPosts
@@ -14,10 +15,30 @@ class FirebaseSettingsManager @Inject constructor(
     val firebaseSource: FirebaseSource,
     val firebasePath: FirebasePath
 ) {
+    private val TAG = "FirebaseSettingsManager"
 
-    //Actually I'll disable the account instead of deleting it.
-    fun deleteAccount(): Flow<ResultData<Boolean>> = flow {
+    fun disableAccount(): Flow<ResultData<Boolean>> = flow {
+        var result = false
+        firebaseSource.functions.getHttpsCallable("disableAccount")
+            .call().continueWith { task ->
+                if (task.isSuccessful) {
+                    val resultTask = task.result ?: throw Exception("Result task doesn't exist")
 
+                    if (resultTask.data == null) {
+                        Log.i(TAG, "Result task data is null")
+                        return@continueWith
+                    } else {
+                        result = resultTask.data as Boolean
+                        Log.i(TAG, "Result is $result")
+                    }
+                } else {
+                }
+            }.await()
+        if (result) {
+            emit(ResultData.Success(result))
+        } else {
+            emit(ResultData.Error(Exception("There was an error when trying to disable the account"), result))
+        }
     }
 
     suspend fun getListReportedPosts(user: User): Flow<ResultData<List<ReportPost>>> = flow {

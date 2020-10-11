@@ -121,4 +121,6 @@ constructor(
     fun getTotalNumberPosts(user: User): Flow<ResultData<Int>> =
         firebaseSettingsManager.getTotalNumberPosts(user)
 
+    fun disableAccount(): Flow<ResultData<Boolean>> = firebaseSettingsManager.disableAccount()
+
 }

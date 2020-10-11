@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:ns2="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- Customize your theme here. -->
@@ -9,6 +9,7 @@
         <!--        <item name="colorControlNormal">@color/yellow</item>-->
         <!--        <item name="android:windowDisablePreview">true</item>-->
         <item name="preferenceTheme">@style/AppTheme.PreferenceThemeOverlay</item>
+        <item name="colorOnSurface">@color/primaryText</item>
     </style>
 
     <style name="Divider">
@@ -116,5 +117,30 @@
 
     <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
         <item name="android:colorBackground">@color/primaryBackground</item>
+    </style>
+
+    <style name="Settings.MaterialDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/primaryText</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogText</item>
+        <item name="buttonBarPositiveButtonStyle">@style/MaterialAlertDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MaterialAlertDialogButton</item>
+    </style>
+
+    <style name="MaterialAlertDialogTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="MaterialAlertDialogText" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:ellipsize">none</item>
+    </style>
+
+    <style name="MaterialAlertDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="backgroundTint">@color/primaryBackground</item>
+        <item name="rippleColor">@color/blueTwitter</item>
     </style>
 </resources>

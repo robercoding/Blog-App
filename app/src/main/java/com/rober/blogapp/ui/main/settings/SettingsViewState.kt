@@ -18,6 +18,12 @@ sealed class SettingsViewState {
     object GoToReportedPosts : SettingsViewState()
     object GoToPreferences : SettingsViewState()
 
+    object AskUserToDisableAccount : SettingsViewState()
+
+    object DisableAccountAction : SettingsViewState()
+    object SuccessDisabledAccount : SettingsViewState()
+    object ErrorDisablingAccount : SettingsViewState()
+
     data class Error(val exception: Exception) : SettingsViewState()
     object Loading : SettingsViewState()
     object Idle : SettingsViewState()

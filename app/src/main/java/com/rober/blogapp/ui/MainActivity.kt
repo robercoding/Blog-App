@@ -2,16 +2,14 @@ package com.rober.blogapp.ui
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.ui.setupWithNavController
-import androidx.preference.PreferenceManager
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.main.settings.preferences.utils.Keys
 import com.rober.blogapp.util.Destinations
@@ -66,7 +64,16 @@ class MainActivity : AppCompatActivity() {
             bottom_navigation.visibility = View.GONE
             view_top_border_bottom_navigation_view.visibility = View.GONE
         }
+    }
 
+    fun displayOpaqueBackground(display: Boolean) {
+        if (display) {
+            main_activity_background_opaque.visibility = View.VISIBLE
+            bottom_navigation.foreground = ContextCompat.getDrawable(this, R.color.background_opaque)
+        } else {
+            main_activity_background_opaque.visibility = View.GONE
+            bottom_navigation.foreground = null
+        }
     }
 
 //    override fun onBackPressed() {

@@ -57,9 +57,7 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-
         setCurrentUser()
-
 
         if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null || firebaseSource.userDocumentUID == null)) {
             var tries = 0
@@ -69,17 +67,14 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-
         if (!loggedIn) {
             emit(ResultAuth.Error(exception))
         } else if (loggedIn && firebaseSource.username.isEmpty()) {
             exception = Exception("There was an issue with our servers")
             emit(ResultAuth.Error(exception))
-        }else if(loggedIn && firebaseSource.username.isNotEmpty()){
+        } else if (loggedIn && firebaseSource.username.isNotEmpty()) {
             emit(ResultAuth.Success)
         }
-
-
     }
 
     suspend fun signUpWithEmail(email: String, password: String, name: String): Flow<ResultAuth> = flow {
@@ -116,16 +111,16 @@ class FirebaseAuthManager @Inject constructor(
         var isNewUser = false
 
         firebaseSource.auth.fetchSignInMethodsForEmail(email)
-            .addOnCompleteListener {task->
+            .addOnCompleteListener { task ->
                 task.result?.signInMethods?.run {
                     isNewUser = isEmpty()
                 }
             }.await()
 
 
-        if(isNewUser){
+        if (isNewUser) {
             emit(ResultAuth.Success)
-        }else{
+        } else {
             emit(ResultAuth.Error(Exception("Email already exists")))
         }
     }
@@ -176,7 +171,7 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-    private suspend fun createUserDocumentsUID(username: String, uid:String): Boolean {
+    private suspend fun createUserDocumentsUID(username: String, uid: String): Boolean {
         val usernameHashMap = hashMapOf("username" to username)
         //Create document for the new user
         val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
@@ -189,7 +184,13 @@ class FirebaseAuthManager @Inject constructor(
 
         //Create object with the ID generated and store them
         val userDocumentUID =
-            UserDocumentUID(username, postDocumentUidDocRef.id, followingDocumentUidDocRef.id, followerDocumentUidDocRef.id, uid)
+            UserDocumentUID(
+                username,
+                postDocumentUidDocRef.id,
+                followingDocumentUidDocRef.id,
+                followerDocumentUidDocRef.id,
+                uid
+            )
         val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
 
         var success = false
