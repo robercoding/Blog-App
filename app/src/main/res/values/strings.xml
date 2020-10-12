@@ -6,6 +6,7 @@
     <!--Login and Register-->
     <string name="username">Username</string>
     <string name="email">Email</string>
+    <string name="username_or_email">Username or Email</string>
     <string name="password">Password</string>
     <string name="login">LOGIN</string>
 

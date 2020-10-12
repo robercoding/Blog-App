@@ -46,26 +46,45 @@ constructor(
 
     fun setLoginIntention(state: LoginFragmentEvent) {
         when (state) {
-            is LoginFragmentEvent.Login -> {
-                login(state.email, state.password)
+            is LoginFragmentEvent.LoginByEmail -> {
+                loginByEmail(state.email, state.password)
+            }
+
+            is LoginFragmentEvent.LoginByUsername -> {
+                loginByUsername(state.username, state.password)
             }
         }
     }
 
-    private fun login(email: String, password: String) {
+    private fun loginByEmail(email: String, password: String) {
         viewModelScope.launch {
-            firebaseRepository.login(email, password)
+            firebaseRepository.loginByEmail(email, password)
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Success -> {
                             _authState.value = AuthState.UserLoggedIn
                         }
                         is ResultAuth.Error -> {
-                            Log.i(TAG, "${resultAuth.exception}")
                             _authState.value = AuthState.Error(resultAuth.exception.message)
                         }
-                        is ResultAuth.Loading ->
-                            _authState.value = AuthState.Logging
+                        is ResultAuth.Loading -> _authState.value = AuthState.Logging
+                    }
+                }
+        }
+    }
+
+    private fun loginByUsername(username: String, password: String) {
+        viewModelScope.launch {
+            firebaseRepository.loginByUsername(username, password)
+                .collect { resultAuth ->
+                    when (resultAuth) {
+                        is ResultAuth.Success -> {
+                            _authState.value = AuthState.UserLoggedIn
+                        }
+                        is ResultAuth.Error -> {
+                            _authState.value = AuthState.Error(resultAuth.exception.message)
+                        }
+                        is ResultAuth.Loading -> _authState.value = AuthState.Logging
                     }
                 }
         }
@@ -78,7 +97,7 @@ constructor(
             }
 
             is RegisterFragmentEvent.LogIn -> {
-                login(event.email, event.password)
+                loginByEmail(event.email, event.password)
             }
 
             is RegisterFragmentEvent.CheckFields -> {
@@ -106,7 +125,12 @@ constructor(
 
             if (!isUsernameAvailable) {
                 _authState.value =
-                    AuthState.SetErrorFields("Sorry, username is not available, try with other username.", "", "", "")
+                    AuthState.SetErrorFields(
+                        "Sorry, username is not available, try with other username.",
+                        "",
+                        "",
+                        ""
+                    )
                 return@launch
             }
 
@@ -122,7 +146,12 @@ constructor(
             Log.i(TAG, "IsEmailAvailable?= $isEmailAvailable")
             if (!isEmailAvailable) {
                 _authState.value =
-                    AuthState.SetErrorFields("", "Sorry, email is not available, try with other email.", "", "")
+                    AuthState.SetErrorFields(
+                        "",
+                        "Sorry, email is not available, try with other email.",
+                        "",
+                        ""
+                    )
                 return@launch
             }
 

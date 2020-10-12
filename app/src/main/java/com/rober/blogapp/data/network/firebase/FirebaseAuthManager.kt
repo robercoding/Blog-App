@@ -1,13 +1,8 @@
 package com.rober.blogapp.data.network.firebase
 
-import android.util.Log
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.QuerySnapshot
 import com.rober.blogapp.data.ResultAuth
-import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.entity.UserDocumentUID
@@ -33,8 +28,7 @@ class FirebaseAuthManager @Inject constructor(
         firebaseSource.setCurrentFollower()
     }
 
-    suspend fun login(email: String, password: String): Flow<ResultAuth> = flow {
-        emit(ResultAuth.Loading)
+    private suspend fun login(email: String, password: String): ResultAuth {
         var loggedIn = false
         try {
             firebaseSource.auth.signInWithEmailAndPassword(email, password)
@@ -49,6 +43,7 @@ class FirebaseAuthManager @Inject constructor(
                 .await()
         } catch (e: FirebaseAuthException) {
             val error = authErrors.find { error -> error[0].contains(e.errorCode) }
+
 
             if (error != null) {
                 exception = Exception(error[1])
@@ -68,21 +63,58 @@ class FirebaseAuthManager @Inject constructor(
         }
 
         if (!loggedIn) {
-            emit(ResultAuth.Error(exception))
+            return ResultAuth.Error(exception)
         } else if (loggedIn && firebaseSource.username.isEmpty()) {
             exception = Exception("There was an issue with our servers")
-            emit(ResultAuth.Error(exception))
+            return ResultAuth.Error(exception)
         } else if (loggedIn && firebaseSource.username.isNotEmpty()) {
-            emit(ResultAuth.Success)
+            return ResultAuth.Success
+        } else {
+            return ResultAuth.Error(Exception(exception))
         }
     }
 
-    suspend fun signUpWithEmail(email: String, password: String, name: String): Flow<ResultAuth> = flow {
+    fun loginByEmail(email: String, password: String): Flow<ResultAuth> = flow {
+        emit(ResultAuth.Loading)
+        val resultAuth = login(email, password)
+        emit(resultAuth)
+    }
+
+    suspend fun loginByUsername(username: String, password: String): Flow<ResultAuth> = flow {
+        emit(ResultAuth.Loading)
+        var email = ""
+
+        firebaseSource.db.collection("usernames")
+            .whereEqualTo("username", username)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                try {
+                    when (querySnapshot.size()) {
+                        0 -> throw Exception("We couldn't an account with that username")
+                        1 -> email = querySnapshot.toObjects(Username::class.java)[0].email
+                        else -> throw Exception("Sorry, there was an when trying to get the username")
+                    }
+                } catch (e: Exception) {
+                    exception = e
+                }
+            }.await()
+
+
+        if (email.isEmpty()) {
+            emit(ResultAuth.Error(exception))
+            return@flow
+        }
+
+        val resultAuth = login(email, password)
+        emit(resultAuth)
+    }
+
+    suspend fun signUpWithEmail(email: String, password: String, username: String): Flow<ResultAuth> = flow {
         emit(ResultAuth.Loading)
         var createdAccount = false
         var savedInDatabase = false
 
-        if (checkIfNameIsAlreadyPicked(name)) {
+        if (checkIfNameIsAlreadyPicked(username)) {
             emit(ResultAuth.Error(Exception("Name is already in use, try other name")))
             return@flow
         }
@@ -96,7 +128,12 @@ class FirebaseAuthManager @Inject constructor(
                     createdAccount = false
                 }.await()
 
-            savedInDatabase = saveNewUserInDatabase(userAuthResult, name)
+            val authResultUID =
+                userAuthResult.user?.uid ?: throw Exception("Error signing up the new account")
+            val authResultEmail =
+                userAuthResult.user?.email ?: throw Exception("Error signing up the new account")
+
+            savedInDatabase = saveNewUserInDatabase(authResultUID, authResultEmail, username)
         } catch (e: FirebaseAuthException) {
             exception = e
         }
@@ -125,10 +162,9 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
-    private suspend fun saveNewUserInDatabase(userAuthResult: AuthResult, username: String): Boolean {
-        val uid = userAuthResult.user!!.uid
+    private suspend fun saveNewUserInDatabase(uid: String, email: String, username: String): Boolean {
 
-        if (!saveUsername(uid, username)) return false
+        if (!saveUsername(uid, username, email)) return false
 
         if (!saveUser(uid, username)) return false
 
@@ -137,11 +173,11 @@ class FirebaseAuthManager @Inject constructor(
         return true
     }
 
-    private suspend fun saveUsername(uid: String, name: String): Boolean {
+    private suspend fun saveUsername(uid: String, name: String, email: String): Boolean {
         var success = false
 
         val userNameCollection = firebaseSource.db.collection("usernames").document(uid)
-        val username = Username(uid, name)
+        val username = Username(uid, name, email)
 
         userNameCollection.set(username)
             .addOnSuccessListener { success = true }

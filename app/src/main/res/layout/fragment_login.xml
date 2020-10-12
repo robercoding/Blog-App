@@ -33,7 +33,7 @@
                     style="@style/AuthTextInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="@string/email"
+                    android:hint="@string/username_or_email"
                     android:text="robercoding@gmail.com" />
 
             </com.google.android.material.textfield.TextInputLayout>

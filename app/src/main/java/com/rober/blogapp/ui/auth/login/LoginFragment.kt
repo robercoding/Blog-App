@@ -62,23 +62,6 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun login() {
-        val email = etEmail.text.toString()
-        val password = etPassword.text.toString()
-
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(activity, "Email must be valid", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (password.isEmpty()) {
-            return
-        }
-
-        viewModel.setLoginIntention(LoginFragmentEvent.Login(email, password))
-    }
-
-
     private fun observeViewModel() {
         viewModel.authState.observe(viewLifecycleOwner, Observer { loginAuthState ->
             render(loginAuthState)
@@ -114,6 +97,21 @@ class LoginFragment : Fragment() {
         }
     }
 
+    private fun login() {
+        val email = etEmail.text.toString()
+        val password = etPassword.text.toString()
+
+        if (password.isEmpty()) {
+            return
+        }
+
+        if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            viewModel.setLoginIntention(LoginFragmentEvent.LoginByEmail(email, password))
+        } else {
+            viewModel.setLoginIntention(LoginFragmentEvent.LoginByUsername(email, password))
+        }
+    }
+
     private fun goToMainFragments() {
         val navController: NavController = findNavController()
 
@@ -145,5 +143,6 @@ class LoginFragment : Fragment() {
 }
 
 sealed class LoginFragmentEvent {
-    data class Login(val email: String, val password: String) : LoginFragmentEvent()
+    data class LoginByEmail(val email: String, val password: String) : LoginFragmentEvent()
+    data class LoginByUsername(val username: String, val password: String) : LoginFragmentEvent()
 }

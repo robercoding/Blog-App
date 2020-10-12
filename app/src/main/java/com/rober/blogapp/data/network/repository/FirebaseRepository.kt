@@ -41,8 +41,11 @@ constructor(
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
 
-    suspend fun login(email: String, password: String): Flow<ResultAuth> =
-        firebaseAuthManager.login(email, password)
+    fun loginByEmail(email: String, password: String): Flow<ResultAuth> =
+        firebaseAuthManager.loginByEmail(email, password)
+
+    suspend fun loginByUsername(username: String, password: String): Flow<ResultAuth> =
+        firebaseAuthManager.loginByUsername(username, password)
 
     suspend fun signOut(): Flow<ResultAuth> = firebaseAuthManager.signOut()
 
