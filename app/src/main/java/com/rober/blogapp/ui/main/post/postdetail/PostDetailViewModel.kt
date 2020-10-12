@@ -130,8 +130,8 @@ class PostDetailViewModel @ViewModelInject constructor(
 
             is PostDetailFragmentEvent.SaveUpdatedPost -> {
                 viewModelScope.launch {
-                    saveUpdatedPost(event.editedPost)
                     setPost(event.editedPost, event.editedPost.userCreatorId)
+                    saveUpdatedPost(event.editedPost)
                 }
             }
         }

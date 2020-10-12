@@ -113,25 +113,54 @@ class FirebasePostDetailManager @Inject constructor(
         val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
 
         if (postDocumentUID == null || user == null) {
-            emit(ResultData.Error(Exception("Post couldn't be deleted"), false))
+            emit(ResultData.Error(Exception("Post couldn't be updated"), false))
             return@flow
         }
         val mapPostUpdate = mapOf(
+            "postID" to post.postId,
             "text" to post.text,
-            "title" to post.title
+            "title" to post.title,
+            "postDocumentUID" to postDocumentUID
         )
 
-        val postDocumentReference = firebaseSource.db
-            .collection(firebasePath.posts_col).document(postDocumentUID)
-            .collection(firebasePath.user_posts).document(post.postId)
-
-
+        var exception = Exception("There was an error in our servers")
         var postUpdated = false
-        postDocumentReference.update(mapPostUpdate)
-            .addOnSuccessListener { postUpdated = true }
-            .await()
+
+        firebaseSource.functions
+            .getHttpsCallable("updatePost")
+            .call(mapPostUpdate)
+            .continueWith { task ->
+                try {
+                    if (task.isSuccessful) {
+                        val resultTask = task.result
+                            ?: throw Exception("There was an error when trying to update the post")
+
+                        postUpdated = resultTask.data as Boolean
+                    } else {
+                        exception = task.exception
+                            ?: throw Exception("There was an error when trying to update the post")
+                    }
+                } catch (e: Exception) {
+                    exception = e
+                }
+            }.await()
+
+        if (!postUpdated) {
+            emit(ResultData.Error(exception))
+            return@flow
+        }
 
         emit(ResultData.Success(postUpdated))
+
+        //Update post from client
+//        val postDocumentReference = firebaseSource.db
+//            .collection(firebasePath.posts_col).document(postDocumentUID)
+//            .collection(firebasePath.user_posts).document(post.postId)
+
+
+//        postDocumentReference.update(mapPostUpdate)
+//            .addOnSuccessListener { postUpdated = true }
+//            .await()
     }
 
     suspend fun getPost(reportedPost: ReportPost): Flow<ResultData<Post>> = flow {
