@@ -54,6 +54,10 @@ class MainActivity : AppCompatActivity() {
                 displayBottomNavigation(true)
             }
         }
+
+        bottom_navigation.setOnNavigationItemReselectedListener {
+            //Don't create re-create the fragment once you are in that
+        }
     }
 
     fun displayBottomNavigation(display: Boolean) {

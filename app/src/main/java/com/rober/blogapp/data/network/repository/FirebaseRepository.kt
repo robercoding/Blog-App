@@ -52,6 +52,9 @@ constructor(
     suspend fun signUpWithEmail(email: String, password: String, name: String): Flow<ResultAuth> =
         firebaseAuthManager.signUpWithEmail(email, password, name)
 
+    suspend fun signUpWithEmailCloud(email: String, password: String, name: String): Flow<ResultAuth> =
+        firebaseAuthManager.signUpWithEmailCloud(email, password, name)
+
     suspend fun checkIfEmailAlreadyExists(email: String): Flow<ResultAuth> =
         firebaseAuthManager.checkIfEmailAlreadyExists(email)
 

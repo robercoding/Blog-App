@@ -93,7 +93,7 @@ constructor(
     fun setRegisterIntention(event: RegisterFragmentEvent) {
         when (event) {
             is RegisterFragmentEvent.SignUp -> {
-                signUpWithEmail(event.username, event.email, event.password)
+                signUpWithEmailCloud(event.username, event.email, event.password)
             }
 
             is RegisterFragmentEvent.LogIn -> {
@@ -110,6 +110,15 @@ constructor(
                 event.isPasswordLengthOk,
                 event.isPasswordRepeatOk
             )
+        }
+    }
+
+    private fun signUpWithEmailCloud(username: String, email: String, password: String){
+        viewModelScope.launch {
+            firebaseRepository.signUpWithEmailCloud(email, password, username)
+                .collect {
+
+                }
         }
     }
 

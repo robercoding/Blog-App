@@ -1,7 +1,9 @@
 package com.rober.blogapp.data.network.firebase
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.entity.User
@@ -108,6 +110,53 @@ class FirebaseAuthManager @Inject constructor(
         val resultAuth = login(email, password)
         emit(resultAuth)
     }
+
+    suspend fun signUpWithEmailCloud(email: String, password: String, username: String): Flow<ResultAuth> =
+        flow {
+
+            val mapSignUp = hashMapOf(
+                "username" to username,
+                "email" to email,
+                "password" to password
+            )
+
+
+            var exception = Exception()
+            var resultSignUp = false
+            firebaseSource.functions
+                .getHttpsCallable("signUpWithEmail")
+                .call(mapSignUp)
+                .continueWith { task ->
+                    try {
+                        if (task.isSuccessful) {
+                            Log.i("SeeSignUp", "Successful")
+
+                            val result = task.result ?: throw Exception("There isn't a result")
+
+                            resultSignUp = result.data as Boolean
+                            Log.i("SeeSignUp", "After resultBoolean ${resultSignUp}")
+
+                        } else {
+                            Log.i("SeeSignUp", "NOT SUCCESSFUL")
+                            Log.i("SeeSignUp", "Exception ${task.exception}")
+                            val e = task.exception
+                            if (e is FirebaseFunctionsException) throw Exception(e.message)
+                        }
+                    } catch (e: Exception) {
+                        exception = e
+                        return@continueWith
+                    }
+                }.await()
+
+            Log.i("SeeSignUp", "Finished, resultBoolean = $resultSignUp")
+
+            if (resultSignUp) {
+                emit(ResultAuth.Success)
+            } else {
+                Log.i("SeeSignUp", "Exception = ${exception.message}")
+                emit(ResultAuth.Error(exception))
+            }
+        }
 
     suspend fun signUpWithEmail(email: String, password: String, username: String): Flow<ResultAuth> = flow {
         emit(ResultAuth.Loading)
