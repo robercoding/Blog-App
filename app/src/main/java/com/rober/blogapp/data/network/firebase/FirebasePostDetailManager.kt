@@ -82,16 +82,10 @@ class FirebasePostDetailManager @Inject constructor(
 
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = flow {
         emit(ResultData.Loading)
-//        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
         val currentUserId = firebaseSource.userId
 
-        if(currentUserId.isEmpty())
+        if (currentUserId.isEmpty())
             throw Exception("Couldn't get userId in function deletePost")
-
-//        if (postDocumentUID == null) {
-//            emit(ResultData.Error(Exception("Post couldn't be deleted"), false))
-//            return@flow
-//        }
 
         val postDocumentReference = firebaseSource.db.collection(firebasePath.posts_col)
             .document(currentUserId)
@@ -113,18 +107,10 @@ class FirebasePostDetailManager @Inject constructor(
     }
 
     suspend fun updateEditedPost(post: Post): Flow<ResultData<Boolean>> = flow {
-        val user = firebaseSource.user
-//        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
         val currentUserId = firebaseSource.userId
 
-        if(currentUserId.isEmpty())
+        if (currentUserId.isEmpty())
             throw Exception("Couldn't get userId in function updateEditedPost")
-
-
-//        if (postDocumentUID == null || user == null) {
-//            emit(ResultData.Error(Exception("Post couldn't be updated"), false))
-//            return@flow
-//        }
 
         val mapPostUpdate = mapOf(
             "postID" to post.postId,
@@ -174,17 +160,9 @@ class FirebasePostDetailManager @Inject constructor(
     }
 
     suspend fun getPost(reportedPost: ReportPost): Flow<ResultData<Post>> = flow {
-//        val postsDocumentUID =
-//            firebaseSource.getUserDocumentUID(reportedPost.userIdOwnerReportedPost)?.postsDocumentUid
-//
-//        if (postsDocumentUID == null) {
-//            emit(ResultData.Error(Exception("There was an error with the user"), null))
-//            return@flow
-//        }
-
         val currentUserId = firebaseSource.userId
 
-        if(currentUserId.isEmpty())
+        if (currentUserId.isEmpty())
             throw Exception("Couldn't get userId in function deletePost")
 
         val postDocument = firebaseSource.db

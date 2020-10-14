@@ -27,7 +27,6 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     var user: User? = null
     var username = ""
     var userId = ""
-//    var userDocumentUID: UserDocumentUID? = null
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
     var listPostsDeleted = mutableListOf<Post>()
@@ -85,37 +84,8 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
-//    suspend fun setCurrentUserDocumentsUID() {
-//        if (user == null)
-//            return
-//
-//        try {
-//            val userDocumentsRef =
-//                db.collection(firebasePath.user_documents_uid).whereEqualTo("username", user!!.username)
-//
-//            userDocumentsRef
-//                .get()
-//                .addOnSuccessListener { querySnapshot ->
-//                    if (!querySnapshot.isEmpty) {
-//                        val listUserDocumentsUID = querySnapshot.toObjects(UserDocumentUID::class.java)
-//                        when (listUserDocumentsUID.size) {
-//                            1 -> userDocumentUID = listUserDocumentsUID[0]
-//                            else -> throw Exception("Something went wrong when getting the documents UID")
-//                        }
-//                    }
-//                }.await()
-//        } catch (e: Exception) {
-//
-//        }
-//
-//        Log.i("UserDocumentsUID", "$userDocumentUID")
-//    }
-
     suspend fun setCurrentFollowing() {
-//        if (userDocumentUID == null)
-//            return
-
-        if(userId.isEmpty())
+        if (userId.isEmpty())
             return
 
         try {
@@ -134,9 +104,6 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     }
 
     suspend fun setCurrentFollower() {
-//        if (userDocumentUID == null)
-//            return
-
         try {
             val followerRef =
                 db.collection(firebasePath.follower_col).document(userId)
@@ -151,23 +118,6 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
             Log.i(TAG, "$e")
         }
     }
-
-//    suspend fun getUserDocumentUID(userUID: String): UserDocumentUID? {
-//        var userDocumentUID: UserDocumentUID? = null
-//        val userIDUserDocumentUID =
-//            db.collection(firebasePath.user_documents_uid).whereEqualTo("userUid", userUID)
-//
-//        userIDUserDocumentUID
-//            .get()
-//            .addOnSuccessListener { documents ->
-//                for (document in documents) {
-//                    userDocumentUID = document.toObject(UserDocumentUID::class.java)
-//                }
-//            }.await()
-//
-//        return userDocumentUID
-//    }
-
 
     fun getCurrentUser(): User {
         user?.let {

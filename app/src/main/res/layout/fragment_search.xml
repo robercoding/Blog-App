@@ -45,11 +45,11 @@
                         android:id="@+id/search_toolbar_profile_image"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
+                        android:src="@drawable/user_profile"
                         android:visibility="visible"
                         app:civ_border_color="@color/blueTwitter"
                         app:civ_border_width="2dp" />
                 </com.andexert.library.RippleView>
-
 
                 <ImageView
                     android:id="@+id/search_arrow_back"

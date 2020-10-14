@@ -71,12 +71,6 @@ class FirebaseSettingsManager @Inject constructor(
     }
 
     fun getTotalNumberPosts(user: User): Flow<ResultData<Int>> = flow {
-//        val postsDocumentUID = firebaseSource.getUserDocumentUID(user.userId)?.postsDocumentUid
-
-//        if (postsDocumentUID == null) {
-//            emit(ResultData.Error(Exception("Sorry, there was an error in our servers"), 0))
-//            return@flow
-//        }
 
         val countPostsDocumentReference =
             firebaseSource.db.collection(firebasePath.posts_col).document(user.userId)
@@ -96,6 +90,5 @@ class FirebaseSettingsManager @Inject constructor(
         } ?: kotlin.run {
             emit(ResultData.Error(Exception("There was an error in our servers"), 0))
         }
-
     }
 }

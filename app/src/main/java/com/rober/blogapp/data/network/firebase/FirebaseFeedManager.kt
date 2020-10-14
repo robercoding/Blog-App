@@ -6,7 +6,6 @@ import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.Following
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.entity.UserDocumentUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -179,16 +178,6 @@ constructor
         dateLessThanInit: Long?,
         dateGreaterThanInit: Long?
     ): List<Post> {
-//        Log.i("CheckFollowing", "DateLess = $dateLessThanInit and $dateGreaterThanInit")
-//        var followingDocumentUID = UserDocumentUID()
-//        if (followingId == user.userId)
-//            firebaseSource.userDocumentUID?.run { followingDocumentUID = this }!!
-//        else
-//            followingDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
-//
-//        if (followingDocumentUID.userUid == "")
-//            return emptyList()
-
         return if (dateLessThanInit != null && dateGreaterThanInit != null)
             firebaseSource.db
                 .collection(firebasePath.posts_col)
@@ -274,14 +263,6 @@ constructor
         followingId: String,
         dateGreater: Long?
     ): List<Post> {
-//        val followingUserDocumentUID: UserDocumentUID?
-
-//        if (followingId != user.userId) {
-//            followingUserDocumentUID = getUserDocumentUID(followingId) ?: return emptyList()
-//        } else {
-//            followingUserDocumentUID = firebaseSource.userDocumentUID?.run { this } ?: return emptyList()
-//        }
-
         val currentUserId = firebaseSource.userId
 
         if (currentUserId.isEmpty())
@@ -442,19 +423,7 @@ constructor
             emit(ResultData.Success(listToReturn))
         }
 
-//    private suspend fun getFollowingPostsByDatee(followingId: String): List<Post> {
-//        return firebaseSource.db.collection("posts/${followingId}/user_posts")
-//            .whereGreaterThan("createdAt", dateGreaterThanEpochSeconds!!)
-//            .whereLessThan("createdAt", dateLessThanEpochSeconds!!)
-//            .get()
-//            .await()
-//            .toObjects(Post::class.java)
-//    }
-
     private suspend fun getUserFollowings(): List<Following> {
-//        if (firebaseSource.userDocumentUID == null)
-//            return emptyList()
-
         val currentUserId = firebaseSource.userId
 
         if (currentUserId.isEmpty())
@@ -506,20 +475,11 @@ constructor
 
     //Get Following object from firestore and add local list following
     private suspend fun addFollowingToSavedListFollowing(followingUserUID: String) {
-//        val followingDocumentUID = getUserDocumentUID(followingUserUID) ?: return
-
         val currentUserId = firebaseSource.userId
 
         if (currentUserId.isEmpty())
             throw Exception("userId is empty, couldn't get addFollowingToSavedListFollowing")
-//
-//        var followingDocumentUID = ""
-//        firebaseSource.userDocumentUID?.followingDocumentUid?.also { tempFollowingDocumentUID ->
-//            followingDocumentUID = tempFollowingDocumentUID
-//        }
-//        if (followingDocumentUID.isEmpty()) {
-//            return
-//        }
+
         var followingToSave: Following? = null
 
         firebaseSource.db.collection(firebasePath.following_col).document(currentUserId)
@@ -560,10 +520,6 @@ constructor
     private fun hasUserChangedHisUsername(): Boolean {
         return firebaseSource.userChangedUsername
     }
-
-//    private suspend fun getUserDocumentUID(userID: String): UserDocumentUID? {
-//        return firebaseSource.getUserDocumentUID(userID)
-//    }
 
     //When username change it updates local saved posts
     private fun changeHashMapPostsUsername() {

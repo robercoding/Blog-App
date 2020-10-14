@@ -26,6 +26,8 @@ constructor(
     val authState: LiveData<AuthState>
         get() = _authState
 
+    var alreadySigningUp = false
+
     init {
         viewModelScope.launch {
             firebaseRepository.signOut()
@@ -113,58 +115,12 @@ constructor(
         }
     }
 
-    private fun signUpWithEmailCloud(username: String, email: String, password: String){
+    private fun signUpWithEmailCloud(username: String, email: String, password: String) {
+        if (alreadySigningUp)
+            return
+
         viewModelScope.launch {
             firebaseRepository.signUpWithEmailCloud(email, password, username)
-                .collect {
-
-                }
-        }
-    }
-
-    private fun signUpWithEmail(username: String, email: String, password: String) {
-        viewModelScope.launch {
-            var isUsernameAvailable = false
-            firebaseRepository.checkIfUsernameAvailable(username)
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultData.Success -> isUsernameAvailable = resultData.data!!
-                    }
-                }
-
-            if (!isUsernameAvailable) {
-                _authState.value =
-                    AuthState.SetErrorFields(
-                        "Sorry, username is not available, try with other username.",
-                        "",
-                        "",
-                        ""
-                    )
-                return@launch
-            }
-
-            var isEmailAvailable = false
-            Log.i(TAG, "CheckEmailAvailable Now")
-            firebaseRepository.checkIfEmailAlreadyExists(email)
-                .collect { resultData ->
-                    when (resultData) {
-                        is ResultAuth.Success -> isEmailAvailable = true
-                        is ResultAuth.Error -> isEmailAvailable = false
-                    }
-                }
-            Log.i(TAG, "IsEmailAvailable?= $isEmailAvailable")
-            if (!isEmailAvailable) {
-                _authState.value =
-                    AuthState.SetErrorFields(
-                        "",
-                        "Sorry, email is not available, try with other email.",
-                        "",
-                        ""
-                    )
-                return@launch
-            }
-
-            firebaseRepository.signUpWithEmail(email, password, username)
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Loading -> {
@@ -172,15 +128,76 @@ constructor(
                         }
                         is ResultAuth.Success -> {
                             _authState.value = AuthState.SuccessRegister(email, password)
-
+                            alreadySigningUp = false
                         }
                         is ResultAuth.Error -> {
                             _authState.value = AuthState.Error(resultAuth.exception.message)
+                            alreadySigningUp = false
                         }
                     }
                 }
         }
     }
+
+//    private fun signUpWithEmail(username: String, email: String, password: String) {
+//        viewModelScope.launch {
+//            var isUsernameAvailable = false
+//            firebaseRepository.checkIfUsernameAvailable(username)
+//                .collect { resultData ->
+//                    when (resultData) {
+//                        is ResultData.Success -> isUsernameAvailable = resultData.data!!
+//                    }
+//                }
+//
+//            if (!isUsernameAvailable) {
+//                _authState.value =
+//                    AuthState.SetErrorFields(
+//                        "Sorry, username is not available, try with other username.",
+//                        "",
+//                        "",
+//                        ""
+//                    )
+//                return@launch
+//            }
+//
+//            var isEmailAvailable = false
+//            Log.i(TAG, "CheckEmailAvailable Now")
+//            firebaseRepository.checkIfEmailAlreadyExists(email)
+//                .collect { resultData ->
+//                    when (resultData) {
+//                        is ResultAuth.Success -> isEmailAvailable = true
+//                        is ResultAuth.Error -> isEmailAvailable = false
+//                    }
+//                }
+//            Log.i(TAG, "IsEmailAvailable?= $isEmailAvailable")
+//            if (!isEmailAvailable) {
+//                _authState.value =
+//                    AuthState.SetErrorFields(
+//                        "",
+//                        "Sorry, email is not available, try with other email.",
+//                        "",
+//                        ""
+//                    )
+//                return@launch
+//            }
+//
+//            firebaseRepository.signUpWithEmail(email, password, username)
+//                .collect { resultAuth ->
+//                    when (resultAuth) {
+//                        is ResultAuth.Loading -> {
+//                            _authState.value = AuthState.Registering
+//                        }
+//                        is ResultAuth.Success -> {
+//                            _authState.value = AuthState.SuccessRegister(email, password)
+//
+//                        }
+//                        is ResultAuth.Error -> {
+//                            _authState.value = AuthState.Error(resultAuth.exception.message)
+//                        }
+//                    }
+//                }
+//        }
+//    }
 
     private fun setErrorFields(
         isUsernameLengthOk: Boolean,

@@ -24,7 +24,6 @@ class FirebaseAuthManager @Inject constructor(
 
     suspend fun setCurrentUser() {
         firebaseSource.setCurrentUser()
-//        firebaseSource.setCurrentUserDocumentsUID()
         firebaseSource.setCurrentFollowing()
         firebaseSource.setCurrentFollower()
     }
@@ -55,14 +54,6 @@ class FirebaseAuthManager @Inject constructor(
 
         setCurrentUser()
 
-//        if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null || firebaseSource.userDocumentUID == null)) {
-//            var tries = 0
-//            while (firebaseSource.username.isEmpty() && tries < 20) {
-//                kotlinx.coroutines.delay(200)
-//                tries += 1
-//            }
-//        }
-
         if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null)) {
             var tries = 0
             while (firebaseSource.username.isEmpty() && tries < 20) {
@@ -71,15 +62,15 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-        if (!loggedIn) {
-            return ResultAuth.Error(exception)
+        return if (!loggedIn) {
+            ResultAuth.Error(exception)
         } else if (loggedIn && firebaseSource.username.isEmpty()) {
             exception = Exception("There was an issue with our servers")
-            return ResultAuth.Error(exception)
+            ResultAuth.Error(exception)
         } else if (loggedIn && firebaseSource.username.isNotEmpty()) {
-            return ResultAuth.Success
+            ResultAuth.Success
         } else {
-            return ResultAuth.Error(Exception(exception))
+            ResultAuth.Error(Exception(exception))
         }
     }
 
@@ -139,16 +130,11 @@ class FirebaseAuthManager @Inject constructor(
             .continueWith { task ->
                 try {
                     if (task.isSuccessful) {
-                        Log.i("SeeSignUp", "Successful")
-
                         val result = task.result ?: throw Exception("There isn't a result")
 
                         resultSignUp = result.data as Boolean
-                        Log.i("SeeSignUp", "After resultBoolean ${resultSignUp}")
 
                     } else {
-                        Log.i("SeeSignUp", "NOT SUCCESSFUL")
-                        Log.i("SeeSignUp", "Exception ${task.exception}")
                         val e = task.exception
                         if (e is FirebaseFunctionsException) throw Exception(e.message)
                     }
@@ -158,12 +144,10 @@ class FirebaseAuthManager @Inject constructor(
                 }
             }.await()
 
-        Log.i("SeeSignUp", "Finished, resultBoolean = $resultSignUp")
 
         if (resultSignUp) {
             emit(ResultAuth.Success)
         } else {
-            Log.i("SeeSignUp", "Exception = ${exception.message}")
             emit(ResultAuth.Error(exception))
         }
     }
@@ -228,8 +212,6 @@ class FirebaseAuthManager @Inject constructor(
 
         if (!saveUser(uid, username)) return false
 
-//        if (!createUserDocumentsUID(username, uid)) return false
-
         return true
     }
 
@@ -267,42 +249,6 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-//    private suspend fun createUserDocumentsUID(username: String, uid: String): Boolean {
-//        val usernameHashMap = hashMapOf("username" to username)
-//        //Create document for the new user
-//        val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
-//        val followingDocumentUidDocRef = firebaseSource.db.collection("following").document()
-//        val followerDocumentUidDocRef = firebaseSource.db.collection("follower").document()
-//        //Set the username who pertains the documents
-//        postDocumentUidDocRef.set(usernameHashMap).await()
-//        followingDocumentUidDocRef.set(usernameHashMap).await()
-//        followerDocumentUidDocRef.set(usernameHashMap).await()
-//
-//        //Create object with the ID generated and store them
-//        val userDocumentUID =
-//            UserDocumentUID(
-//                username,
-//                postDocumentUidDocRef.id,
-//                followingDocumentUidDocRef.id,
-//                followerDocumentUidDocRef.id,
-//                uid
-//            )
-//        val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
-//
-//        var success = false
-//        userDocumentsUidDocRef
-//            .set(userDocumentUID)
-//            .addOnSuccessListener {
-//                success = true
-//            }
-//            .addOnFailureListener {
-//                success = false
-//            }.await()
-//
-//        return success
-//    }
-
-
     private suspend fun checkIfNameIsAlreadyPicked(name: String): Boolean {
         val usersCollection = firebaseSource.db.collection("users")
 
@@ -329,21 +275,4 @@ class FirebaseAuthManager @Inject constructor(
         }
         return false
     }
-
-//    private fun checkIfUserAlreadyLoggedIn(): Boolean{
-//        val user = firebaseSource.userAuth
-//        return checkUser(user)
-//    }
-
-    //Modify method to return ResultAuth
-//    suspend fun getCurrentUser(): User {
-//        var user: User? = null
-//        val docRef = firebaseSource.db.collection("users").document(firebaseSource.username!!)
-//        user = docRef
-//            .get()
-//            .await()
-//            .toObject(User::class.java)
-//
-//        return user!!
-//    }
 }
