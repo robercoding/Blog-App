@@ -1,97 +1,50 @@
 package com.rober.blogapp.ui.auth.login
 
-import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
-import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.ui.auth.AuthState
+import com.rober.blogapp.ui.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_login.*
 
 @AndroidEntryPoint
-class LoginFragment : Fragment() {
+class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewModel>(R.layout.fragment_login) {
 
-    private val viewModel: AuthViewModel by viewModels()
+    override val viewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        observeViewModel()
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-
-        activateListeners()
-
-    }
-
-
-    private fun activateListeners() {
-        btnLogin.setOnClickListener {
-            login()
-        }
-        btnRegisterEmail.setOnClickListener {
-            goToRegisterFragment()
-        }
-    }
-
-    private fun observeViewModel() {
-        viewModel.authState.observe(viewLifecycleOwner, Observer { loginAuthState ->
-            render(loginAuthState)
-        })
-    }
-
-    private fun render(state: AuthState) {
-        when (state) {
-            is AuthState.CheckingUserLoggedIn -> {
-                displayProgressBar(true)
+    override fun render(viewState: LoginState) {
+        when (viewState) {
+            is LoginState.CheckingUserLoggedIn -> {
+                displayProgressBar(login_progress_bar, true)
             }
-            is AuthState.Logging -> {
-                displayProgressBar(true)
+            is LoginState.Logging -> {
+                displayProgressBar(login_progress_bar, true)
             }
-            is AuthState.UserLoggedIn -> {
-                displayProgressBar(false)
+            is LoginState.UserLoggedIn -> {
+                displayProgressBar(login_progress_bar, false)
                 hideKeyBoard()
                 goToMainFragments()
             }
-            is AuthState.UserLogout -> {
-                displayProgressBar(false)
+            is LoginState.UserLogout -> {
+                displayProgressBar(login_progress_bar, false)
                 Snackbar.make(requireView(), "Logout", Snackbar.LENGTH_SHORT).show()
             }
-            is AuthState.Error -> {
-                displayProgressBar(false)
-                errorMessage(state.message)
+            is LoginState.Error -> {
+                displayProgressBar(login_progress_bar, false)
+                displayToast(viewState.message)
             }
-            is AuthState.Idle -> {
+            is LoginState.Idle -> {
 
-                displayProgressBar(false)
+                displayProgressBar(login_progress_bar, false)
 //                Snackbar.make(requireView(), "Idle", Snackbar.LENGTH_SHORT).show()
             }
         }
@@ -106,39 +59,29 @@ class LoginFragment : Fragment() {
         }
 
         if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            viewModel.setLoginIntention(LoginFragmentEvent.LoginByEmail(email, password))
+            viewModel.setIntention(LoginFragmentEvent.LoginByEmail(email, password))
         } else {
-            viewModel.setLoginIntention(LoginFragmentEvent.LoginByUsername(email, password))
+            viewModel.setIntention(LoginFragmentEvent.LoginByUsername(email, password))
         }
     }
 
     private fun goToMainFragments() {
         val navController: NavController = findNavController()
-
         navController.navigate(R.id.action_loginFragment_to_feedFragment)
     }
 
     private fun goToRegisterFragment() {
         val navController: NavController = findNavController()
-
         navController.navigate(R.id.action_loginFragment_to_registerFragment)
     }
 
-    fun errorMessage(message: String?) {
-        if (message != null)
-            Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
-        else
-            Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
-    }
-
-    fun displayProgressBar(isDisplayed: Boolean) {
-        progress_bar.visibility = if (isDisplayed) View.VISIBLE else View.GONE
-    }
-
-    private fun hideKeyBoard() {
-        val imm: InputMethodManager =
-            context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+    override fun setupListeners() {
+        btnLogin.setOnClickListener {
+            login()
+        }
+        btnRegisterEmail.setOnClickListener {
+            goToRegisterFragment()
+        }
     }
 }
 

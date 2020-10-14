@@ -84,9 +84,11 @@ class SearchFragment :
     }
 
     private fun setUserDetails(user: User) {
-        Glide.with(requireView())
-            .load(user.profileImageUrl)
-            .into(search_toolbar_profile_image)
+        if (user.profileImageUrl.isNotEmpty()) {
+            Glide.with(requireView())
+                .load(user.profileImageUrl)
+                .into(search_toolbar_profile_image)
+        }
     }
 
     private fun recyclerAdapterApply() {

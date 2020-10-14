@@ -1,34 +1,22 @@
 package com.rober.blogapp.ui.auth.register
 
-import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.rober.blogapp.R
-import com.rober.blogapp.ui.auth.AuthViewModel
-import com.rober.blogapp.ui.auth.AuthState
-import com.rober.blogapp.util.ColorUtils
+import com.rober.blogapp.ui.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_register.*
-import kotlinx.android.synthetic.main.fragment_register.progress_bar
 
 @AndroidEntryPoint
-class RegisterFragment : Fragment() {
+class RegisterFragment :
+    BaseFragment<RegisterState, RegisterFragmentEvent, RegisterViewModel>(R.layout.fragment_register) {
 
-    private val viewModel: AuthViewModel by viewModels()
+    override val viewModel: RegisterViewModel by viewModels()
     private lateinit var setErrorFieldsEvent: RegisterFragmentEvent.SetErrorFields
     private var username = ""
     private var email = ""
@@ -36,72 +24,48 @@ class RegisterFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_register, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupListeners()
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        observeViewModel()
-    }
-
-    private fun observeViewModel() {
-        viewModel.authState.observe(viewLifecycleOwner, Observer { authState ->
-            render(authState)
-        })
-    }
-
-    private fun render(authState: AuthState) {
-        when (authState) {
-            is AuthState.Registering -> {
-                displayProgressBar(true)
+    override fun render(viewState: RegisterState) {
+        when (viewState) {
+            is RegisterState.Registering -> {
+                displayProgressBar(register_progress_bar, true)
             }
-            is AuthState.SuccessRegister -> {
-                displayProgressBar(false)
+            is RegisterState.SuccessRegister -> {
+                displayProgressBar(register_progress_bar, false)
 //                Toast.makeText(activity, "Succesfully registered", Toast.LENGTH_SHORT).show()
-                viewModel.setRegisterIntention(RegisterFragmentEvent.LogIn(authState.email, authState.password))
+                viewModel.setIntention(RegisterFragmentEvent.Login(viewState.email, viewState.password))
             }
 
-            is AuthState.CheckFields -> {
-                displayProgressBar(true)
+            is RegisterState.CheckFields -> {
+                displayProgressBar(register_progress_bar, true)
                 if (validateFields())
-                    viewModel.setRegisterIntention(RegisterFragmentEvent.SignUp(username, email, password))
+                    viewModel.setIntention(RegisterFragmentEvent.SignUp(username, email, password))
                 else
-                    viewModel.setRegisterIntention(setErrorFieldsEvent)
+                    viewModel.setIntention(setErrorFieldsEvent)
 
             }
 
-            is AuthState.UserLoggedIn -> {
-                goToMainFragments()
+            is RegisterState.UserLoggedIn -> {
+                goToFeedFragment()
                 hideKeyBoard()
             }
 
-            is AuthState.SetErrorFields -> {
-                displayProgressBar(false)
+            is RegisterState.SetErrorFields -> {
+                displayProgressBar(register_progress_bar, false)
                 cleanErrorFields()
                 setErrorFields(
-                    authState.usernameError,
-                    authState.emailError,
-                    authState.passwordLengthError,
-                    authState.passwordRepeatError
+                    viewState.usernameError,
+                    viewState.emailError,
+                    viewState.passwordLengthError,
+                    viewState.passwordRepeatError
                 )
             }
 
-            is AuthState.Error -> {
-                displayProgressBar(false)
-                errorMessage(authState.message)
+            is RegisterState.Error -> {
+                displayProgressBar(register_progress_bar, false)
+                displayToast(viewState.message)
             }
         }
     }
@@ -111,7 +75,12 @@ class RegisterFragment : Fragment() {
         email = register_input_text_email.text.toString()
         password = register_input_text_password.text.toString()
         val passwordRepeat = register_input_text_password_repeat.text.toString()
-        setErrorFieldsEvent = RegisterFragmentEvent.SetErrorFields(true, true, true, true)
+        setErrorFieldsEvent = RegisterFragmentEvent.SetErrorFields(
+            isUsernameLengthOk = true,
+            isEmailOk = true,
+            isPasswordLengthOk = true,
+            isPasswordRepeatOk = true
+        )
 
         if (username.length < 5 || username.length > 15) {
             setErrorFieldsEvent.isUsernameLengthOk = false
@@ -124,7 +93,7 @@ class RegisterFragment : Fragment() {
         if (password.length <= 6) {
             setErrorFieldsEvent.isPasswordLengthOk = false
         }
-        if (!passwordRepeat.equals(password)) {
+        if (passwordRepeat != password) {
             setErrorFieldsEvent.isPasswordRepeatOk = false
         }
 
@@ -139,7 +108,6 @@ class RegisterFragment : Fragment() {
     ) {
         if (usernameError.isNotEmpty()) {
             register_input_layout_username.helperText = usernameError
-
         }
 
         if (emailError.isNotEmpty()) {
@@ -173,30 +141,14 @@ class RegisterFragment : Fragment() {
         inputLayout.helperText = ""
     }
 
-    private fun goToMainFragments() {
+    private fun goToFeedFragment() {
         val navController: NavController = findNavController()
-        navController.navigate(R.id.feedFragment)
+        navController.navigate(R.id.action_registerFragment_to_feedFragment)
     }
 
-    fun displayProgressBar(isDisplayed: Boolean) {
-        progress_bar.visibility = if (isDisplayed) View.VISIBLE else View.GONE
-    }
-
-    fun errorMessage(message: String?) {
-        if (message != null)
-            Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
-        else
-            Snackbar.make(requireView(), "There was an error in the server", Snackbar.LENGTH_SHORT).show()
-    }
-
-    private fun hideKeyBoard() {
-        val imm: InputMethodManager = context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view?.windowToken, 0)
-    }
-
-    private fun setupListeners() {
+    override fun setupListeners() {
         btnSignUp.setOnClickListener {
-            viewModel.setRegisterIntention(RegisterFragmentEvent.CheckFields)
+            viewModel.setIntention(RegisterFragmentEvent.CheckFields)
         }
 
         register_input_text_username.addTextChangedListener {
@@ -225,7 +177,7 @@ class RegisterFragment : Fragment() {
 
 sealed class RegisterFragmentEvent {
     data class SignUp(val username: String, val email: String, val password: String) : RegisterFragmentEvent()
-    data class LogIn(val email: String, val password: String) : RegisterFragmentEvent()
+    data class Login(val email: String, val password: String) : RegisterFragmentEvent()
     data class SetErrorFields(
         var isUsernameLengthOk: Boolean,
         var isEmailOk: Boolean,

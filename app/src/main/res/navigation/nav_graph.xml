@@ -136,7 +136,8 @@
         tools:layout="@layout/fragment_register">
         <action
             android:id="@+id/action_registerFragment_to_feedFragment"
-            app:destination="@id/feedFragment" />
+            app:destination="@id/feedFragment"
+            app:popUpTo="@id/nav_graph" />
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment" />

@@ -90,7 +90,7 @@ class FirebaseAuthManager @Inject constructor(
             .addOnSuccessListener { querySnapshot ->
                 try {
                     when (querySnapshot.size()) {
-                        0 -> throw Exception("We couldn't an account with that username")
+                        0 -> throw Exception("We couldn't find an account with that username")
                         1 -> email = querySnapshot.toObjects(Username::class.java)[0].email
                         else -> throw Exception("Sorry, there was an when trying to get the username")
                     }
