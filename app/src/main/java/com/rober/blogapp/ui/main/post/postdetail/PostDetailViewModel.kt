@@ -66,7 +66,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                 val currentUser = getCurrentUser()
                 viewModelScope.launch {
                     post?.also { tempPost ->
-                        if (tempPost.userCreatorId == currentUser.user_id) {
+                        if (tempPost.userCreatorId == currentUser.userId) {
                             loadPostOptionsFromCurrentUser()
                         } else {
                             loadPostOptionsFromOtherUser()
@@ -291,7 +291,7 @@ class PostDetailViewModel @ViewModelInject constructor(
     }
 
     private fun redirectToEditPostFragment() {
-        if (userPost?.user_id != post?.userCreatorId) {
+        if (userPost?.userId != post?.userCreatorId) {
             viewState = PostDetailState.ErrorExecuteOption
             return
         }

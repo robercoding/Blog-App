@@ -102,7 +102,7 @@ class FirebaseProfileEditManager @Inject constructor(
             "profileImageUrl" to newUser.profileImageUrl,
             "backgroundImageUrl" to newUser.backgroundImageUrl,
             "lastDateUsernameChange" to newUser.lastDateUsernameChange,
-            "userId" to newUser.user_id
+            "userId" to newUser.userId
         )
 
         //Change it on server-side

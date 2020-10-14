@@ -14,7 +14,7 @@ sealed class FeedState {
     object LoadMessageZeroPosts: FeedState()
 
     data class GoToPostDetailsFragment(val post: Post): FeedState()
-    data class GoToProfileDetailsFragment(val user_id: String): FeedState()
+    data class GoToProfileDetailsFragment(val userId: String): FeedState()
 
     object Loading: FeedState()
     object LoadingMorePosts: FeedState()

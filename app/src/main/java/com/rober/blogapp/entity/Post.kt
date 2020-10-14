@@ -18,7 +18,7 @@ data class Post (
     var title: String,
     var text: String,
     var userCreatorId: String,
-    val created_at: Long,
+    val createdAt: Long,
     var likes: Int
 ) : Parcelable {
 

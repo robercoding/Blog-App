@@ -19,21 +19,26 @@ class FirebasePostAddManager
 constructor(
     private val firebaseSource: FirebaseSource
 ) {
-    private var userDocumentUID: UserDocumentUID? = null
+//    private var userDocumentUID: UserDocumentUID? = null
 
 
     suspend fun savePost(post: Post): Flow<ResultData<Unit>> = flow {
         emit(ResultData.Loading)
-        if (isUserDocumentUIDNull()) {
-            emit(ResultData.Error(Exception("User documents are null"), null))
-            return@flow
-        }
+//        if (isUserDocumentUIDNull()) {
+//            emit(ResultData.Error(Exception("User documents are null"), null))
+//            return@flow
+//        }
 
-        val userPostsDocumentUID = userDocumentUID!!.postsDocumentUid
+//        val userPostsDocumentUID = userDocumentUID!!.postsDocumentUid
+
+        val currentUserId = firebaseSource.userId
+
+        if(currentUserId.isEmpty())
+            throw Exception("Couldn't get userId in function deletePost")
 
         val user: User = firebaseSource.getCurrentUser()
 
-        if (user.user_id == "") {
+        if (user.userId == "") {
             emit(ResultData.Error(Exception("Sorry, we had a problem with your user account"), null))
             return@flow
         }
@@ -42,9 +47,8 @@ constructor(
             "postTitle" to post.title,
             "postText" to post.text,
             "postLikes" to post.likes,
-            "postCreated_at" to post.created_at,
-            "postUserCreatorId" to user.user_id,
-            "userPostsDocUid" to userPostsDocumentUID
+            "postCreated_at" to post.createdAt,
+            "postUserCreatorId" to user.userId
         )
 
         firebaseSource.functions
@@ -54,14 +58,14 @@ constructor(
         emit(ResultData.Success<Unit>())
     }
 
-    private fun isUserDocumentUIDNull(): Boolean {
-        if (userDocumentUID == null) {
-            firebaseSource.userDocumentUID?.let {
-                userDocumentUID = it
-            } ?: kotlin.run {
-                return true
-            }
-        }
-        return false
-    }
+//    private fun isUserDocumentUIDNull(): Boolean {
+//        if (userDocumentUID == null) {
+//            firebaseSource.userDocumentUID?.let {
+//                userDocumentUID = it
+//            } ?: kotlin.run {
+//                return true
+//            }
+//        }
+//        return false
+//    }
 }

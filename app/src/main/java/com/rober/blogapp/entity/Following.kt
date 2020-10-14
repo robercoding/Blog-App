@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Following(
     @PrimaryKey
-    val following_id: String
+    val followingId: String
     /*@ColumnInfo(name="user_follow_id")
     val user_follow_id: Long,
     var users: List<User>?*/

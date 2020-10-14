@@ -13,7 +13,7 @@ import kotlinx.android.parcel.Parcelize
 data class User(
     @PrimaryKey(autoGenerate = true)
     @get:Exclude val db_user_id: Long = 0,
-    val user_id: String = "",
+    val userId: String = "",
     var username: String = "",
     var biography: String = "",
     var location: String = "",

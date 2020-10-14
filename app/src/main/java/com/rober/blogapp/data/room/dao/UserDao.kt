@@ -18,8 +18,8 @@ import com.rober.blogapp.entity.User
 //    suspend fun getUsersWithBlogs(): List<UserWithBlogs>
 //
 //    @Transaction
-//    @Query("SELECT * FROM users WHERE user_id =:user_id ")
-//    suspend fun getUserWithBlogs(user_id: Long): UserWithBlogs
+//    @Query("SELECT * FROM users WHERE userId =:userId ")
+//    suspend fun getUserWithBlogs(userId: Long): UserWithBlogs
 
 //    @Delete
 //    suspend fun deleteUser(user:User): Int

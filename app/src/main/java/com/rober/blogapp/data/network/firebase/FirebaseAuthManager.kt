@@ -7,7 +7,6 @@ import com.google.firebase.functions.FirebaseFunctionsException
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.entity.UserDocumentUID
 import com.rober.blogapp.entity.Username
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -25,7 +24,7 @@ class FirebaseAuthManager @Inject constructor(
 
     suspend fun setCurrentUser() {
         firebaseSource.setCurrentUser()
-        firebaseSource.setCurrentUserDocumentsUID()
+//        firebaseSource.setCurrentUserDocumentsUID()
         firebaseSource.setCurrentFollowing()
         firebaseSource.setCurrentFollower()
     }
@@ -56,7 +55,15 @@ class FirebaseAuthManager @Inject constructor(
 
         setCurrentUser()
 
-        if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null || firebaseSource.userDocumentUID == null)) {
+//        if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null || firebaseSource.userDocumentUID == null)) {
+//            var tries = 0
+//            while (firebaseSource.username.isEmpty() && tries < 20) {
+//                kotlinx.coroutines.delay(200)
+//                tries += 1
+//            }
+//        }
+
+        if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null)) {
             var tries = 0
             while (firebaseSource.username.isEmpty() && tries < 20) {
                 kotlinx.coroutines.delay(200)
@@ -111,87 +118,91 @@ class FirebaseAuthManager @Inject constructor(
         emit(resultAuth)
     }
 
-    suspend fun signUpWithEmailCloud(email: String, password: String, username: String): Flow<ResultAuth> =
-        flow {
+    suspend fun signUpWithEmailCloud(
+        email: String,
+        password: String,
+        username: String
+    ): Flow<ResultAuth> = flow {
 
-            val mapSignUp = hashMapOf(
-                "username" to username,
-                "email" to email,
-                "password" to password
-            )
+        val mapSignUp = hashMapOf(
+            "username" to username,
+            "email" to email,
+            "password" to password
+        )
 
 
-            var exception = Exception()
-            var resultSignUp = false
-            firebaseSource.functions
-                .getHttpsCallable("signUpWithEmail")
-                .call(mapSignUp)
-                .continueWith { task ->
-                    try {
-                        if (task.isSuccessful) {
-                            Log.i("SeeSignUp", "Successful")
+        var exception = Exception()
+        var resultSignUp = false
+        firebaseSource.functions
+            .getHttpsCallable("signUpWithEmail")
+            .call(mapSignUp)
+            .continueWith { task ->
+                try {
+                    if (task.isSuccessful) {
+                        Log.i("SeeSignUp", "Successful")
 
-                            val result = task.result ?: throw Exception("There isn't a result")
+                        val result = task.result ?: throw Exception("There isn't a result")
 
-                            resultSignUp = result.data as Boolean
-                            Log.i("SeeSignUp", "After resultBoolean ${resultSignUp}")
+                        resultSignUp = result.data as Boolean
+                        Log.i("SeeSignUp", "After resultBoolean ${resultSignUp}")
 
-                        } else {
-                            Log.i("SeeSignUp", "NOT SUCCESSFUL")
-                            Log.i("SeeSignUp", "Exception ${task.exception}")
-                            val e = task.exception
-                            if (e is FirebaseFunctionsException) throw Exception(e.message)
-                        }
-                    } catch (e: Exception) {
-                        exception = e
-                        return@continueWith
+                    } else {
+                        Log.i("SeeSignUp", "NOT SUCCESSFUL")
+                        Log.i("SeeSignUp", "Exception ${task.exception}")
+                        val e = task.exception
+                        if (e is FirebaseFunctionsException) throw Exception(e.message)
                     }
-                }.await()
-
-            Log.i("SeeSignUp", "Finished, resultBoolean = $resultSignUp")
-
-            if (resultSignUp) {
-                emit(ResultAuth.Success)
-            } else {
-                Log.i("SeeSignUp", "Exception = ${exception.message}")
-                emit(ResultAuth.Error(exception))
-            }
-        }
-
-    suspend fun signUpWithEmail(email: String, password: String, username: String): Flow<ResultAuth> = flow {
-        emit(ResultAuth.Loading)
-        var createdAccount = false
-        var savedInDatabase = false
-
-        if (checkIfNameIsAlreadyPicked(username)) {
-            emit(ResultAuth.Error(Exception("Name is already in use, try other name")))
-            return@flow
-        }
-
-        try {
-            val userAuthResult = firebaseSource.auth.createUserWithEmailAndPassword(email, password)
-                .addOnSuccessListener {
-                    createdAccount = true
+                } catch (e: Exception) {
+                    exception = e
+                    return@continueWith
                 }
-                .addOnFailureListener {
-                    createdAccount = false
-                }.await()
+            }.await()
 
-            val authResultUID =
-                userAuthResult.user?.uid ?: throw Exception("Error signing up the new account")
-            val authResultEmail =
-                userAuthResult.user?.email ?: throw Exception("Error signing up the new account")
+        Log.i("SeeSignUp", "Finished, resultBoolean = $resultSignUp")
 
-            savedInDatabase = saveNewUserInDatabase(authResultUID, authResultEmail, username)
-        } catch (e: FirebaseAuthException) {
-            exception = e
-        }
-
-        if (createdAccount && savedInDatabase)
+        if (resultSignUp) {
             emit(ResultAuth.Success)
-        else
+        } else {
+            Log.i("SeeSignUp", "Exception = ${exception.message}")
             emit(ResultAuth.Error(exception))
+        }
     }
+
+    suspend fun signUpWithEmail(email: String, password: String, username: String): Flow<ResultAuth> =
+        flow {
+            emit(ResultAuth.Loading)
+            var createdAccount = false
+            var savedInDatabase = false
+
+            if (checkIfNameIsAlreadyPicked(username)) {
+                emit(ResultAuth.Error(Exception("Name is already in use, try other name")))
+                return@flow
+            }
+
+            try {
+                val userAuthResult = firebaseSource.auth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener {
+                        createdAccount = true
+                    }
+                    .addOnFailureListener {
+                        createdAccount = false
+                    }.await()
+
+                val authResultUID =
+                    userAuthResult.user?.uid ?: throw Exception("Error signing up the new account")
+                val authResultEmail =
+                    userAuthResult.user?.email ?: throw Exception("Error signing up the new account")
+
+                savedInDatabase = saveNewUserInDatabase(authResultUID, authResultEmail, username)
+            } catch (e: FirebaseAuthException) {
+                exception = e
+            }
+
+            if (createdAccount && savedInDatabase)
+                emit(ResultAuth.Success)
+            else
+                emit(ResultAuth.Error(exception))
+        }
 
     suspend fun checkIfEmailAlreadyExists(email: String): Flow<ResultAuth> = flow {
         var isNewUser = false
@@ -217,7 +228,7 @@ class FirebaseAuthManager @Inject constructor(
 
         if (!saveUser(uid, username)) return false
 
-        if (!createUserDocumentsUID(username, uid)) return false
+//        if (!createUserDocumentsUID(username, uid)) return false
 
         return true
     }
@@ -256,40 +267,40 @@ class FirebaseAuthManager @Inject constructor(
         return success
     }
 
-    private suspend fun createUserDocumentsUID(username: String, uid: String): Boolean {
-        val usernameHashMap = hashMapOf("username" to username)
-        //Create document for the new user
-        val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
-        val followingDocumentUidDocRef = firebaseSource.db.collection("following").document()
-        val followerDocumentUidDocRef = firebaseSource.db.collection("follower").document()
-        //Set the username who pertains the documents
-        postDocumentUidDocRef.set(usernameHashMap).await()
-        followingDocumentUidDocRef.set(usernameHashMap).await()
-        followerDocumentUidDocRef.set(usernameHashMap).await()
-
-        //Create object with the ID generated and store them
-        val userDocumentUID =
-            UserDocumentUID(
-                username,
-                postDocumentUidDocRef.id,
-                followingDocumentUidDocRef.id,
-                followerDocumentUidDocRef.id,
-                uid
-            )
-        val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
-
-        var success = false
-        userDocumentsUidDocRef
-            .set(userDocumentUID)
-            .addOnSuccessListener {
-                success = true
-            }
-            .addOnFailureListener {
-                success = false
-            }.await()
-
-        return success
-    }
+//    private suspend fun createUserDocumentsUID(username: String, uid: String): Boolean {
+//        val usernameHashMap = hashMapOf("username" to username)
+//        //Create document for the new user
+//        val postDocumentUidDocRef = firebaseSource.db.collection("posts").document()
+//        val followingDocumentUidDocRef = firebaseSource.db.collection("following").document()
+//        val followerDocumentUidDocRef = firebaseSource.db.collection("follower").document()
+//        //Set the username who pertains the documents
+//        postDocumentUidDocRef.set(usernameHashMap).await()
+//        followingDocumentUidDocRef.set(usernameHashMap).await()
+//        followerDocumentUidDocRef.set(usernameHashMap).await()
+//
+//        //Create object with the ID generated and store them
+//        val userDocumentUID =
+//            UserDocumentUID(
+//                username,
+//                postDocumentUidDocRef.id,
+//                followingDocumentUidDocRef.id,
+//                followerDocumentUidDocRef.id,
+//                uid
+//            )
+//        val userDocumentsUidDocRef = firebaseSource.db.collection("user_documents_uid").document()
+//
+//        var success = false
+//        userDocumentsUidDocRef
+//            .set(userDocumentUID)
+//            .addOnSuccessListener {
+//                success = true
+//            }
+//            .addOnFailureListener {
+//                success = false
+//            }.await()
+//
+//        return success
+//    }
 
 
     private suspend fun checkIfNameIsAlreadyPicked(name: String): Boolean {

@@ -135,7 +135,7 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
             }
 
             is FeedState.GoToProfileDetailsFragment -> {
-                goToProfileDetailsFragment(viewState.user_id)
+                goToProfileDetailsFragment(viewState.userId)
             }
 
             is FeedState.Loading -> {
@@ -322,9 +322,9 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
         //
     }
 
-    private fun goToProfileDetailsFragment(user_id: String) {
+    private fun goToProfileDetailsFragment(userId: String) {
         val navController = findNavController()
-        val bundleUserId = bundleOf("userId" to user_id)
+        val bundleUserId = bundleOf("userId" to userId)
         navController.navigate(R.id.action_feedFragment_to_profileFragment, bundleUserId)
     }
 

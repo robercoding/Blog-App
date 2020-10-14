@@ -173,7 +173,7 @@ class SearchFragment :
     }
 
     private fun goToProfileFragment(user: User) {
-//        val userId = listUsers[positionAdapter].user_id
+//        val userId = listUsers[positionAdapter].userId
 
         val navController = findNavController()
         val bundleUserObject = bundleOf("userObject" to user)

@@ -24,7 +24,7 @@ class FirebasePostDetailManager @Inject constructor(
             return@flow
         }
 
-        if (checkIfUserAlreadyReportedThePost(post.postId, user.user_id)) {
+        if (checkIfUserAlreadyReportedThePost(post.postId, user.userId)) {
             emit(
                 ResultData.Error(
                     Exception("Thank you for submitting a report, but you already reported this post!"),
@@ -35,10 +35,10 @@ class FirebasePostDetailManager @Inject constructor(
         }
 
         val postDocumentRef = firebaseSource.db.collection(firebasePath.reports_col)
-            .document(user.user_id).collection(firebasePath.posts_reports).document()
+            .document(user.userId).collection(firebasePath.posts_reports).document()
 
         val reportPostObject =
-            ReportPost(post.postId, post.userCreatorId, user.user_id, reportedCause, message)
+            ReportPost(post.postId, post.userCreatorId, user.userId, reportedCause, message)
         var savedReport = false
         postDocumentRef.set(reportPostObject)
             .addOnSuccessListener {
@@ -82,15 +82,19 @@ class FirebasePostDetailManager @Inject constructor(
 
     suspend fun deletePost(post: Post): Flow<ResultData<Boolean>> = flow {
         emit(ResultData.Loading)
-        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
+//        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
+        val currentUserId = firebaseSource.userId
 
-        if (postDocumentUID == null) {
-            emit(ResultData.Error(Exception("Post couldn't be deleted"), false))
-            return@flow
-        }
+        if(currentUserId.isEmpty())
+            throw Exception("Couldn't get userId in function deletePost")
+
+//        if (postDocumentUID == null) {
+//            emit(ResultData.Error(Exception("Post couldn't be deleted"), false))
+//            return@flow
+//        }
 
         val postDocumentReference = firebaseSource.db.collection(firebasePath.posts_col)
-            .document(postDocumentUID)
+            .document(currentUserId)
             .collection(firebasePath.user_posts)
             .document(post.postId)
 
@@ -110,17 +114,23 @@ class FirebasePostDetailManager @Inject constructor(
 
     suspend fun updateEditedPost(post: Post): Flow<ResultData<Boolean>> = flow {
         val user = firebaseSource.user
-        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
+//        val postDocumentUID = firebaseSource.userDocumentUID?.postsDocumentUid
+        val currentUserId = firebaseSource.userId
 
-        if (postDocumentUID == null || user == null) {
-            emit(ResultData.Error(Exception("Post couldn't be updated"), false))
-            return@flow
-        }
+        if(currentUserId.isEmpty())
+            throw Exception("Couldn't get userId in function updateEditedPost")
+
+
+//        if (postDocumentUID == null || user == null) {
+//            emit(ResultData.Error(Exception("Post couldn't be updated"), false))
+//            return@flow
+//        }
+
         val mapPostUpdate = mapOf(
             "postID" to post.postId,
             "text" to post.text,
             "title" to post.title,
-            "postDocumentUID" to postDocumentUID
+            "userId" to currentUserId
         )
 
         var exception = Exception("There was an error in our servers")
@@ -164,16 +174,21 @@ class FirebasePostDetailManager @Inject constructor(
     }
 
     suspend fun getPost(reportedPost: ReportPost): Flow<ResultData<Post>> = flow {
-        val postsDocumentUID =
-            firebaseSource.getUserDocumentUID(reportedPost.userIdOwnerReportedPost)?.postsDocumentUid
+//        val postsDocumentUID =
+//            firebaseSource.getUserDocumentUID(reportedPost.userIdOwnerReportedPost)?.postsDocumentUid
+//
+//        if (postsDocumentUID == null) {
+//            emit(ResultData.Error(Exception("There was an error with the user"), null))
+//            return@flow
+//        }
 
-        if (postsDocumentUID == null) {
-            emit(ResultData.Error(Exception("There was an error with the user"), null))
-            return@flow
-        }
+        val currentUserId = firebaseSource.userId
+
+        if(currentUserId.isEmpty())
+            throw Exception("Couldn't get userId in function deletePost")
 
         val postDocument = firebaseSource.db
-            .collection(firebasePath.posts_col).document(postsDocumentUID)
+            .collection(firebasePath.posts_col).document(currentUserId)
             .collection(firebasePath.user_posts).document(reportedPost.reportedPostId)
 
         var post: Post? = null

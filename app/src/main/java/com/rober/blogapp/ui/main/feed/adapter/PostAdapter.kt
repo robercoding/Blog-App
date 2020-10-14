@@ -48,7 +48,7 @@ class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActio
 
     private val differUserCallback = object : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-            return oldItem.user_id == newItem.user_id
+            return oldItem.userId == newItem.userId
         }
 
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
@@ -111,11 +111,11 @@ class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActio
         fun bind(post: Post) {
             Log.i("PostAdapter", post.userCreatorId)
             Log.i("PostAdapter", "${differUser.currentList}")
-            if (post.created_at == 0.toLong()) {
+            if (post.createdAt == 0.toLong()) {
                 container_no_more_posts?.visibility = View.VISIBLE
                 container_post?.visibility = View.GONE
             } else {
-                val user = differUser.currentList.find { user -> user.user_id == post.userCreatorId }
+                val user = differUser.currentList.find { user -> user.userId == post.userCreatorId }
                 user?.let { tempUser ->
                     uid_image?.let {
                         Glide.with(itemView)
@@ -124,7 +124,7 @@ class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActio
                     }
 
                     uid_name?.text = "@${tempUser.username}"
-                    val diffTime = getDifferenceTime(post.created_at)
+                    val diffTime = getDifferenceTime(post.createdAt)
                     time?.text = diffTime
                     setupClickListeners()
                 } ?: kotlin.run {

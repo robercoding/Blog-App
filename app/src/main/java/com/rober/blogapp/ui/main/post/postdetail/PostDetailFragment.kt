@@ -168,7 +168,7 @@ class PostDetailFragment :
         post_detail_text.text = post.text
         post_detail_title.text = post.title
 
-        val instantDate = Instant.ofEpochSecond(post.created_at)
+        val instantDate = Instant.ofEpochSecond(post.createdAt)
         val zdt = ZoneId.systemDefault()
         val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
 
@@ -213,7 +213,7 @@ class PostDetailFragment :
 
     private fun goToProfileFragment(user: User) {
         val navController = findNavController()
-        val bundleUserId = bundleOf("userId" to user.user_id)
+        val bundleUserId = bundleOf("userId" to user.userId)
         navController.navigate(R.id.profileDetailFragment, bundleUserId)
     }
 

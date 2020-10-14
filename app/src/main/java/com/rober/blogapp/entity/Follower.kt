@@ -4,7 +4,7 @@ import androidx.room.PrimaryKey
 
 data class Follower(
     @PrimaryKey
-    val follower_id: String
+    val followerId: String
 ) {
   constructor() : this("")
 }

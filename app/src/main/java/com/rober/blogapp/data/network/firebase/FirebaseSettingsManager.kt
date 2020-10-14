@@ -44,7 +44,7 @@ class FirebaseSettingsManager @Inject constructor(
     suspend fun getListReportedPosts(user: User): Flow<ResultData<List<ReportPost>>> = flow {
         val collectionReportedPosts =
             firebaseSource.db.collection(firebasePath.reports_col)
-                .document(user.user_id)
+                .document(user.userId)
                 .collection(firebasePath.posts_reports)
 
         var reportedPosts = mutableListOf<ReportPost>()
@@ -71,15 +71,15 @@ class FirebaseSettingsManager @Inject constructor(
     }
 
     fun getTotalNumberPosts(user: User): Flow<ResultData<Int>> = flow {
-        val postsDocumentUID = firebaseSource.getUserDocumentUID(user.user_id)?.postsDocumentUid
+//        val postsDocumentUID = firebaseSource.getUserDocumentUID(user.userId)?.postsDocumentUid
 
-        if (postsDocumentUID == null) {
-            emit(ResultData.Error(Exception("Sorry, there was an error in our servers"), 0))
-            return@flow
-        }
+//        if (postsDocumentUID == null) {
+//            emit(ResultData.Error(Exception("Sorry, there was an error in our servers"), 0))
+//            return@flow
+//        }
 
         val countPostsDocumentReference =
-            firebaseSource.db.collection(firebasePath.posts_col).document(postsDocumentUID)
+            firebaseSource.db.collection(firebasePath.posts_col).document(user.userId)
                 .collection(firebasePath.user_count_posts).document(firebasePath.countPosts)
 
         var countPosts: CountsPosts? = null

@@ -37,9 +37,9 @@ import javax.inject.Inject
 //        kotlinx.coroutines.delay(1000)
 //        emit(DataState.Success(userDao.getUsersWithBlogs()))
 //    }
-//    suspend fun getUserWithBlogs(user_id: Long): Flow<DataState<UserWithBlogs>> = flow {
+//    suspend fun getUserWithBlogs(userId: Long): Flow<DataState<UserWithBlogs>> = flow {
 //        emit(DataState.Loading)
 //        kotlinx.coroutines.delay(4000)
-//        emit(DataState.Success(userDao.getUserWithBlogs(user_id)))
+//        emit(DataState.Success(userDao.getUserWithBlogs(userId)))
 //    }
 //}

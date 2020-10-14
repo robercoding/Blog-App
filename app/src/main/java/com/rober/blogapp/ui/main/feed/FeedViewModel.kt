@@ -169,7 +169,7 @@ constructor(
 
         feedListPosts.addAll(newListPosts.toMutableList())
         feedListPosts =
-            feedListPosts.sortedByDescending { post -> post.created_at }.toMutableList() //Is already ordered
+            feedListPosts.sortedByDescending { post -> post.createdAt }.toMutableList() //Is already ordered
         feedListUsers.addAll(newListUsers.toMutableList())
 
         var positionOfTheFirstPost = 1
@@ -264,7 +264,7 @@ constructor(
         val listPostsHashSet = listPosts.map { post -> post.userCreatorId }.toHashSet()
 
         for (user in feedListUsers) {
-            val containsUser = listPostsHashSet.indexOf(user.user_id)
+            val containsUser = listPostsHashSet.indexOf(user.userId)
             if (containsUser == -1) {
                 return true
             }
@@ -282,8 +282,8 @@ constructor(
     }
 
     private fun goToProfileDetailsFragment(positionAdapter: Int) {
-        val user_id = feedListPosts[positionAdapter].userCreatorId
-        viewState = FeedState.GoToProfileDetailsFragment(user_id)
+        val userId = feedListPosts[positionAdapter].userCreatorId
+        viewState = FeedState.GoToProfileDetailsFragment(userId)
     }
 
     private fun clearListsAndMapsLocalDatabase() {

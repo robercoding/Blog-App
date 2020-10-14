@@ -145,13 +145,13 @@ class ProfileDetailViewModel
     private suspend fun setUserObjectDetails(user: User) {
         viewState = ProfileDetailState.LoadingUser
 
-        val isUserTheCurrentUser = checkIfUserIsCurrentUser(user.user_id)
+        val isUserTheCurrentUser = checkIfUserIsCurrentUser(user.userId)
 
 
         if (isUserTheCurrentUser)
             PROFILE_USER = ProfileUserCodes.CURRENT_USER_PROFILE
         else {
-            currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(user.user_id)
+            currentUserFollowsOtherUser = checkIfCurrentUserFollowsOtherUser(user.userId)
             PROFILE_USER = ProfileUserCodes.OTHER_USER_PROFILE
         }
 
@@ -197,7 +197,7 @@ class ProfileDetailViewModel
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            if (userUID == resultData.data?.user_id)
+                            if (userUID == resultData.data?.userId)
                                 isUserCurrentUser = true
                         }
                         is ResultData.Error -> {
@@ -222,7 +222,7 @@ class ProfileDetailViewModel
                             resultData.data?.let { resultDataUser ->
                                 user = resultDataUser
                                 currentUserFollowsOtherUser =
-                                    checkIfCurrentUserFollowsOtherUser(resultData.data.user_id)
+                                    checkIfCurrentUserFollowsOtherUser(resultData.data.userId)
 //                                val bitmap = getBitmapFromUrl(imageUrl)
 //                                val bitmap = getBitmapLightWeight(imageUrl)
                             }
@@ -304,7 +304,7 @@ class ProfileDetailViewModel
 //        viewState = ProfileDetailState.LoadingPosts
         user?.let { tempUser ->
             viewModelScope.launch {
-                firebaseRepository.retrieveProfileUsersPosts(tempUser.user_id)
+                firebaseRepository.retrieveProfileUsersPosts(tempUser.userId)
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
@@ -343,7 +343,7 @@ class ProfileDetailViewModel
                             ProfileDetailState.SetCurrentUserProfile(tempUser, tempBitmap)
                     }
                 }
-                firebaseRepository.retrieveNewerPostsUserProfile(tempUser.user_id)
+                firebaseRepository.retrieveNewerPostsUserProfile(tempUser.userId)
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {

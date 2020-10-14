@@ -5,12 +5,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -28,7 +26,8 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     var userAuth: FirebaseUser? = null
     var user: User? = null
     var username = ""
-    var userDocumentUID: UserDocumentUID? = null
+    var userId = ""
+//    var userDocumentUID: UserDocumentUID? = null
     var followingList: MutableList<Following>? = null
     var followerList: MutableList<Follower>? = null
     var listPostsDeleted = mutableListOf<Post>()
@@ -36,20 +35,20 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     var userChangedUsername = false
     var usernameBeforeChange = ""
 
-    var feedCheckedUserChangedUsername = false
-    var profileDetailCheckedUserChangedUsername = false
+//    var feedCheckedUserChangedUsername = false
+//    var profileDetailCheckedUserChangedUsername = false
 
     //When user goes back to FeedFragment check if there's a new activity on following to retrieve or not the their feeds
     val listNewFollowingsUserID = HashSet<String>()
     val listNewUnfollowingsUsername = HashSet<String>()
 
-    val listNewFollowersUsername = HashSet<String>()
-    val listNewUnfollowersUsername = HashSet<String>()
+//    val listNewFollowersUsername = HashSet<String>()
+//    val listNewUnfollowersUsername = HashSet<String>()
 
     suspend fun setCurrentUser() {
         Log.i("User:", "First time user -> $user and $username")
-        var tempUsername = Username()
-        var tempUser = User()
+        var tempUsername: Username? = null
+        var tempUser: User? = null
         Log.i(TAG, userAuth.toString())
         if (userAuth != null) {
             try {
@@ -59,65 +58,70 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
                     .addOnSuccessListener {
                         Log.i("User:", "Success")
                         if (it.exists())
-                            tempUsername = it.toObject(Username::class.java)!!
+                            tempUsername = it.toObject(Username::class.java)
                     }.addOnFailureListener {
                         Log.i("User:", "Failure")
-                        username = "noname"
+                        username = ""
                     }
                     .await()
-
-                if (!tempUsername.isEmpty()) {
-                    tempUser =
-                        db.collection(firebasePath.users_col).document(tempUsername.username).get().await()
-                            .toObject(User::class.java)!!
-                }
-
             } catch (e: Exception) {
                 Log.i(TAG, e.message.toString())
             }
 
-            if (!tempUser.isEmpty())
-                user = tempUser
+            tempUsername?.let { temporaryUsername ->
+                username = temporaryUsername.username
 
-            if (!tempUsername.isEmpty())
-                username = tempUsername.username
+                tempUser =
+                    db.collection(firebasePath.users_col).document(temporaryUsername.username).get().await()
+                        .toObject(User::class.java)
+            }
+
+            tempUser?.let { temporaryUser ->
+                user = temporaryUser
+                userId = temporaryUser.userId
+            }
 
             Log.i(TAG, "User: $user")
         }
     }
 
-    suspend fun setCurrentUserDocumentsUID() {
-        if (user == null)
-            return
-
-        try {
-            val userDocumentsRef = db.collection(firebasePath.user_documents_uid).whereEqualTo("username", user!!.username)
-
-            userDocumentsRef
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    if (!querySnapshot.isEmpty) {
-                        val listUserDocumentsUID = querySnapshot.toObjects(UserDocumentUID::class.java)
-                        when (listUserDocumentsUID.size) {
-                            1 -> userDocumentUID = listUserDocumentsUID[0]
-                            else -> throw Exception("Something went wrong when getting the documents UID")
-                        }
-                    }
-                }.await()
-        } catch (e: Exception) {
-
-        }
-
-        Log.i("UserDocumentsUID", "$userDocumentUID")
-    }
+//    suspend fun setCurrentUserDocumentsUID() {
+//        if (user == null)
+//            return
+//
+//        try {
+//            val userDocumentsRef =
+//                db.collection(firebasePath.user_documents_uid).whereEqualTo("username", user!!.username)
+//
+//            userDocumentsRef
+//                .get()
+//                .addOnSuccessListener { querySnapshot ->
+//                    if (!querySnapshot.isEmpty) {
+//                        val listUserDocumentsUID = querySnapshot.toObjects(UserDocumentUID::class.java)
+//                        when (listUserDocumentsUID.size) {
+//                            1 -> userDocumentUID = listUserDocumentsUID[0]
+//                            else -> throw Exception("Something went wrong when getting the documents UID")
+//                        }
+//                    }
+//                }.await()
+//        } catch (e: Exception) {
+//
+//        }
+//
+//        Log.i("UserDocumentsUID", "$userDocumentUID")
+//    }
 
     suspend fun setCurrentFollowing() {
-        if (userDocumentUID == null)
+//        if (userDocumentUID == null)
+//            return
+
+        if(userId.isEmpty())
             return
 
         try {
-            val followingRef = db.collection(firebasePath.following_col).document(userDocumentUID!!.followingDocumentUid)
-                .collection(firebasePath.user_following)
+            val followingRef =
+                db.collection(firebasePath.following_col).document(userId)
+                    .collection(firebasePath.user_following)
 
             followingList = followingRef
                 .get()
@@ -130,12 +134,13 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     }
 
     suspend fun setCurrentFollower() {
-        if (userDocumentUID == null)
-            return
+//        if (userDocumentUID == null)
+//            return
 
         try {
-            val followerRef = db.collection(firebasePath.follower_col).document(userDocumentUID!!.followerDocumentUid)
-                .collection(firebasePath.user_followers)
+            val followerRef =
+                db.collection(firebasePath.follower_col).document(userId)
+                    .collection(firebasePath.user_followers)
 
             followerList = followerRef
                 .get()
@@ -147,21 +152,21 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
-    suspend fun getUserDocumentUID(userUID: String): UserDocumentUID? {
-        var userDocumentUID: UserDocumentUID? = null
-        val userIDUserDocumentUID =
-            db.collection(firebasePath.user_documents_uid).whereEqualTo("userUid", userUID)
-
-        userIDUserDocumentUID
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    userDocumentUID = document.toObject(UserDocumentUID::class.java)
-                }
-            }.await()
-
-        return userDocumentUID
-    }
+//    suspend fun getUserDocumentUID(userUID: String): UserDocumentUID? {
+//        var userDocumentUID: UserDocumentUID? = null
+//        val userIDUserDocumentUID =
+//            db.collection(firebasePath.user_documents_uid).whereEqualTo("userUid", userUID)
+//
+//        userIDUserDocumentUID
+//            .get()
+//            .addOnSuccessListener { documents ->
+//                for (document in documents) {
+//                    userDocumentUID = document.toObject(UserDocumentUID::class.java)
+//                }
+//            }.await()
+//
+//        return userDocumentUID
+//    }
 
 
     fun getCurrentUser(): User {
@@ -176,6 +181,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         setCurrentUser()
         return getCurrentUser()
     }
+
     suspend fun checkIfUsernameAvailable(username: String): Flow<ResultData<Boolean>> = flow {
         var nameAvailable = false
 
@@ -200,13 +206,13 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         emit(ResultData.Loading)
         var tempUser: User? = null
 
-        var documentUID: String = ""
+        var documentUID = ""
 
-        if (userUID == user?.user_id) {
+        if (userUID == user?.userId) {
             tempUser = user
         } else {
             db.collection("users")
-                .whereEqualTo("user_id", userUID)
+                .whereEqualTo("userId", userUID)
                 .get()
                 .addOnSuccessListener { documents ->
                     if (documents.isEmpty)
@@ -240,39 +246,43 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
         }
     }
 
-    fun addToNewFollowingList(userUID: String){
-        val userIsAlreadyOnNewFollowing = listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
+    fun addToNewFollowingList(userUID: String) {
+        val userIsAlreadyOnNewFollowing =
+            listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
 
-        if(userIsAlreadyOnNewFollowing != null) {
+        if (userIsAlreadyOnNewFollowing != null) {
             return
         }
 
-        val userIsAlreadyOnNewUnfollowing = listNewUnfollowingsUsername.find { newUnfollowingUserUID ->  newUnfollowingUserUID == userUID }
+        val userIsAlreadyOnNewUnfollowing =
+            listNewUnfollowingsUsername.find { newUnfollowingUserUID -> newUnfollowingUserUID == userUID }
 
-        if(userIsAlreadyOnNewUnfollowing != null){
+        if (userIsAlreadyOnNewUnfollowing != null) {
             listNewUnfollowingsUsername.remove(userUID)
         }
 
-        val userIsAlreadyFollowing = followingList?.find { following-> following.following_id == userUID }
+        val userIsAlreadyFollowing = followingList?.find { following -> following.followingId == userUID }
 
-        if(userIsAlreadyFollowing != null){
+        if (userIsAlreadyFollowing != null) {
             return
         }
 
         listNewFollowingsUserID.add(userUID)
     }
 
-    fun addToNewUnfollowingList(userUID: String){
-        val userIsAlreadyOnNewFollowing = listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
+    fun addToNewUnfollowingList(userUID: String) {
+        val userIsAlreadyOnNewFollowing =
+            listNewFollowingsUserID.find { newFollowingUserUID -> newFollowingUserUID == userUID }
 
-        if(userIsAlreadyOnNewFollowing != null) {
+        if (userIsAlreadyOnNewFollowing != null) {
             listNewFollowingsUserID.remove(userUID)
 
         }
 
-        val userIsAlreadyOnNewUnfollowing = listNewUnfollowingsUsername.find { newUnfollowingUserUID ->  newUnfollowingUserUID == userUID }
+        val userIsAlreadyOnNewUnfollowing =
+            listNewUnfollowingsUsername.find { newUnfollowingUserUID -> newUnfollowingUserUID == userUID }
 
-        if(userIsAlreadyOnNewUnfollowing != null){
+        if (userIsAlreadyOnNewUnfollowing != null) {
             return
         }
 
