@@ -13,7 +13,7 @@ class FirebasePath @Inject constructor() {
 
 
     val user_count_posts = "user_count_posts"
-    val countPosts ="countPosts"
+    val countPosts = "countPosts"
 
     //Following
     val following_col = "following"
@@ -26,4 +26,7 @@ class FirebasePath @Inject constructor() {
     //Post
     val reports_col = "reports"
     val posts_reports = "posts_reports"
+
+    //Disabled
+    val disabled_col = "disabled"
 }

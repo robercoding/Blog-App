@@ -235,7 +235,6 @@ class FeedFragment : BaseFragment<FeedState, FeedFragmentEvent, FeedViewModel>(R
             recycler_feed.smoothScrollToPosition(0)
             displayTextNotifyMorePosts(false)
 //            feed_text_notify_new_posts.clearAnimation()
-
         }
 
         feed_fragment_toolbar_exit_app.setOnClickListener {

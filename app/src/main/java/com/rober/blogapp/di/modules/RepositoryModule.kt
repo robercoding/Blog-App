@@ -1,10 +1,10 @@
 package com.rober.blogapp.di.modules
 
-import android.app.Application
 import com.rober.blogapp.data.network.firebase.*
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.data.network.util.FirebaseErrors
 import com.rober.blogapp.data.network.util.FirebasePath
+import com.rober.blogapp.data.network.util.FirebaseUtils
 //import com.rober.blogapp.data.room.dao.BlogDao
 //import com.rober.blogapp.data.room.dao.UserDao
 //import com.rober.blogapp.data.room.repository.RoomRepository
@@ -38,9 +38,11 @@ object RepositoryModule {
     @Provides
     fun provideFirebaseAuthManager(
         firebaseSource: FirebaseSource,
-        firebaseErrors: FirebaseErrors
+        firebasePath: FirebasePath,
+        firebaseErrors: FirebaseErrors,
+        firebaseUtils: FirebaseUtils
     ): FirebaseAuthManager =
-        FirebaseAuthManager(firebaseSource, firebaseErrors)
+        FirebaseAuthManager(firebaseSource, firebasePath, firebaseErrors, firebaseUtils)
 
     @Singleton
     @Provides

@@ -1,12 +1,30 @@
 package com.rober.blogapp.data.network.util
 
-class FirebaseErrors {
-    var generalError = "Sorry there was an error in our servers"
-    var authErrors = listOf(
-        listOf("ERROR_USER_NOT_FOUND", "Sorry, credentials are incorrect, try again"),
-        listOf("ERROR_WRONG_PASSWORD", "Sorry, credentials are incorrect, try again"),
-        listOf("ERROR_USER_TOKEN_EXPIRE", "Lo sentimos, el token ha expirado"),
-        listOf("ERROR_INVALID_USER_TOKEN", "Lo sentimos, el token no es correcto"),
-        listOf("ERROR_USER_DISABLED", "Lo sentimos, el usuario ha sido desactivado")
-    )
+import javax.inject.Inject
+
+class FirebaseErrors @Inject constructor() {
+
+    val GENERAL_ERROR = 100
+
+    //Authentication error codes Firebase
+    val ERROR_NOT_FOUND = "ERROR_USER_NOT_FOUND"
+    val ERROR_WRONG_PASSWORD = "ERROR_WRONG_PASSWORD"
+    val ERROR_USER_DISABLED = "ERROR_USER_DISABLED"
+
+    val ERROR_NOT_FOUND_CODE = 1
+    val ERROR_WRONG_PASSWORD_CODE = 2
+
+    //Disabled error codes
+    val ACCOUNT_NOT_DISABLED = -1
+    val ACCOUNT_DISABLED_LESS_30_DAYS = 3
+    val ACCOUNT_DISABLED_MORE_30_DAYS = 4
+
+
+//    //Only response to errors.
+//    //Response that aren't errors are not included here.
+//    var nodeJsResponse = listOf(
+//        listOf("no-exists", "Sorry, there"),
+//        listOf("")
+//
+//    )
 }

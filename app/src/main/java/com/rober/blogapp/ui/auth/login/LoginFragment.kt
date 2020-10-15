@@ -2,9 +2,11 @@ package com.rober.blogapp.ui.auth.login
 
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.R
 import com.rober.blogapp.ui.base.BaseFragment
@@ -38,6 +40,11 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
                 displayProgressBar(login_progress_bar, false)
                 Snackbar.make(requireView(), "Logout", Snackbar.LENGTH_SHORT).show()
             }
+
+            is LoginState.OfferEnableAccount -> {
+                showMaterialDialogEnableAccount(viewState.message)
+            }
+
             is LoginState.Error -> {
                 displayProgressBar(login_progress_bar, false)
                 displayToast(viewState.message)
@@ -75,6 +82,22 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
         navController.navigate(R.id.action_loginFragment_to_registerFragment)
     }
 
+    private fun showMaterialDialogEnableAccount(message: String) {
+        val materialDialog =
+            MaterialAlertDialogBuilder(requireContext(), R.style.Settings_MaterialDialogTheme)
+
+        materialDialog
+            .setTitle("Enable account")
+            .setMessage(message)
+            .setBackground(ContextCompat.getDrawable(requireContext(), R.color.primaryBackground))
+            .setPositiveButton("Yes") { dialog, which ->
+                viewModel.setIntention(LoginFragmentEvent.EnableAccount)
+            }
+            .setNegativeButton("No") { dialog, which ->
+                dialog.dismiss()
+            }.show()
+    }
+
     override fun setupListeners() {
         btnLogin.setOnClickListener {
             login()
@@ -88,4 +111,6 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
 sealed class LoginFragmentEvent {
     data class LoginByEmail(val email: String, val password: String) : LoginFragmentEvent()
     data class LoginByUsername(val username: String, val password: String) : LoginFragmentEvent()
+
+    object EnableAccount : LoginFragmentEvent()
 }
