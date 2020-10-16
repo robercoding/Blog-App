@@ -14,6 +14,7 @@ class LoginViewModel @ViewModelInject constructor(
     private val firebaseUtils: FirebaseUtils
 ) : BaseViewModel<LoginState, LoginFragmentEvent>() {
 
+    var alreadyLogging = false
     override fun setIntention(event: LoginFragmentEvent) {
         when (event) {
             is LoginFragmentEvent.LoginByEmail -> {
@@ -31,14 +32,20 @@ class LoginViewModel @ViewModelInject constructor(
     }
 
     private fun loginByEmail(email: String, password: String) {
+        if(alreadyLogging){
+            return
+        }
+        alreadyLogging = true
         viewModelScope.launch {
             firebaseRepository.loginByEmail(email, password)
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Success -> {
+                            alreadyLogging = false
                             viewState = LoginState.UserLoggedIn
                         }
                         is ResultAuth.Error -> {
+                            alreadyLogging = false
                             val message = resultAuth.exception.message
                             setErrorState(message)
                         }
@@ -49,14 +56,20 @@ class LoginViewModel @ViewModelInject constructor(
     }
 
     private fun loginByUsername(username: String, password: String) {
+        if(alreadyLogging){
+            return
+        }
+        alreadyLogging = true
         viewModelScope.launch {
             firebaseRepository.loginByUsername(username, password)
                 .collect { resultAuth ->
                     when (resultAuth) {
                         is ResultAuth.Success -> {
+                            alreadyLogging = false
                             viewState = LoginState.UserLoggedIn
                         }
                         is ResultAuth.Error -> {
+                            alreadyLogging = false
                             val message = resultAuth.exception.message
                             setErrorState(message)
                         }

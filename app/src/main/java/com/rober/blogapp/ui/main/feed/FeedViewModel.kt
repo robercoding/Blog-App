@@ -56,8 +56,7 @@ constructor(
                 viewState = FeedState.Idle
             }
             is FeedFragmentEvent.SignOut -> {
-                clearListsAndMapsLocalDatabase()
-                viewState = FeedState.SignOut
+                signOut()
             }
         }
     }
@@ -286,11 +285,14 @@ constructor(
         viewState = FeedState.GoToProfileDetailsFragment(userId)
     }
 
-    private fun clearListsAndMapsLocalDatabase() {
+    private fun clearSignout() {
         firebaseRepository.clearListsAndMapsLocalDatabase()
+        firebaseRepository.clearFirebaseSource()
     }
 
     private fun signOut() {
+        clearSignout()
+
         viewModelScope.launch {
             firebaseRepository.signOut()
                 .collect {

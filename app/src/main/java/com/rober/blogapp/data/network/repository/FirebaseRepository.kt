@@ -38,6 +38,9 @@ constructor(
     suspend fun getUserProfile(userUID: String): Flow<ResultData<User>> =
         firebaseSource.getUserProfile(userUID)
 
+    fun clearFirebaseSource() = firebaseSource.clearFirebaseSource()
+
+
     //Auth
     suspend fun getAndSetCurrentUser() = firebaseAuthManager.setCurrentUser()
 

@@ -83,23 +83,18 @@ class FirebaseAuthManager @Inject constructor(
                 }
                 .await()
         } catch (e: FirebaseAuthException) {
-            val firebaseErrorCode = e.errorCode
-            val uid = firebaseSource.auth.uid
-            if (uid.isNullOrEmpty()) {
-                return ResultAuth.Error(e)
-            }
 
-            val errorCode = when (firebaseErrorCode) {
+            val errorCode = when (e.errorCode) {
                 firebaseErrors.ERROR_USER_DISABLED -> {
                     Log.i("SeeError", "We going disabled.")
-                    checkIfAccountIsDisabled(email)
+                    checkDisabledError(email)
                 }
                 firebaseErrors.ERROR_WRONG_PASSWORD -> firebaseErrors.ERROR_WRONG_PASSWORD_CODE
                 firebaseErrors.ERROR_NOT_FOUND -> firebaseErrors.ERROR_NOT_FOUND_CODE
                 else -> firebaseErrors.GENERAL_ERROR
             }
 
-            Log.i("SeeError", "we are going to return")
+            Log.i("SeeError", "we are going to return ${errorCode}")
             return when (errorCode) {
                 firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS -> {
                     Log.i("SeeError", "We going disabled. 30 less")
@@ -107,15 +102,18 @@ class FirebaseAuthManager @Inject constructor(
                 }
                 firebaseErrors.ACCOUNT_DISABLED_MORE_30_DAYS -> {
                     Log.i("SeeError", "We going disabled. 30 more")
+                    deleteAccount(uidToEnableAccount)
                     ResultAuth.Error(Exception(firebaseUtils.ACCOUNT_DISABLED_MORE_30_DAYS_MESSAGE))
                 }
                 firebaseErrors.ERROR_WRONG_PASSWORD_CODE -> ResultAuth.Error(Exception(firebaseUtils.ERROR_WRONG_PASSWORD))
                 firebaseErrors.ERROR_NOT_FOUND_CODE -> ResultAuth.Error(Exception(firebaseUtils.ERROR_NOT_FOUND_MESSAGE))
+                firebaseErrors.ACCOUNT_NOT_DISABLED -> ResultAuth.Error(Exception(firebaseUtils.GENERAL_MESSAGE_ERROR))
                 firebaseErrors.GENERAL_ERROR -> ResultAuth.Error(Exception(firebaseUtils.GENERAL_MESSAGE_ERROR))
                 else -> ResultAuth.Error(Exception(firebaseUtils.GENERAL_MESSAGE_ERROR))
             }
         }
 
+        Log.i("SeeUID", "ALL GOOD UID= ${firebaseSource.auth.uid}")
         setCurrentUser()
 
         if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null)) {
@@ -138,63 +136,103 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
-    private suspend fun checkIfAccountIsDisabled(identifier: String): Int {
+    private suspend fun checkDisabledError(email: String): Int {
 
-        val uid = getUidByEmailOrUsername(identifier)
-        val isAccountDisabled =
-            firebaseSource.db.collection(firebasePath.disabled_col).document(uid).get().await()
+        uidToEnableAccount = getUidByEmail(email)
 
-//        Log.i("SeeDisable", "Send = ${uid}")
+        var errorCode = 0
+        val uidHashMap = hashMapOf("uid" to uidToEnableAccount)
+        firebaseSource.functions.getHttpsCallable("checkIfAccountIsDisabled")
+            .call(uidHashMap)
+            .continueWith { task ->
+                try {
+                    if (!task.isSuccessful) {
+                        errorCode = firebaseErrors.GENERAL_ERROR
+                        return@continueWith
+                    }
+                    val result = task.result ?: throw Exception("There was an error getting the result")
 
-        if (!isAccountDisabled.exists()) {
-            return firebaseErrors.ACCOUNT_NOT_DISABLED
-        }
+                    //Cloud function send an object and we receive it as a map
+                    val data = result.data as Map<String, *>
+                    val isAccountDisabled = data["disabled"] as Boolean
 
-        val disable = isAccountDisabled.toObject(Disable::class.java) ?: return firebaseErrors.GENERAL_ERROR
+                    errorCode = if (isAccountDisabled) {
+                        data["errorCode"] as Int
+                    } else {
+                        firebaseErrors.ACCOUNT_NOT_DISABLED
+                    }
 
-        //Compare days
-        val now = Instant.now().toEpochMilli()
-        val dateDisable = disable.dateDisabledMilliseconds
-        if (!disable.disabled) return firebaseErrors.ACCOUNT_NOT_DISABLED
+                } catch (e: Exception) {
 
-        val secondsDifference = (now - dateDisable) / 1000
-        val daysDifference = (secondsDifference / 86400)
+                }
+            }.await()
 
-        return if (daysDifference <= 30) {
-            uidToEnableAccount = uid
-            firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS
-        } else {
-            Log.i("SeeDisable", "MORE 30 days")
-            firebaseErrors.ACCOUNT_DISABLED_MORE_30_DAYS
-        }
+        return errorCode
+
+//        val isAccountDisabled =
+//            firebaseSource.db.collection(firebasePath.disabled_col).document(uid).get().await()
+//
+//        if (!isAccountDisabled.exists()) {
+//            return firebaseErrors.ACCOUNT_NOT_DISABLED
+//        }
+//
+//        val disable = isAccountDisabled.toObject(Disable::class.java) ?: return firebaseErrors.GENERAL_ERROR
+//
+//        //Compare days
+//        val now = Instant.now().toEpochMilli()
+//        val dateDisable = disable.dateDisabledMilliseconds
+//        if (!disable.disabled) return firebaseErrors.ACCOUNT_NOT_DISABLED
+//
+//        val secondsDifference = (now - dateDisable) / 1000
+//        val daysDifference = (secondsDifference / 86400)
+//
+//        return if (daysDifference <= 30) {
+//            uidToEnableAccount = uid
+//            firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS
+//        } else {
+//            Log.i("SeeDisable", "MORE 30 days")
+//            firebaseErrors.ACCOUNT_DISABLED_MORE_30_DAYS
+//        }
     }
 
-    private suspend fun getUidByEmailOrUsername(identifier: String): String {
-        if (android.util.Patterns.EMAIL_ADDRESS.matcher(identifier).matches()) {
-            val snapshotUid =
-                firebaseSource.db.collection("usernames").whereEqualTo("email", identifier).get().await()
+    private suspend fun getUidByEmail(email: String): String {
+        var uid = ""
+        val emailHashMap = hashMapOf("email" to email)
+        firebaseSource.functions.getHttpsCallable("getUidByEmail")
+            .call(emailHashMap)
+            .continueWith { task ->
+                try {
+                    if (!task.isSuccessful) {
+                        return@continueWith
+                    }
+                    val result = task.result ?: throw Exception("We couldn't get the value")
 
-            if (snapshotUid.isEmpty)
-                return ""
+                    val data = result.data as Map<*, *>
+                    val status = data["status"] as Boolean
+                    if (status) {
+                        uid = data["uid"] as String
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error: ${e.message}")
+                }
+            }.await()
 
-            val username = snapshotUid.toObjects(Username::class.java)[0]
-            return username.uid
-        } else {
-            val snapshotUid =
-                firebaseSource.db.collection("usernames").whereEqualTo("username", identifier).get().await()
-
-            if (snapshotUid.isEmpty)
-                return ""
-
-            val username = snapshotUid.toObjects(Username::class.java)[0]
-            return username.uid
-        }
+        return uid
+//        val snapshotUid =
+//            firebaseSource.db.collection("usernames").whereEqualTo("email", identifier).get().await()
+//
+//        if (snapshotUid.isEmpty)
+//            return ""
+//
+//        val username = snapshotUid.toObjects(Username::class.java)[0]
+//        return username.uid
     }
 
     fun enableAccount(): Flow<ResultAuth> = flow {
         emit(ResultAuth.Loading)
         if (uidToEnableAccount.isEmpty()) {
             emit(ResultAuth.Error(Exception(firebaseUtils.ERROR_ENABLING_ACCOUNT_MESSAGE)))
+            return@flow
         }
 
 
@@ -219,13 +257,13 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
-//    private fun deleteAccount(uid: String) {
-//        val hashMap = hashMapOf(
-//            "uid" to uid
-//        )
-//        firebaseSource.functions.getHttpsCallable("deleteAccount")
-//            .call(hashMap)
-//    }
+    private fun deleteAccount(uid: String) {
+        val hashMap = hashMapOf(
+            "uid" to uid
+        )
+        firebaseSource.functions.getHttpsCallable("deleteAccount")
+            .call(hashMap)
+    }
 
     suspend fun signUpWithEmailCloud(
         email: String,
@@ -379,18 +417,18 @@ class FirebaseAuthManager @Inject constructor(
 
     suspend fun signOut(): Flow<ResultAuth> = flow {
         firebaseSource.auth.signOut()
-
-        val user = firebaseSource.userAuth
-
-        firebaseSource.userAuth = null
-
-        emit(if (checkUser(user)) ResultAuth.SuccessSignout else ResultAuth.FailureSignout)
+        if(firebaseSource.auth.currentUser == null)
+            emit(ResultAuth.Success)
+        else
+            throw Exception("There was an eror when trying to sign out.")
     }
 
     private fun checkUser(user: FirebaseUser?): Boolean {
         if (user != null) {
+            Log.i("SeeUID", "True")
             return true
         }
+        Log.i("SeeUID", "False")
         return false
     }
 }

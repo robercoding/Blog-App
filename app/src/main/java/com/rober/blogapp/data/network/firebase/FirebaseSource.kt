@@ -238,4 +238,14 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
 
         listNewUnfollowingsUsername.add(userUID)
     }
+
+    fun clearFirebaseSource(){
+        userAuth = null
+        user = null
+        username = ""
+        userId = ""
+        followingList = null
+        followerList = null
+        listPostsDeleted = mutableListOf<Post>()
+    }
 }
