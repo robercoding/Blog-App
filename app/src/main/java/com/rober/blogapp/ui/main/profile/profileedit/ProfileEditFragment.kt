@@ -115,7 +115,7 @@ class ProfileEditFragment :
         profile_text_edit_location.setText(user.location)
 
         val profileImage: Any = if (user.profileImageUrl.isEmpty())
-            R.drawable.user_profile_png
+            R.drawable.cat
         else
             user.profileImageUrl
 

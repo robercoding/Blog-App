@@ -86,7 +86,6 @@ class FirebaseAuthManager @Inject constructor(
 
             val errorCode = when (e.errorCode) {
                 firebaseErrors.ERROR_USER_DISABLED -> {
-                    Log.i("SeeError", "We going disabled.")
                     checkDisabledError(email)
                 }
                 firebaseErrors.ERROR_WRONG_PASSWORD -> firebaseErrors.ERROR_WRONG_PASSWORD_CODE
@@ -94,14 +93,11 @@ class FirebaseAuthManager @Inject constructor(
                 else -> firebaseErrors.GENERAL_ERROR
             }
 
-            Log.i("SeeError", "we are going to return ${errorCode}")
             return when (errorCode) {
                 firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS -> {
-                    Log.i("SeeError", "We going disabled. 30 less")
                     ResultAuth.Error(Exception(firebaseUtils.ACCOUNT_DISABLED_LESS_30_DAYS_MESSAGE))
                 }
                 firebaseErrors.ACCOUNT_DISABLED_MORE_30_DAYS -> {
-                    Log.i("SeeError", "We going disabled. 30 more")
                     deleteAccount(uidToEnableAccount)
                     ResultAuth.Error(Exception(firebaseUtils.ACCOUNT_DISABLED_MORE_30_DAYS_MESSAGE))
                 }
@@ -113,7 +109,6 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-        Log.i("SeeUID", "ALL GOOD UID= ${firebaseSource.auth.uid}")
         setCurrentUser()
 
         if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null)) {
@@ -257,13 +252,22 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
-    private fun deleteAccount(uid: String) {
+    private suspend fun deleteAccount(uid: String) {
         val hashMap = hashMapOf(
             "uid" to uid
         )
-        firebaseSource.functions.getHttpsCallable("deleteAccount")
+        var accountDeleted = false
+        firebaseSource.functions.getHttpsCallable("deleteUser")
             .call(hashMap)
+            .continueWith { task ->
+                if (!task.isSuccessful) {
+                    return@continueWith
+                }
+                val result = task.result ?: throw Exception("We didn't get a confirmation")
+                accountDeleted = result.data as Boolean
+            }.await()
     }
+
 
     suspend fun signUpWithEmailCloud(
         email: String,
@@ -417,18 +421,9 @@ class FirebaseAuthManager @Inject constructor(
 
     suspend fun signOut(): Flow<ResultAuth> = flow {
         firebaseSource.auth.signOut()
-        if(firebaseSource.auth.currentUser == null)
+        if (firebaseSource.auth.currentUser == null)
             emit(ResultAuth.Success)
         else
             throw Exception("There was an eror when trying to sign out.")
-    }
-
-    private fun checkUser(user: FirebaseUser?): Boolean {
-        if (user != null) {
-            Log.i("SeeUID", "True")
-            return true
-        }
-        Log.i("SeeUID", "False")
-        return false
     }
 }

@@ -147,7 +147,7 @@ class ProfileFragment :
 
                 val images = mutableListOf<Any>()
                 if (imageProfile.isEmpty()) {
-                    images.add(R.drawable.user_profile_png)
+                    images.add(R.drawable.cat_sleep)
                 } else {
                     images.add(imageProfile)
                 }
@@ -328,7 +328,7 @@ class ProfileFragment :
 
     private fun setImages(user: User) {
         val profileImageToLoad: Any = if (user.profileImageUrl.isEmpty())
-            R.drawable.user_profile_png
+            R.drawable.cat
         else
             user.profileImageUrl
 

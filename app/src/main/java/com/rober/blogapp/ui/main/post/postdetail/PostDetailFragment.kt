@@ -185,12 +185,13 @@ class PostDetailFragment :
         post_detail_username.text = "@${user.username}"
 
         val imageProfile: Any = if (user.profileImageUrl.isEmpty())
-            R.drawable.user
+            R.drawable.cat_sleep
         else
             user.profileImageUrl
 
         Glide.with(requireView())
             .load(imageProfile)
+            .dontAnimate()
             .into(post_detail_image_profile)
     }
 

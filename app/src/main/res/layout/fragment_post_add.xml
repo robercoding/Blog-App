@@ -46,7 +46,7 @@
         android:layout_height="35dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="17dp"
-        android:background="@drawable/user_profile"
+        android:background="@drawable/cat_sleep"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/post_add_title" />
 

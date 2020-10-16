@@ -110,7 +110,6 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="30dp"
-            android:background="@drawable/user_profile"
             android:clickable="true"
             android:scaleType="centerCrop"
             app:civ_border_color="@color/blueTwitter"
