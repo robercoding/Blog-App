@@ -43,6 +43,17 @@
         app:layout_constraintTop_toBottomOf="@id/container_fragment"
         app:menu="@menu/bottom_nav" />
 
+    <ProgressBar
+        android:id="@+id/main_activity_center_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/blueTwitter"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <View
         android:id="@+id/main_activity_background_opaque"
         android:layout_width="match_parent"

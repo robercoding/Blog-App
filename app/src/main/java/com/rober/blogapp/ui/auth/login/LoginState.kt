@@ -8,6 +8,8 @@ sealed class LoginState {
     object UserLogout : LoginState()
 
     data class OfferEnableAccount(val message: String) : LoginState()
+    object EnablingAccount : LoginState()
+    data class EnabledAccount(val message: String) : LoginState()
 
     object Idle : LoginState()
     data class Error(val message: String) : LoginState()

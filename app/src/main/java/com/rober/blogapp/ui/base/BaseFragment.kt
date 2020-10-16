@@ -92,6 +92,10 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
         (requireActivity() as MainActivity).displayOpaqueBackground(display)
     }
 
+    fun displayCenterProgressBar(display: Boolean) {
+        (requireActivity() as MainActivity).displayCenterProgressBar(display)
+    }
+
     open fun displayProgressBar(view: View, display: Boolean) {
         if (display)
             view.show()

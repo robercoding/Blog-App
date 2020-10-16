@@ -1,6 +1,8 @@
 package com.rober.blogapp.ui.auth.login
 
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -43,6 +45,21 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
 
             is LoginState.OfferEnableAccount -> {
                 showMaterialDialogEnableAccount(viewState.message)
+                displayProgressBar(login_progress_bar, false)
+            }
+
+            is LoginState.EnablingAccount -> {
+                displayOpaqueBackground(true)
+                displayCenterProgressBar(true)
+                enableTouchView(login_scroll_view, false)
+            }
+
+            is LoginState.EnabledAccount -> {
+                displayOpaqueBackground(false)
+                displayCenterProgressBar(false)
+                displayToast(viewState.message)
+                enableTouchView(login_scroll_view, true)
+                login()
             }
 
             is LoginState.Error -> {
@@ -96,6 +113,17 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
             .setNegativeButton("No") { dialog, which ->
                 dialog.dismiss()
             }.show()
+    }
+
+    private fun enableTouchView(view: View, enableTouch: Boolean) {
+        view.isEnabled = enableTouch
+        if (view is ViewGroup) {
+            val viewgroup = view as ViewGroup
+            for (index in 0 until viewgroup.childCount) {
+                val child = viewgroup.getChildAt(index)
+                enableTouchView(child, enableTouch)
+            }
+        }
     }
 
     override fun setupListeners() {

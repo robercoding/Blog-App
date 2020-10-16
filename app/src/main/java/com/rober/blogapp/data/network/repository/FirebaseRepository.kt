@@ -58,6 +58,8 @@ constructor(
     suspend fun checkIfEmailAlreadyExists(email: String): Flow<ResultAuth> =
         firebaseAuthManager.checkIfEmailAlreadyExists(email)
 
+    fun enableAccount(): Flow<ResultAuth> = firebaseAuthManager.enableAccount()
+
     //suspend fun checkIfUserAlreadyLoggedIn(): Boolean = firebaseAuthManager.checkIfUserAlreadyLoggedIn()
 
     //Feed

@@ -12,9 +12,11 @@ class FirebaseUtils @Inject constructor() {
 //    val ERROR_USER_DISABLED = "Sorry, user has been disabled"
 
 
-    //Messages
+    //Messages enable-disable account
     val ACCOUNT_DISABLED_LESS_30_DAYS_MESSAGE =
         "Woah! Looks like you want to login after disabling the account before the 30 days have passed. Do you want to enable it again?"
     val ACCOUNT_DISABLED_MORE_30_DAYS_MESSAGE =
         "Your account has been deleted as you requested it and we can't get the information again."
+    val ERROR_ENABLING_ACCOUNT_MESSAGE =
+        "We are sorry, we couldn't enable the account, please contact with support if you still can't enable the account."
 }

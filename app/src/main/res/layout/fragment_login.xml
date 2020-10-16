@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/login_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -105,6 +107,5 @@
             android:text="@string/sign_up_with_google"
             android:textColor="@color/primaryText"
             android:visibility="gone" />
-
     </LinearLayout>
 </ScrollView>

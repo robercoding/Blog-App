@@ -23,6 +23,10 @@ class LoginViewModel @ViewModelInject constructor(
             is LoginFragmentEvent.LoginByUsername -> {
                 loginByUsername(event.username, event.password)
             }
+
+            is LoginFragmentEvent.EnableAccount -> {
+                enableAccount()
+            }
         }
     }
 
@@ -62,6 +66,25 @@ class LoginViewModel @ViewModelInject constructor(
         }
     }
 
+    private fun enableAccount() {
+        viewModelScope.launch {
+            firebaseRepository.enableAccount()
+                .collect { resultAuth ->
+                    when (resultAuth) {
+                        is ResultAuth.Loading -> viewState = LoginState.EnablingAccount
+
+                        is ResultAuth.Success -> viewState =
+                            LoginState.EnabledAccount("Congratulations, your account has been enabled! Wait a moment we'll login you in a second!")
+
+                        is ResultAuth.Error -> {
+                            val message = resultAuth.exception.message
+                            setErrorState(message)
+                        }
+                    }
+                }
+        }
+    }
+
     private fun setErrorState(message: String?) {
         if (message.isNullOrEmpty()) {
             viewState = LoginState.Error("There was an unknown error when trying to login.")
@@ -69,6 +92,7 @@ class LoginViewModel @ViewModelInject constructor(
         viewState = when (message) {
             firebaseUtils.ACCOUNT_DISABLED_LESS_30_DAYS_MESSAGE -> LoginState.OfferEnableAccount(message)
             firebaseUtils.ACCOUNT_DISABLED_MORE_30_DAYS_MESSAGE -> LoginState.Error(message)
+            firebaseUtils.ERROR_ENABLING_ACCOUNT_MESSAGE -> LoginState.Error(message)
             else -> LoginState.Error(message!!)
         }
     }

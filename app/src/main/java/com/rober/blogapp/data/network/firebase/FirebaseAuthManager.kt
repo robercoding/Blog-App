@@ -26,7 +26,7 @@ class FirebaseAuthManager @Inject constructor(
 ) {
     private val TAG = "FirebaseAuthManager"
     private var exception = Exception("There was an error in our servers")
-//    private val authErrors = firebaseErrors.authErrors
+    private var uidToEnableAccount = ""
 
     suspend fun setCurrentUser() {
         firebaseSource.setCurrentUser()
@@ -116,23 +116,6 @@ class FirebaseAuthManager @Inject constructor(
             }
         }
 
-        val uid = firebaseSource.auth.uid
-        Log.i("SeeError", "We jump catch? uid = ${uid}")
-
-//        val uid = firebaseSource.userAuth?.uid
-//        if (uid.isNullOrEmpty()) {
-//            return ResultAuth.Error(exception)
-//        }
-//
-//        val isAccountDisabled = checkIfAccountIsDisabled(uid)
-//
-//        if (isAccountDisabled == firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS) {
-//            return ResultAuth.Error(Exception(firebaseUtils.ACCOUNT_DISABLED_LESS_30_DAYS_MESSAGE))
-//        } else if (isAccountDisabled == firebaseErrors.ACCOUNT_DISABLED_MORE_30_DAYS) {
-//            deleteAccount(uid)
-//            return ResultAuth.Error(Exception(firebaseUtils.ACCOUNT_DISABLED_MORE_30_DAYS_MESSAGE))
-//        }
-
         setCurrentUser()
 
         if ((loggedIn || firebaseSource.followingList == null || firebaseSource.followerList == null)) {
@@ -178,7 +161,7 @@ class FirebaseAuthManager @Inject constructor(
         val daysDifference = (secondsDifference / 86400)
 
         return if (daysDifference <= 30) {
-            Log.i("SeeDisable", "Less 30 days")
+            uidToEnableAccount = uid
             firebaseErrors.ACCOUNT_DISABLED_LESS_30_DAYS
         } else {
             Log.i("SeeDisable", "MORE 30 days")
@@ -208,13 +191,41 @@ class FirebaseAuthManager @Inject constructor(
         }
     }
 
-    private fun deleteAccount(uid: String) {
-        val hashMap = hashMapOf(
-            "uid" to uid
-        )
-        firebaseSource.functions.getHttpsCallable("deleteAccount")
+    fun enableAccount(): Flow<ResultAuth> = flow {
+        emit(ResultAuth.Loading)
+        if (uidToEnableAccount.isEmpty()) {
+            emit(ResultAuth.Error(Exception(firebaseUtils.ERROR_ENABLING_ACCOUNT_MESSAGE)))
+        }
+
+
+        var enabled = false
+        val hashMap = hashMapOf("uid" to uidToEnableAccount)
+        firebaseSource.functions.getHttpsCallable("enableAccount")
             .call(hashMap)
+            .continueWith { task ->
+                try {
+                    if (task.isSuccessful) {
+                        val result = task.result ?: throw Exception("We didn't get a confirmation")
+                        enabled = result.data as Boolean
+                    }
+                } catch (e: Exception) {
+                }
+            }.await()
+
+        if (enabled)
+            emit(ResultAuth.Success)
+        else {
+            emit(ResultAuth.Error(Exception(firebaseUtils.ERROR_ENABLING_ACCOUNT_MESSAGE)))
+        }
     }
+
+//    private fun deleteAccount(uid: String) {
+//        val hashMap = hashMapOf(
+//            "uid" to uid
+//        )
+//        firebaseSource.functions.getHttpsCallable("deleteAccount")
+//            .call(hashMap)
+//    }
 
     suspend fun signUpWithEmailCloud(
         email: String,

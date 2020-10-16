@@ -80,6 +80,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun displayCenterProgressBar(display: Boolean) {
+        if (display)
+            main_activity_center_progress_bar.visibility = View.VISIBLE
+        else
+            main_activity_center_progress_bar.visibility = View.GONE
+    }
+
 //    override fun onBackPressed() {
 //        Log.i("SeeBack", "Detected Back")
 //        when (navController.currentDestination?.id) {
