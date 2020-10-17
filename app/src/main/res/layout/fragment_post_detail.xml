@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/general_post"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primaryBackground"
@@ -194,6 +195,14 @@
         app:layout_constraintTop_toBottomOf="@id/post_detail_reposts"
         app:layout_constraintWidth_percent="0.95" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/post_detail_bottom_divider" />
+
     <androidx.constraintlayout.motion.widget.MotionLayout
         android:id="@+id/post_detail_motion_layout_container"
         android:layout_width="0dp"
@@ -244,6 +253,65 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.motion.widget.MotionLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/post_detail_container_reply"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@color/primaryBackground">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/post_detail_textview_username_reply_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@id/post_detail_input_layout_reply"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="Username"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/post_detail_input_layout_reply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryBackground"
+            app:boxStrokeColor="@color/text_input_box_stroke"
+            app:layout_constraintBottom_toTopOf="@id/post_detail_button_reply"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/post_detail_edittext_reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="60dp"
+                android:maxLength="200"
+                android:textColor="@color/primaryText"
+                android:textSize="14sp"
+                app:boxStrokeColor="@color/text_input_text_hint"
+                android:inputType="textMultiLine"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/post_detail_button_reply"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            app:layout_constraintWidth_percent="0.2"
+            android:text="reply"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:backgroundTint="@color/primaryIcon"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:visibility="gone"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_view_background_opaque"

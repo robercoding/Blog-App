@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -26,10 +27,12 @@ import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_report_post.view.*
 import kotlinx.android.synthetic.main.fragment_post_detail.*
+import kotlinx.coroutines.delay
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
@@ -183,6 +186,7 @@ class PostDetailFragment :
 
     private fun setUserDetails(user: User) {
         post_detail_username.text = "@${user.username}"
+        post_detail_textview_username_reply_to.text = "You are replying to @${user.username}"
 
         val imageProfile: Any = if (user.profileImageUrl.isEmpty())
             R.drawable.cat_sleep
@@ -207,9 +211,15 @@ class PostDetailFragment :
         findNavController().popBackStack()
     }
 
-    private fun moveToFeedFragment() {
-        val navController = findNavController()
-        navController.navigate(R.id.feedFragment)
+    private fun displayReplyView(display: Boolean) {
+        if (display) {
+            post_detail_textview_username_reply_to.show()
+            post_detail_button_reply.show()
+        } else {
+            post_detail_textview_username_reply_to.hide()
+            post_detail_button_reply.hide()
+        }
+
     }
 
     private fun goToProfileFragment(user: User) {
@@ -243,13 +253,14 @@ class PostDetailFragment :
     private fun displayViewReportPost() {
         post_detail_material_toolbar.title = "Reported Post"
 
-        post_detail_options.visibility = View.GONE
-        post_detail_top_divider.visibility = View.GONE
-        post_detail_bottom_divider.visibility = View.GONE
-        post_detail_comment_icon.visibility = View.GONE
-        post_detail_heart_icon.visibility = View.GONE
-        post_detail_heart_number.visibility = View.GONE
-        post_detail_heart_text.visibility = View.GONE
+        post_detail_options.hide()
+        post_detail_top_divider.hide()
+        post_detail_bottom_divider.hide()
+        post_detail_comment_icon.hide()
+        post_detail_heart_icon.hide()
+        post_detail_heart_number.hide()
+        post_detail_heart_text.hide()
+        post_detail_container_reply.hide()
 
     }
 
@@ -269,6 +280,34 @@ class PostDetailFragment :
 
         post_detail_options.setOnClickListener {
             viewModel.setIntention(PostDetailFragmentEvent.ShowPostOptions)
+        }
+
+        post_detail_comment_icon.setOnClickListener {
+            //
+        }
+
+        post_detail_heart_icon.setOnClickListener {
+            //
+        }
+
+//        post_detail_edittext_reply.setOnFocusChangeListener { v, hasFocus ->
+//            displayToast("Edit: Has focus? ${hasFocus}")
+//            if (hasFocus) {
+//                displayReplyView(true)
+//            } else {
+//                displayReplyView(false)
+//            }
+//        }
+
+
+        post_detail_edittext_reply.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                displayReplyView(true)
+                customActionOnBackPressed(Constants.BACK_REPLY)
+            } else {
+                displayReplyView(false)
+                restoreDefaultOnBackPressed()
+            }
         }
 
         post_detail_motion_layout_container.setTransitionListener(object : MotionLayout.TransitionListener {
@@ -296,6 +335,21 @@ class PostDetailFragment :
                 ContextCompat.getColor(requireContext(), R.color.blueTwitter),
                 PorterDuff.Mode.SRC_ATOP
             )
+        requireActivity().window.setSoftInputMode(0) //Don't move up all views when keyboard appears to reply
+    }
+
+    override fun customActionOnBackPressed(action: Int) {
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                when (action) {
+                    Constants.BACK_REPLY -> {
+                        post_detail_edittext_reply.clearFocus()
+                    }
+                }
+            }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
 
     override fun onClickListOption(position: Int) {

@@ -1,6 +1,7 @@
 package com.rober.blogapp.ui.auth.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -22,7 +23,6 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
     }
 
     override fun render(viewState: LoginState) {
@@ -133,6 +133,10 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
         btnRegisterEmail.setOnClickListener {
             goToRegisterFragment()
         }
+    }
+
+    override fun setupViewDesign() {
+        super.setupViewDesign()
     }
 }
 

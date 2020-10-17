@@ -13,11 +13,11 @@ import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.DELETE_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.EDIT_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.FOLLOW_USER
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.REPORT_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.OptionsUtils.UNFOLLOW_USER
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.DELETE_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.EDIT_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.FOLLOW_USER
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.REPORT_POST
+import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.UNFOLLOW_USER
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 

@@ -24,7 +24,6 @@ class RegisterFragment :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
     override fun render(viewState: RegisterState) {
@@ -172,6 +171,11 @@ class RegisterFragment :
                 cleanErrorField(register_input_layout_password_repeat)
             }
         }
+    }
+
+    override fun setupViewDesign() {
+        super.setupViewDesign()
+        requireActivity().window.setResize()
     }
 }
 

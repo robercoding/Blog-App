@@ -2,15 +2,14 @@ package com.rober.blogapp.ui.base
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.rober.blogapp.ui.MainActivity
 
@@ -55,7 +54,9 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
 
     open fun setupObjects() {}
 
-    open fun setupViewDesign() {}
+    open fun setupViewDesign() {
+//        requireActivity().window.setPan()
+    }
 
     open fun customActionOnBackPressed(action: Int = 0) {}
 
@@ -82,8 +83,10 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
     }
 
     fun restoreDefaultOnBackPressed() {
-        val onBackPressedCallback = object : OnBackPressedCallback(false) {
-            override fun handleOnBackPressed() {}
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().popBackStack()
+            }
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
@@ -107,11 +110,27 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
         return String(Character.toChars(codePoint))
     }
 
-    private fun View.hide() {
+    fun View.hide() {
         this.visibility = View.GONE
     }
 
-    private fun View.show() {
+    fun View.show() {
         this.visibility = View.VISIBLE
+    }
+
+    fun Window.getSoftInputMode(): Int {
+        return attributes.softInputMode
+    }
+
+    fun Window.setPan() {
+        this.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+    }
+
+    fun Window.setResize() {
+        this.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    }
+
+    fun Window.setOriginal() {
+        this.setSoftInputMode(0)
     }
 }
