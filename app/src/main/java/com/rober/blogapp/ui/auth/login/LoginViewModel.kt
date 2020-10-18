@@ -28,6 +28,13 @@ class LoginViewModel @ViewModelInject constructor(
             is LoginFragmentEvent.EnableAccount -> {
                 enableAccount()
             }
+
+            is LoginFragmentEvent.CheckIfAlreadyLogin -> {
+                val user = firebaseRepository.getCurrentUser()
+                if(user.username.isNotEmpty()){
+                    viewState = LoginState.UserLoggedIn
+                }
+            }
         }
     }
 

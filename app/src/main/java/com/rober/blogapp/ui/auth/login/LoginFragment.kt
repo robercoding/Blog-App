@@ -1,10 +1,8 @@
 package com.rober.blogapp.ui.auth.login
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
@@ -135,14 +133,18 @@ class LoginFragment : BaseFragment<LoginState, LoginFragmentEvent, LoginViewMode
         }
     }
 
-    override fun setupViewDesign() {
-        super.setupViewDesign()
+    override fun onResume() {
+        super.onResume()
+        viewModel.setIntention(LoginFragmentEvent.CheckIfAlreadyLogin)
     }
 }
 
 sealed class LoginFragmentEvent {
     data class LoginByEmail(val email: String, val password: String) : LoginFragmentEvent()
     data class LoginByUsername(val username: String, val password: String) : LoginFragmentEvent()
+
+    object CheckIfAlreadyLogin : LoginFragmentEvent()
+
 
     object EnableAccount : LoginFragmentEvent()
 }
