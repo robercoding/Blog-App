@@ -15,6 +15,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -290,15 +291,15 @@ class PostDetailFragment :
             //
         }
 
-//        post_detail_edittext_reply.setOnFocusChangeListener { v, hasFocus ->
-//            displayToast("Edit: Has focus? ${hasFocus}")
-//            if (hasFocus) {
-//                displayReplyView(true)
-//            } else {
-//                displayReplyView(false)
-//            }
-//        }
+        post_detail_button_reply.setOnClickListener {
+            val replyText = post_detail_edittext_reply.text.toString()
+            if(replyText.isEmpty()){
+                displayToast("Reply can't be empty")
+                return@setOnClickListener
+            }
 
+            viewModel.setIntention(PostDetailFragmentEvent.AddReply(replyText))
+        }
 
         post_detail_edittext_reply.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
@@ -307,6 +308,20 @@ class PostDetailFragment :
             } else {
                 displayReplyView(false)
                 restoreDefaultOnBackPressed()
+            }
+        }
+
+        post_detail_edittext_reply.addTextChangedListener {
+            it?.let {
+                if(it.isEmpty()){
+                    post_detail_button_reply.isEnabled = false
+                    post_detail_button_reply.setTextColor(getColor(R.color.secondaryText))
+                    post_detail_button_reply.background.setTint(getColor(R.color.blueGray))
+                }else{
+                    post_detail_button_reply.isEnabled = true
+                    post_detail_button_reply.setTextColor(getColor(R.color.primaryText))
+                    post_detail_button_reply.background.setTint(getColor(R.color.blueTwitter))
+                }
             }
         }
 
@@ -403,6 +418,7 @@ sealed class PostDetailFragmentEvent {
 
     data class SetPost(val post: Post) : PostDetailFragmentEvent()
     data class GetReportedPostAndUser(val reportedPost: ReportPost) : PostDetailFragmentEvent()
+    data class AddReply(val message: String) : PostDetailFragmentEvent()
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
 

@@ -3,6 +3,7 @@ package com.rober.blogapp.data.network.firebase
 import android.util.Log
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.util.FirebasePath
+import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.ReportPost
 import kotlinx.coroutines.flow.Flow
@@ -182,5 +183,25 @@ class FirebasePostDetailManager @Inject constructor(
         } ?: kotlin.run {
             emit(ResultData.Error(Exception("We couldn't get the post, sorry"), null))
         }
+    }
+
+    suspend fun addReplyToPost(comment: Comment) : Flow<ResultData<Boolean>> = flow {
+        emit(ResultData.Loading)
+        val documentComment = firebaseSource.db.collection(firebasePath.comments_col).document(comment.replyToldId).collection(firebasePath.comments_post).document()
+
+        var success = false
+        documentComment.set(comment)
+            .addOnSuccessListener {
+                success = true
+            }
+            .addOnFailureListener {
+                success = false
+            }
+            .await()
+
+        if(success)
+            emit(ResultData.Success(success))
+        else
+            emit(ResultData.Error(Exception("There was an error when replying the post, try again later!"), false))
     }
 }

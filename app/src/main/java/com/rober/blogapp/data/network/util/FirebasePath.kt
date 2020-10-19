@@ -27,6 +27,10 @@ class FirebasePath @Inject constructor() {
     val reports_col = "reports"
     val posts_reports = "posts_reports"
 
+    //Comments
+    val comments_col = "comments"
+    val comments_post = "comments_post"
+
     //Disabled
     val disabled_col = "disabled"
 }

@@ -120,11 +120,7 @@ class FirebaseSource @Inject constructor(private val firebasePath: FirebasePath)
     }
 
     fun getCurrentUser(): User {
-        user?.let {
-            return it
-        } ?: kotlin.run {
-            return User()
-        }
+        return user ?: User()
     }
 
     suspend fun getCurrentUserRefreshed(): User {

@@ -1,5 +1,6 @@
 package com.rober.blogapp.ui.main.post.postdetail
 
+import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Option
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
@@ -12,6 +13,10 @@ sealed class PostDetailState {
 
     data class SetPostDetails(val post: Post, val user: User) : PostDetailState()
     data class SetReportPostDetails(val post: Post, val user: User) : PostDetailState()
+
+    //Reply
+    object LoadingReply : PostDetailState()
+    data class ReplySuccess(val comment: Comment) : PostDetailState()
 
     data class GoToProfileFragment(val user: User) : PostDetailState()
     object BackToPreviousFragment : PostDetailState()

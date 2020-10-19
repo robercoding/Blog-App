@@ -7,10 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.R
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
-import com.rober.blogapp.entity.Option
-import com.rober.blogapp.entity.Post
-import com.rober.blogapp.entity.ReportPost
-import com.rober.blogapp.entity.User
+import com.rober.blogapp.entity.*
 import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
 import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.DELETE_POST
@@ -101,7 +98,6 @@ class PostDetailViewModel @ViewModelInject constructor(
                 post?.also { tempPost ->
                     reportPost(tempPost, event.reportCause, event.message)
                 }
-
             }
 
             is PostDetailFragmentEvent.CancelReport -> {
@@ -125,7 +121,6 @@ class PostDetailViewModel @ViewModelInject constructor(
                 viewModelScope.launch {
                     getReportedPostAndUser(event.reportedPost)
                 }
-
             }
 
             is PostDetailFragmentEvent.SaveUpdatedPost -> {
@@ -133,6 +128,10 @@ class PostDetailViewModel @ViewModelInject constructor(
                     setPost(event.editedPost, event.editedPost.userCreatorId)
                     saveUpdatedPost(event.editedPost)
                 }
+            }
+
+            is PostDetailFragmentEvent.AddReply -> {
+                addRepply(event.message)
             }
         }
     }
@@ -476,6 +475,42 @@ class PostDetailViewModel @ViewModelInject constructor(
         } else {
             viewState =
                 PostDetailState.ErrorLoadingPost("Sorry, we couldn't load the post you've reported, try again later")
+        }
+    }
+
+    private fun addRepply(message: String){
+        Log.i("SeeReply", "See reply ${message}")
+        val currentUser = firebaseRepository.getCurrentUser()
+        if(currentUser.username.isEmpty())
+            return
+
+        post?.let {tempPost->
+            val comment = Comment(message, currentUser.userId, tempPost.postId)
+
+            viewModelScope.launch {
+                firebaseRepository.addReply(comment)
+                    .collect {resultData->
+                        when(resultData){
+
+                            is ResultData.Loading -> {
+                                Log.i("SeeReply", "See Loading")
+                                viewState = PostDetailState.LoadingReply
+                            }
+
+                            is ResultData.Success -> {
+                                Log.i("SeeReply", "See Success")
+                                viewState = PostDetailState.ReplySuccess(comment)
+                            }
+
+                            is ResultData.Error -> {
+                                Log.i("SeeReply", "SeeError")
+                                viewState = PostDetailState.Error(resultData.exception)
+                            }
+                        }
+                    }
+            }
+        }?: kotlin.run {
+
         }
     }
 

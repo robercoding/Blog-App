@@ -5,6 +5,7 @@ import com.google.firebase.firestore.Source
 import com.rober.blogapp.data.ResultAuth
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.firebase.*
+import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
@@ -95,6 +96,8 @@ constructor(
 
     suspend fun getPost(reportPost: ReportPost): Flow<ResultData<Post>> =
         firebasePostDetailManager.getPost(reportPost)
+
+    suspend fun addReply(comment: Comment) : Flow<ResultData<Boolean>> = firebasePostDetailManager.addReplyToPost(comment)
 
     //Search
     suspend fun getUserByString(searchUsername: String) =

@@ -54,9 +54,7 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
 
     open fun setupObjects() {}
 
-    open fun setupViewDesign() {
-//        requireActivity().window.setPan()
-    }
+    open fun setupViewDesign() {}
 
     open fun customActionOnBackPressed(action: Int = 0) {}
 
