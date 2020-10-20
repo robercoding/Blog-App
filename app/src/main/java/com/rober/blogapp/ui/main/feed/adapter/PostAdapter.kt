@@ -23,7 +23,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
-class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActionInterface: RecyclerViewActionInterface) :
+class PostAdapter(
+    val itemView: View,
+    val viewHolder: Int,
+    val recyclerViewActionInterface: RecyclerViewActionInterface
+) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -141,7 +145,11 @@ class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActio
         private fun setupClickListeners() {
             title?.setOnClickListener { recyclerViewActionInterface.clickListenerOnPost(adapterPosition) }
             text?.setOnClickListener { recyclerViewActionInterface.clickListenerOnPost(adapterPosition) }
-            container_post?.setOnClickListener { recyclerViewActionInterface.clickListenerOnPost(adapterPosition) }
+            container_post?.setOnClickListener {
+                recyclerViewActionInterface.clickListenerOnPost(
+                    adapterPosition
+                )
+            }
 
             uid_name?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition) }
             uid_image?.setOnClickListener { recyclerViewActionInterface.clickListenerOnUser(adapterPosition) }
@@ -153,6 +161,7 @@ class PostAdapter(val itemView: View, val viewHolder: Int, val recyclerViewActio
 
             val instantNow = Instant.now().toEpochMilli()
             val diff = abs(instantNow - instantPostMillis)
+            //Get how many days have past in milliseconds
             val diffDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS).toInt()
 
             when (diffDays) {

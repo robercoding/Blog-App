@@ -196,12 +196,23 @@
         app:layout_constraintWidth_percent="0.95" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_post_detail_comments"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/post_detail_container_reply"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/post_detail_bottom_divider" />
+
+    <ProgressBar
+        android:id="@+id/post_detail_comments_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/blueTwitter"
+        app:layout_constraintBottom_toTopOf="@id/post_detail_container_reply"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/post_detail_bottom_divider" />
 
     <androidx.constraintlayout.motion.widget.MotionLayout
         android:id="@+id/post_detail_motion_layout_container"
@@ -258,58 +269,76 @@
         android:id="@+id/post_detail_container_reply"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/primaryBackground"
+        android:paddingStart="10dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:background="@color/primaryBackground">
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/post_detail_textview_reply_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You are replying to "
+            android:textSize="14sp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/post_detail_edittext_reply"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/post_detail_textview_username_reply_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/post_detail_input_layout_reply"
-            app:layout_constraintStart_toStartOf="parent"
             android:text="Username"
+            android:textColor="@color/blueTwitter"
             android:textSize="14sp"
-            android:visibility="gone"/>
+            android:textStyle="bold"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@id/post_detail_edittext_reply"
+            app:layout_constraintStart_toEndOf="@id/post_detail_textview_reply_text"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/post_detail_input_layout_reply"
+        <EditText
+            android:id="@+id/post_detail_edittext_reply"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primaryBackground"
-            app:boxStrokeColor="@color/text_input_box_stroke"
+            android:backgroundTint="@color/background_tint_gray_blue_normal"
+            android:hint="Write your reply here!"
+            android:inputType="textMultiLine"
+            android:maxHeight="60dp"
+            android:maxLength="200"
+            android:textColor="@color/primaryText"
+            android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@id/post_detail_button_reply"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/post_detail_edittext_reply"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxHeight="60dp"
-                android:maxLength="200"
-                android:textColor="@color/primaryText"
-                android:textSize="14sp"
-                app:boxStrokeColor="@color/text_input_text_hint"
-                android:inputType="textMultiLine"/>
-        </com.google.android.material.textfield.TextInputLayout>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/post_detail_button_reply"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            app:layout_constraintWidth_percent="0.2"
+            android:backgroundTint="@color/primaryIcon"
+            android:gravity="center"
             android:text="reply"
+            android:textColor="@color/white"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:backgroundTint="@color/primaryIcon"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:visibility="gone"/>
+            app:layout_constraintWidth_percent="0.2" />
 
+        <ProgressBar
+            android:id="@+id/post_detail_sending_reply_progressbar"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="10dp"
+            android:indeterminateTint="@color/secondaryIcon"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/post_detail_button_reply"
+            app:layout_constraintTop_toBottomOf="@id/post_detail_edittext_reply" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

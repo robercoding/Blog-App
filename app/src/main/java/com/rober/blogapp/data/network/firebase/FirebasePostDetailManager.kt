@@ -6,6 +6,7 @@ import com.rober.blogapp.data.network.util.FirebasePath
 import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.ReportPost
+import com.rober.blogapp.entity.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -185,10 +186,73 @@ class FirebasePostDetailManager @Inject constructor(
         }
     }
 
-    suspend fun addReplyToPost(comment: Comment) : Flow<ResultData<Boolean>> = flow {
-        emit(ResultData.Loading)
-        val documentComment = firebaseSource.db.collection(firebasePath.comments_col).document(comment.replyToldId).collection(firebasePath.comments_post).document()
+    suspend fun getPostComments(postId: String): Flow<ResultData<List<Comment>>> = flow {
+        var success = false
 
+        val collectionCommentsPost = firebaseSource.db
+            .collection(firebasePath.comments_col).document(postId)
+            .collection(firebasePath.comments_post)
+
+        var listComments = listOf<Comment>()
+        collectionCommentsPost
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                success = true
+                if (querySnapshot.isEmpty) {
+                    return@addOnSuccessListener
+                }
+
+                listComments = querySnapshot.toObjects(Comment::class.java).toList()
+            }
+            .addOnFailureListener {
+                success = false
+            }
+            .await()
+
+        if (success)
+            emit(ResultData.Success(listComments))
+        else {
+            emit(ResultData.Error(Exception("There was an error when getting the post comments, try again later")))
+        }
+    }
+
+    suspend fun getUsersComments(listComment: List<Comment>): Flow<ResultData<List<User>>> = flow {
+
+        val listUsers = mutableListOf<User>()
+
+        for (comment in listComment) {
+            val document = firebaseSource.db.collection(firebasePath.users_col)
+                .whereEqualTo("userId", comment.commentUserId)
+
+            document.get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (querySnapshot.isEmpty)
+                        return@addOnSuccessListener
+
+                    val usersSnapshot = querySnapshot.toObjects(User::class.java).toList()
+                    for (user in usersSnapshot) {
+                        listUsers.add(user)
+                    }
+                }
+                .addOnFailureListener {
+
+                }
+                .await()
+        }
+
+        if (listUsers.size > 0)
+            emit(ResultData.Success(listUsers))
+        else
+            emit(ResultData.Error(Exception("There was an error trying to get the comments")))
+    }
+
+    suspend fun addReplyToPost(comment: Comment): Flow<ResultData<Boolean>> = flow {
+        emit(ResultData.Loading)
+        val documentComment =
+            firebaseSource.db.collection(firebasePath.comments_col).document(comment.replyToldId)
+                .collection(firebasePath.comments_post).document()
+
+        comment.commentId = documentComment.id
         var success = false
         documentComment.set(comment)
             .addOnSuccessListener {
@@ -199,9 +263,14 @@ class FirebasePostDetailManager @Inject constructor(
             }
             .await()
 
-        if(success)
+        if (success)
             emit(ResultData.Success(success))
         else
-            emit(ResultData.Error(Exception("There was an error when replying the post, try again later!"), false))
+            emit(
+                ResultData.Error(
+                    Exception("There was an error when replying the post, try again later!"),
+                    false
+                )
+            )
     }
 }

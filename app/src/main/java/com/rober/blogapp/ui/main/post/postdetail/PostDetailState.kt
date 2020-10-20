@@ -12,11 +12,13 @@ sealed class PostDetailState {
     object GetParcelableReportedPost : PostDetailState()
 
     data class SetPostDetails(val post: Post, val user: User) : PostDetailState()
+    data class SetPostCommments(val listComment: List<Comment>, val listUser: List<User>) : PostDetailState()
+    object PostCommentsEmpty : PostDetailState()
     data class SetReportPostDetails(val post: Post, val user: User) : PostDetailState()
 
     //Reply
     object LoadingReply : PostDetailState()
-    data class ReplySuccess(val comment: Comment) : PostDetailState()
+    data class ReplySuccess(val listComment: List<Comment>, val listUser: List<User>) : PostDetailState()
 
     data class GoToProfileFragment(val user: User) : PostDetailState()
     object BackToPreviousFragment : PostDetailState()

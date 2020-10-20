@@ -6,14 +6,14 @@
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/feed_viewholder_container_post"
+        android:id="@+id/row_comment_container_comment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/ripple_effect"
         android:visibility="visible">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/uid_image"
+            android:id="@+id/row_comment_uid_picture"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="10dp"
@@ -23,7 +23,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/uid_name"
+            android:id="@+id/row_comment_uid_name"
             style="@style/PostUserName"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
@@ -33,11 +33,11 @@
             android:padding="5dp"
             android:text="User"
             android:textColor="@color/primaryText"
-            app:layout_constraintStart_toStartOf="@id/uid_image"
+            app:layout_constraintStart_toStartOf="@id/row_comment_uid_picture"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/time"
+            android:id="@+id/row_comment_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
@@ -49,20 +49,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/title"
-            style="@style/PostTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="60dp"
-            android:maxWidth="250dp"
-            android:padding="5dp"
-            android:text="Title"
-            android:textColor="@color/primaryText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/uid_name" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text"
+            android:id="@+id/row_comment_text"
             style="@style/PostText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -75,30 +62,10 @@
             android:text="Text"
             android:textColor="@color/primaryText"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title" />
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name" />
 
         <View
             style="@style/Divider"
             tools:ignore="MissingConstraints" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/feed_viewholder_container_no_more_posts"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="5dp"
-            android:layout_height="5dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/ic_fiber_manual_record_black_18dp"
-            android:textColor="@color/blueTwitter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -97,7 +97,14 @@ constructor(
     suspend fun getPost(reportPost: ReportPost): Flow<ResultData<Post>> =
         firebasePostDetailManager.getPost(reportPost)
 
-    suspend fun addReply(comment: Comment) : Flow<ResultData<Boolean>> = firebasePostDetailManager.addReplyToPost(comment)
+    suspend fun getPostComments(postId: String): Flow<ResultData<List<Comment>>> =
+        firebasePostDetailManager.getPostComments(postId)
+
+    suspend fun getUsersComments(listComments: List<Comment>): Flow<ResultData<List<User>>> =
+        firebasePostDetailManager.getUsersComments(listComments)
+
+    suspend fun addReply(comment: Comment): Flow<ResultData<Boolean>> =
+        firebasePostDetailManager.addReplyToPost(comment)
 
     //Search
     suspend fun getUserByString(searchUsername: String) =

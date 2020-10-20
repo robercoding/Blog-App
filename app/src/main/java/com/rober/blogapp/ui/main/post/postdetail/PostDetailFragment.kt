@@ -18,17 +18,21 @@ import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.rober.blogapp.R
+import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
+import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
 import com.rober.blogapp.ui.main.post.postdetail.utils.Constants
+import com.rober.blogapp.util.ColorUtils
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_report_post.view.*
@@ -45,10 +49,6 @@ class PostDetailFragment :
 
     override val viewModel: PostDetailViewModel by viewModels()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupViewDesign()
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -77,6 +77,20 @@ class PostDetailFragment :
                 setPostDetails(viewState.post)
                 setUserDetails(viewState.user)
                 enableLoadingPost(false)
+                displayReplyView(false)
+
+                viewModel.setIntention(PostDetailFragmentEvent.GetCommentsPost)
+                displayProgressBar(post_detail_comments_progressbar, true)
+            }
+
+            is PostDetailState.SetPostCommments -> {
+                setAdapter(viewState.listComment, viewState.listUser)
+                post_detail_comments_progressbar.hide()
+                post_detail_sending_reply_progressbar.hide()
+            }
+
+            is PostDetailState.PostCommentsEmpty -> {
+                displayProgressBar(post_detail_comments_progressbar, false)
             }
 
             is PostDetailState.SetReportPostDetails -> {
@@ -97,6 +111,12 @@ class PostDetailFragment :
 
             is PostDetailState.GoToProfileFragment -> {
                 goToProfileFragment(viewState.user)
+            }
+
+            is PostDetailState.ReplySuccess -> {
+                setAdapter(viewState.listComment, viewState.listUser)
+                displaySnackbar("Reply is successful!")
+                post_detail_sending_reply_progressbar.hide()
             }
 
             is PostDetailState.ShowPostOptions -> {
@@ -146,6 +166,14 @@ class PostDetailFragment :
         }
     }
 
+    private fun setAdapter(listComment: List<Comment>, listUser: List<User>) {
+        val commentsAdapter = CommentsAdapter(listComment, listUser)
+        recyclerview_post_detail_comments.apply {
+            adapter = commentsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+
     private fun enablePostDetailOptionsMode(displayOptionsMode: Boolean) {
         if (displayOptionsMode) {
             post_detail_motion_layout_container.visibility = View.VISIBLE
@@ -187,7 +215,7 @@ class PostDetailFragment :
 
     private fun setUserDetails(user: User) {
         post_detail_username.text = "@${user.username}"
-        post_detail_textview_username_reply_to.text = "You are replying to @${user.username}"
+        post_detail_textview_username_reply_to.text = "@${user.username}"
 
         val imageProfile: Any = if (user.profileImageUrl.isEmpty())
             R.drawable.cat_sleep
@@ -215,10 +243,14 @@ class PostDetailFragment :
     private fun displayReplyView(display: Boolean) {
         if (display) {
             post_detail_textview_username_reply_to.show()
+            post_detail_textview_reply_text.show()
             post_detail_button_reply.show()
+            post_detail_sending_reply_progressbar.hide()
         } else {
             post_detail_textview_username_reply_to.hide()
+            post_detail_textview_reply_text.hide()
             post_detail_button_reply.hide()
+            post_detail_sending_reply_progressbar.hide()
         }
 
     }
@@ -293,11 +325,16 @@ class PostDetailFragment :
 
         post_detail_button_reply.setOnClickListener {
             val replyText = post_detail_edittext_reply.text.toString()
-            if(replyText.isEmpty()){
+            if (replyText.isEmpty()) {
                 displayToast("Reply can't be empty")
                 return@setOnClickListener
             }
 
+            displayReplyView(false)
+            post_detail_edittext_reply.clearFocus()
+            post_detail_edittext_reply.setText("")
+            post_detail_sending_reply_progressbar.show()
+            hideKeyBoard()
             viewModel.setIntention(PostDetailFragmentEvent.AddReply(replyText))
         }
 
@@ -313,11 +350,11 @@ class PostDetailFragment :
 
         post_detail_edittext_reply.addTextChangedListener {
             it?.let {
-                if(it.isEmpty()){
+                if (it.isEmpty()) {
                     post_detail_button_reply.isEnabled = false
                     post_detail_button_reply.setTextColor(getColor(R.color.secondaryText))
                     post_detail_button_reply.background.setTint(getColor(R.color.blueGray))
-                }else{
+                } else {
                     post_detail_button_reply.isEnabled = true
                     post_detail_button_reply.setTextColor(getColor(R.color.primaryText))
                     post_detail_button_reply.background.setTint(getColor(R.color.blueTwitter))
@@ -350,6 +387,9 @@ class PostDetailFragment :
                 ContextCompat.getColor(requireContext(), R.color.blueTwitter),
                 PorterDuff.Mode.SRC_ATOP
             )
+
+//        post_detail_edittext_reply.backgroundTintList = ColorUtils(requireContext()).postDetailReplyEditText
+//        post_detail_edittext_reply.background.colorFilter
         requireActivity().window.setSoftInputMode(0) //Don't move up all views when keyboard appears to reply
     }
 
@@ -415,6 +455,8 @@ sealed class PostDetailFragmentEvent {
     object GetParcelableUpdatedPost : PostDetailFragmentEvent()
     object GetParcelablePost : PostDetailFragmentEvent()
     object GetParcelableReportedPost : PostDetailFragmentEvent()
+
+    object GetCommentsPost : PostDetailFragmentEvent()
 
     data class SetPost(val post: Post) : PostDetailFragmentEvent()
     data class GetReportedPostAndUser(val reportedPost: ReportPost) : PostDetailFragmentEvent()

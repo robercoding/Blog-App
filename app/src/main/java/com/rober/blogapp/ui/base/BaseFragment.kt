@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.rober.blogapp.R
 import com.rober.blogapp.ui.MainActivity
 
 abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
@@ -77,7 +78,8 @@ abstract class BaseFragment<STATE, EVENT, VM : BaseViewModel<STATE, EVENT>>(
     }
 
     fun displaySnackbar(message: String) {
-        Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT)
+            .setBackgroundTint(getColor(R.color.blueGray)).show()
     }
 
     fun restoreDefaultOnBackPressed() {

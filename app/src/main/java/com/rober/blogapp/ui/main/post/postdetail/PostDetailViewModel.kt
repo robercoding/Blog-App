@@ -17,6 +17,7 @@ import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.REPORT_POST
 import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.UNFOLLOW_USER
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.threeten.bp.Instant
 
 
 class PostDetailViewModel @ViewModelInject constructor(
@@ -33,12 +34,20 @@ class PostDetailViewModel @ViewModelInject constructor(
     private var listOptionsText = listOf<String>()
     private var listOptions = listOf<Option>()
 
+    private var mutableListComments = mutableListOf<Comment>()
+    private var mutableListUser = mutableListOf<User>()
 
     override fun setIntention(event: PostDetailFragmentEvent) {
         when (event) {
             is PostDetailFragmentEvent.SetPost -> {
                 post = event.post
                 setPost(event.post, event.post.userCreatorId)
+            }
+
+            is PostDetailFragmentEvent.GetCommentsPost -> {
+                viewModelScope.launch {
+                    getPostComments()
+                }
             }
             is PostDetailFragmentEvent.AddLike -> {
             }
@@ -478,19 +487,68 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun addRepply(message: String){
+    private suspend fun getPostComments() {
+        post?.let { tempPost ->
+            job = viewModelScope.launch {
+                firebaseRepository.getPostComments(tempPost.postId)
+                    .collect { resultData ->
+                        when (resultData) {
+                            is ResultData.Success -> {
+                                Log.i("SeeComments", "Comments Success")
+                                mutableListComments = resultData.data!!.toMutableList()
+                                Log.i("SeeComments", "Added comments")
+                            }
+                            is ResultData.Error -> viewState = PostDetailState.Error(resultData.exception)
+                        }
+                    }
+            }
+        }
+        job?.join()
+        job = viewModelScope.launch {
+            Log.i("SeeComments", "Start users")
+            if (mutableListComments.isEmpty()) {
+                Log.i("SeeComments", "Start is empty")
+                viewState = PostDetailState.PostCommentsEmpty
+                return@launch
+            }
+
+            firebaseRepository.getUsersComments(mutableListComments)
+                .collect { resultData ->
+                    when (resultData) {
+                        is ResultData.Success -> {
+                            Log.i("SeeComments", "Users Comments Success")
+                            mutableListUser = resultData.data!!.toMutableList()
+                        }
+                        is ResultData.Error -> {
+                            Log.i("SeeComments", "Users Comments Error ${resultData.exception}")
+                            viewState = PostDetailState.Error(resultData.exception)
+                        }
+                    }
+                }
+        }
+        job?.join()
+
+        if (mutableListComments.isNotEmpty() && mutableListUser.isNotEmpty()) {
+            viewState =
+                PostDetailState.SetPostCommments(mutableListComments.toList(), mutableListUser.toList())
+        } else {
+            viewState = PostDetailState.PostCommentsEmpty
+        }
+    }
+
+    private fun addRepply(message: String) {
         Log.i("SeeReply", "See reply ${message}")
         val currentUser = firebaseRepository.getCurrentUser()
-        if(currentUser.username.isEmpty())
+        if (currentUser.username.isEmpty())
             return
 
-        post?.let {tempPost->
-            val comment = Comment(message, currentUser.userId, tempPost.postId)
+        post?.let { tempPost ->
+            val comment = Comment(message, "", currentUser.userId, tempPost.postId, Instant.now().epochSecond)
 
             viewModelScope.launch {
                 firebaseRepository.addReply(comment)
-                    .collect {resultData->
-                        when(resultData){
+                    .collect { resultData ->
+                        when (resultData) {
 
                             is ResultData.Loading -> {
                                 Log.i("SeeReply", "See Loading")
@@ -499,7 +557,12 @@ class PostDetailViewModel @ViewModelInject constructor(
 
                             is ResultData.Success -> {
                                 Log.i("SeeReply", "See Success")
-                                viewState = PostDetailState.ReplySuccess(comment)
+                                mutableListComments.add(comment)
+                                mutableListUser.add(currentUser)
+                                viewState = PostDetailState.ReplySuccess(
+                                    mutableListComments.toList(),
+                                    mutableListUser.toList()
+                                )
                             }
 
                             is ResultData.Error -> {
@@ -509,7 +572,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                         }
                     }
             }
-        }?: kotlin.run {
+        } ?: kotlin.run {
 
         }
     }
