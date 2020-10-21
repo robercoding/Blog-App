@@ -35,7 +35,9 @@ class PostDetailViewModel @ViewModelInject constructor(
     private var listOptions = listOf<Option>()
 
     private var mutableListComments = mutableListOf<Comment>()
+    private var mutableListSelectedComments = mutableListOf<Comment>()
     private var mutableListUser = mutableListOf<User>()
+
 
     override fun setIntention(event: PostDetailFragmentEvent) {
         when (event) {
@@ -137,6 +139,14 @@ class PostDetailViewModel @ViewModelInject constructor(
                     setPost(event.editedPost, event.editedPost.userCreatorId)
                     saveUpdatedPost(event.editedPost)
                 }
+            }
+
+            is PostDetailFragmentEvent.SelectComment -> {
+                val commentHighlight = mutableListComments[event.position]
+                mutableListSelectedComments.clear()
+                mutableListSelectedComments.add(commentHighlight)
+                viewState =
+                    PostDetailState.SetSelectedCommentView(mutableListSelectedComments, mutableListUser, 0, userPost?.username)
             }
 
             is PostDetailFragmentEvent.AddReply -> {

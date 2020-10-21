@@ -20,6 +20,14 @@ sealed class PostDetailState {
     object LoadingReply : PostDetailState()
     data class ReplySuccess(val listComment: List<Comment>, val listUser: List<User>) : PostDetailState()
 
+    //Comment
+    data class SetSelectedCommentView(
+        val listSelectedComment: List<Comment>,
+        val listUsers: List<User>,
+        val highlightCommentPosition: Int,
+        val usernameReply: String?
+    ) : PostDetailState()
+
     data class GoToProfileFragment(val user: User) : PostDetailState()
     object BackToPreviousFragment : PostDetailState()
 

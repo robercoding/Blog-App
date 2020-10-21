@@ -8,6 +8,7 @@
     <color name="black">#000000</color>
 
     <color name="primaryBackground">@color/white</color>
+    <color name="primaryBackgroundTransparency">@color/darkBlueTransparency</color>
     <color name="searchBackground">@color/white</color>
 
     <color name="primaryText">@color/black</color>
@@ -36,6 +37,7 @@
 
 
     <color name="darkBlue">#14242c</color>
+    <color name="darkBlueTransparency">#0014242c</color>
     <color name="darkBlackBlue">#10171F</color>
 
     <color name="background_opaque">#CC121B1F</color>

@@ -10,9 +10,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
@@ -29,15 +29,17 @@ import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
+import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsHighlightAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
 import com.rober.blogapp.ui.main.post.postdetail.utils.Constants
-import com.rober.blogapp.util.ColorUtils
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
+import com.rober.blogapp.util.RecyclerViewActionInterface
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_report_post.view.*
 import kotlinx.android.synthetic.main.fragment_post_detail.*
-import kotlinx.coroutines.delay
+import kotlinx.android.synthetic.main.fragment_post_detail.view.*
+
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
@@ -45,7 +47,7 @@ import org.threeten.bp.format.DateTimeFormatter
 @AndroidEntryPoint
 class PostDetailFragment :
     BaseFragment<PostDetailState, PostDetailFragmentEvent, PostDetailViewModel>(R.layout.fragment_post_detail),
-    OnListOptionsClickInterface {
+    OnListOptionsClickInterface, RecyclerViewActionInterface {
 
     override val viewModel: PostDetailViewModel by viewModels()
 
@@ -84,9 +86,20 @@ class PostDetailFragment :
             }
 
             is PostDetailState.SetPostCommments -> {
-                setAdapter(viewState.listComment, viewState.listUser)
+                displayHighlightCommentView(false)
+                setCommentAdapter(viewState.listComment, viewState.listUser)
                 post_detail_comments_progressbar.hide()
                 post_detail_sending_reply_progressbar.hide()
+            }
+
+            is PostDetailState.SetSelectedCommentView -> {
+                displayHighlightCommentView(true)
+                setHighlightCommentAdapter(
+                    viewState.listSelectedComment,
+                    viewState.listUsers,
+                    viewState.highlightCommentPosition,
+                    viewState.usernameReply
+                )
             }
 
             is PostDetailState.PostCommentsEmpty -> {
@@ -114,7 +127,7 @@ class PostDetailFragment :
             }
 
             is PostDetailState.ReplySuccess -> {
-                setAdapter(viewState.listComment, viewState.listUser)
+                setCommentAdapter(viewState.listComment, viewState.listUser)
                 displaySnackbar("Reply is successful!")
                 post_detail_sending_reply_progressbar.hide()
             }
@@ -166,12 +179,33 @@ class PostDetailFragment :
         }
     }
 
-    private fun setAdapter(listComment: List<Comment>, listUser: List<User>) {
-        val commentsAdapter = CommentsAdapter(listComment, listUser)
+    private fun setCommentAdapter(listComment: List<Comment>, listUser: List<User>) {
+        val commentsAdapter = CommentsAdapter(listComment, listUser, this)
         recyclerview_post_detail_comments.apply {
             adapter = commentsAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
+    }
+
+    private fun setHighlightCommentAdapter(
+        listComment: List<Comment>,
+        listUser: List<User>,
+        highlighCommentPosition: Int,
+        usernameReply: String?
+    ) {
+        val commentsAdapter = CommentsHighlightAdapter(
+            listComment,
+            listUser,
+            this,
+            highlighCommentPosition,
+            usernameReply
+        )
+        recyclerview_post_detail_comments.apply {
+            adapter = commentsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
+
+
     }
 
     private fun enablePostDetailOptionsMode(displayOptionsMode: Boolean) {
@@ -288,13 +322,87 @@ class PostDetailFragment :
 
         post_detail_options.hide()
         post_detail_top_divider.hide()
-        post_detail_bottom_divider.hide()
+
         post_detail_comment_icon.hide()
         post_detail_heart_icon.hide()
         post_detail_heart_number.hide()
         post_detail_heart_text.hide()
         post_detail_container_reply.hide()
 
+    }
+
+    private fun displayHighlightCommentView(display: Boolean) {
+        if (display) {
+            post_detail_text.textSize = 14f
+            post_detail_username.textSize = 12f
+            post_detail_title.textSize = 12f
+
+            post_detail_container_post_selected_comment.show()
+            post_detail_container_post.hide()
+            val constraintLayoutParams =
+                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
+            constraintLayoutParams.topToBottom = R.id.post_detail_container_post_selected_comment
+            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
+
+        } else {
+
+            post_detail_heart_icon.show()
+            post_detail_heart_text.show()
+            post_detail_heart_number.show()
+            post_detail_comment_icon.show()
+            post_detail_top_divider.show()
+            post_detail_date.show()
+            post_detail_options.show()
+            post_detail_text.textSize = 16f
+            post_detail_username.textSize = 12f
+
+            post_detail_container_post_selected_comment.hide()
+            post_detail_container_post.show()
+            val constraintLayoutParams =
+                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
+            constraintLayoutParams.topToBottom = R.id.post_detail_container_post
+            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
+        }
+    }
+
+
+    private fun getParcelableUpdatedPostAndSetIntention() {
+        val updatedPost = arguments?.getParcelable<Post>("updatedPost")
+
+        updatedPost?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.SaveUpdatedPost(updatedPost))
+        } ?: kotlin.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetParcelablePost)
+        }
+    }
+
+    private fun getParcelablePostAndSetIntention() {
+        val post = arguments?.getParcelable<Post>("post")
+
+        post?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.SetPost(this))
+        } ?: kotlin.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetParcelableReportedPost)
+        }
+    }
+
+    private fun getParcelableReportedPostAndSetIntention() {
+        val reportedPost = arguments?.getParcelable<ReportPost>("reportPost")
+
+        reportedPost?.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GetReportedPostAndUser(reportedPost))
+        } ?: kotlin.run {
+            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
+        }
+    }
+
+    private fun enableLoadingPost(display: Boolean) {
+        if (display) post_detail_background_loading.visibility =
+            View.VISIBLE else post_detail_background_loading.visibility = View.GONE
     }
 
     override fun setupListeners() {
@@ -415,39 +523,20 @@ class PostDetailFragment :
         )
     }
 
-    private fun getParcelableUpdatedPostAndSetIntention() {
-        val updatedPost = arguments?.getParcelable<Post>("updatedPost")
-
-        updatedPost?.run {
-            viewModel.setIntention(PostDetailFragmentEvent.SaveUpdatedPost(updatedPost))
-        } ?: kotlin.run {
-            viewModel.setIntention(PostDetailFragmentEvent.GetParcelablePost)
-        }
+    override fun clickListenerOnItem(positionAdapter: Int) {
+        viewModel.setIntention(PostDetailFragmentEvent.SelectComment(positionAdapter))
     }
 
-    private fun getParcelablePostAndSetIntention() {
-        val post = arguments?.getParcelable<Post>("post")
-
-        post?.run {
-            viewModel.setIntention(PostDetailFragmentEvent.SetPost(this))
-        } ?: kotlin.run {
-            viewModel.setIntention(PostDetailFragmentEvent.GetParcelableReportedPost)
-        }
+    override fun clickListenerOnPost(positionAdapter: Int) {
+        //
     }
 
-    private fun getParcelableReportedPostAndSetIntention() {
-        val reportedPost = arguments?.getParcelable<ReportPost>("reportPost")
-
-        reportedPost?.run {
-            viewModel.setIntention(PostDetailFragmentEvent.GetReportedPostAndUser(reportedPost))
-        } ?: kotlin.run {
-            viewModel.setIntention(PostDetailFragmentEvent.GoBackToPreviousFragment)
-        }
+    override fun clickListenerOnUser(positionAdapter: Int) {
+        //
     }
 
-    private fun enableLoadingPost(display: Boolean) {
-        if (display) post_detail_background_loading.visibility =
-            View.VISIBLE else post_detail_background_loading.visibility = View.GONE
+    override fun requestMorePosts(actualRecyclerViewPosition: Int) {
+        //
     }
 }
 
@@ -463,6 +552,8 @@ sealed class PostDetailFragmentEvent {
     data class AddReply(val message: String) : PostDetailFragmentEvent()
     object AddLike : PostDetailFragmentEvent()
     object AddRepost : PostDetailFragmentEvent()
+
+    data class SelectComment(val position: Int) : PostDetailFragmentEvent()
 
     object HideOptions : PostDetailFragmentEvent()
     object ShowPostOptions : PostDetailFragmentEvent()

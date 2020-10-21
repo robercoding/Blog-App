@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:minHeight="75dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/row_comment_container_comment"
@@ -11,13 +12,24 @@
         android:layout_height="match_parent"
         android:background="@drawable/ripple_effect"
         android:visibility="visible">
+        <View
+            android:layout_width="3dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="35dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintBottom_toTopOf="@id/row_comment_uid_picture"
+            android:background="@color/grayLight"
+            />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/row_comment_uid_picture"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/cat_sleep"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -27,26 +39,64 @@
             style="@style/PostUserName"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="25dp"
             android:maxWidth="150dp"
             android:padding="5dp"
             android:text="User"
             android:textColor="@color/primaryText"
-            app:layout_constraintStart_toStartOf="@id/row_comment_uid_picture"
+            app:layout_constraintStart_toEndOf="@id/row_comment_uid_picture"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/row_comment_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="25dp"
             android:layout_marginEnd="10dp"
             android:padding="5dp"
             android:text="time"
             android:textColor="@color/grayLight"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/row_comment_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:background="@color/primaryBackgroundTransparency"
+            android:padding="7dp"
+            android:src="@drawable/ic_options_arrow_down"
+            android:tint="@color/grayLight"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/row_comment_reply_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name"
+            app:layout_constraintStart_toStartOf="@id/row_comment_uid_picture"
+            android:text="Replying to "
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="15dp"
+            android:textSize="12sp"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/row_comment_reply_text_to_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name"
+            app:layout_constraintStart_toEndOf="@id/row_comment_reply_text"
+            android:text="Username"
+            android:textSize="12sp"
+            android:textColor="@color/blueTwitter"
+            android:textStyle="bold"
+            android:layout_marginTop="15dp"
+            android:visibility="gone"/>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/row_comment_text"
@@ -62,7 +112,21 @@
             android:text="Text"
             android:textColor="@color/primaryText"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name" />
+            app:layout_constraintTop_toBottomOf="@id/row_comment_reply_text" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/row_comment_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="date null"
+            android:textColor="@color/grayLight"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_text"
+            app:layout_constraintWidth_percent="0.85"
+            android:visibility="gone"/>
 
         <View
             style="@style/Divider"
