@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.post.postdetail.utils
+package com.rober.blogapp.ui.main.post.utils
 
 object Constants {
     val EDIT_POST = "Edit post"

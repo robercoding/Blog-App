@@ -3,7 +3,7 @@ package com.rober.blogapp.util
 import com.rober.blogapp.R
 import javax.inject.Inject
 
-class Destinations @Inject constructor(){
+class Destinations @Inject constructor() {
 
     //WithoutBottomNavigation
     val LOGIN_FRAGMENT = R.id.loginFragment
@@ -11,6 +11,7 @@ class Destinations @Inject constructor(){
     val POST_ADD_FRAGMENT = R.id.postAddFragment
     val POST_DETAIL_FRAGMENT = R.id.postDetailFragment
     val PROFILE_EDIT_FRAGMENT = R.id.profileEditFragment
+    val POST_REPLY_FRAGMENT = R.id.postReplyFragment
 
     //With BottomNavigation
     val FEED_FRAGMENT = R.id.feedFragment
@@ -22,7 +23,8 @@ class Destinations @Inject constructor(){
         REGISTER_FRAGMENT,
         POST_ADD_FRAGMENT,
         POST_DETAIL_FRAGMENT,
-        PROFILE_EDIT_FRAGMENT
+        PROFILE_EDIT_FRAGMENT,
+        POST_REPLY_FRAGMENT
     )
 
     val fragmentsWithBottomNavigationList = listOf(

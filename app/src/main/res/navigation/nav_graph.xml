@@ -197,6 +197,9 @@
             app:exitAnim="@anim/to_top"
             app:popEnterAnim="@anim/from_top"
             app:popExitAnim="@anim/to_bottom" />
+        <action
+            android:id="@+id/action_postDetailFragment_to_postReply"
+            app:destination="@id/postReplyFragment" />
     </fragment>
     <fragment
         android:id="@+id/profileEditFragment"
@@ -257,5 +260,30 @@
             app:exitAnim="@anim/to_left"
             app:popEnterAnim="@anim/from_left"
             app:popExitAnim="@anim/to_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/postReplyFragment"
+        android:name="com.rober.blogapp.ui.main.post.postreply.PostReplyFragment"
+        android:label="post_reply_fragment"
+        tools:layout="@layout/fragment_post_reply">
+
+        <argument
+            android:name="post"
+            app:argType="com.rober.blogapp.entity.Post"
+            app:nullable="false" />
+
+        <argument
+            android:name="postUser"
+            app:argType="com.rober.blogapp.entity.User"
+            app:nullable="false" />
+
+        <argument
+            android:name="listComment"
+            app:argType="com.rober.blogapp.entity.Comment[]"
+            app:nullable="false" />
+        <argument
+            android:name="listUsers"
+            app:argType="com.rober.blogapp.entity.User[]"
+            app:nullable="false" />
     </fragment>
 </navigation>

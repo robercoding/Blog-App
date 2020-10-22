@@ -1,4 +1,4 @@
-package com.rober.blogapp.ui.main.post.postdetail.adapter
+package com.rober.blogapp.ui.main.post.postreply.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,7 +8,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rober.blogapp.R
@@ -18,11 +17,10 @@ import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 
 class CommentsHighlightAdapter(
-    val listSelectedComment: List<Comment>,
+    val listHighlightComments: List<Comment>,
     val listUsers: List<User>,
     val recyclerViewActionInterface: RecyclerViewActionInterface,
-    val selectedCommentPosition: Int,
-    val usernameReply: String?
+    val usernameReply: String
 ) :
     RecyclerView.Adapter<CommentsHighlightAdapter.CommentsViewHolder>() {
 
@@ -32,10 +30,13 @@ class CommentsHighlightAdapter(
         var userName: TextView? = null
         var userText: TextView? = null
         var time: TextView? = null
-        var date: TextView? = null
+        var dateTextView: TextView? = null
         var options: ImageButton? = null
         var replyingText: TextView? = null
         var replyingToUsername: TextView? = null
+        var continueReplyTop: View? = null
+        var continueReplyBottom: View? = null
+        var topDivider: View? = null
 
         init {
             containerComments = itemView.findViewById(R.id.row_comment_container_comment)
@@ -43,10 +44,14 @@ class CommentsHighlightAdapter(
             userName = itemView.findViewById(R.id.row_comment_uid_name)
             userText = itemView.findViewById(R.id.row_comment_text)
             time = itemView.findViewById(R.id.row_comment_time)
-            date = itemView.findViewById(R.id.row_comment_date)
+            dateTextView = itemView.findViewById(R.id.row_comment_date)
             options = itemView.findViewById(R.id.row_comment_options)
             replyingText = itemView.findViewById(R.id.row_comment_reply_text)
             replyingToUsername = itemView.findViewById(R.id.row_comment_reply_text_to_username)
+            continueReplyTop = itemView.findViewById(R.id.row_comment_continue_reply_top)
+            continueReplyBottom = itemView.findViewById(R.id.row_comment_continue_reply_bottom)
+            topDivider = itemView.findViewById(R.id.row_comment_top_divider)
+
         }
 
         fun bind(
@@ -72,19 +77,37 @@ class CommentsHighlightAdapter(
                 recyclerViewActionInterface.clickListenerOnItem(adapterPosition)
             }
 
+            topDivider?.visibility = View.GONE
+            continueReplyTop?.visibility = View.VISIBLE
+            continueReplyBottom?.visibility = View.VISIBLE
+
             if (highlightedComment) {
                 time?.visibility = View.GONE
+                continueReplyBottom?.visibility = View.GONE
 
                 options?.visibility = View.VISIBLE
-                date?.visibility = View.VISIBLE
+                dateTextView?.visibility = View.VISIBLE
                 replyingText?.visibility = View.VISIBLE
+                continueReplyTop?.visibility = View.VISIBLE
                 replyingToUsername?.visibility = View.VISIBLE
                 replyingToUsername?.text = "@${usernameReply}"
 
+                val date = Utils.getDateDayMonthYearInSeconds(comment.repliedAt)
+                val time = Utils.getDateHourMinutesInSeconds(comment.repliedAt)
+                dateTextView?.text = "${date}    |    ${time}"
+
+
                 userText?.textSize = 16f
-//                val constraintLayout =
-////                    ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, 300)
-////                containerComments?.layoutParams = constraintLayout
+                val constraintLayout =
+                    ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                    )
+                constraintLayout.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+                constraintLayout.topToBottom = R.id.row_comment_reply_text
+                constraintLayout.marginStart = 60
+
+                userText?.layoutParams = constraintLayout
             } else {
                 Log.i("SeeResize", "Not resized")
             }
@@ -98,16 +121,16 @@ class CommentsHighlightAdapter(
     }
 
     override fun onBindViewHolder(holder: CommentsViewHolder, position: Int) {
-        val userId = listSelectedComment[position].commentUserId
-        val userComment = listUsers.find { user -> user.userId == userId }
+        val userId = listHighlightComments[position].commentUserId
+        val commentUser = listUsers.find { user -> user.userId == userId }
 
         var highlightedComment = false
-        if (position == selectedCommentPosition)
+        if (position == listHighlightComments.size - 1)
             highlightedComment = true
 
-        userComment?.let { tempUser ->
+        commentUser?.let { tempUser ->
             holder.bind(
-                listSelectedComment[position],
+                listHighlightComments[position],
                 tempUser,
                 recyclerViewActionInterface,
                 highlightedComment,
@@ -117,7 +140,7 @@ class CommentsHighlightAdapter(
     }
 
     override fun getItemCount(): Int {
-        return listSelectedComment.size
+        return listHighlightComments.size
     }
 
 }

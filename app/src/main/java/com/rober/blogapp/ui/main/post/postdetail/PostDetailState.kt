@@ -24,8 +24,8 @@ sealed class PostDetailState {
     data class SetSelectedCommentView(
         val listSelectedComment: List<Comment>,
         val listUsers: List<User>,
-        val highlightCommentPosition: Int,
-        val usernameReply: String?
+        val post: Post,
+        val postUser: User
     ) : PostDetailState()
 
     data class GoToProfileFragment(val user: User) : PostDetailState()

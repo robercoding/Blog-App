@@ -12,12 +12,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -29,20 +29,15 @@ import com.rober.blogapp.entity.ReportPost
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
-import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsHighlightAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants
+import com.rober.blogapp.ui.main.post.utils.Constants
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import com.rober.blogapp.util.RecyclerViewActionInterface
+import com.rober.blogapp.util.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.dialog_report_post.view.*
 import kotlinx.android.synthetic.main.fragment_post_detail.*
-import kotlinx.android.synthetic.main.fragment_post_detail.view.*
-
-import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.format.DateTimeFormatter
 
 @AndroidEntryPoint
 class PostDetailFragment :
@@ -50,6 +45,7 @@ class PostDetailFragment :
     OnListOptionsClickInterface, RecyclerViewActionInterface {
 
     override val viewModel: PostDetailViewModel by viewModels()
+    val args: PostDetailFragmentArgs by navArgs()
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -86,20 +82,29 @@ class PostDetailFragment :
             }
 
             is PostDetailState.SetPostCommments -> {
-                displayHighlightCommentView(false)
+//                displayHighlightCommentView(false)b
                 setCommentAdapter(viewState.listComment, viewState.listUser)
                 post_detail_comments_progressbar.hide()
                 post_detail_sending_reply_progressbar.hide()
             }
 
             is PostDetailState.SetSelectedCommentView -> {
-                displayHighlightCommentView(true)
-                setHighlightCommentAdapter(
-                    viewState.listSelectedComment,
-                    viewState.listUsers,
-                    viewState.highlightCommentPosition,
-                    viewState.usernameReply
+//                displayHighlightCommentView(true)
+//                setHighlightCommentAdapter(
+//                    viewState.listSelectedComment,
+//                    viewState.listUsers,
+//                    viewState.highlightCommentPosition,
+//                    viewState.usernameReply
+//                )
+
+
+                val action = PostDetailFragmentDirections.actionPostDetailFragmentToPostReply(
+                    viewState.post,
+                    viewState.postUser,
+                    viewState.listSelectedComment.toTypedArray(),
+                    viewState.listUsers.toTypedArray()
                 )
+                findNavController().navigate(action)
             }
 
             is PostDetailState.PostCommentsEmpty -> {
@@ -187,26 +192,26 @@ class PostDetailFragment :
         }
     }
 
-    private fun setHighlightCommentAdapter(
-        listComment: List<Comment>,
-        listUser: List<User>,
-        highlighCommentPosition: Int,
-        usernameReply: String?
-    ) {
-        val commentsAdapter = CommentsHighlightAdapter(
-            listComment,
-            listUser,
-            this,
-            highlighCommentPosition,
-            usernameReply
-        )
-        recyclerview_post_detail_comments.apply {
-            adapter = commentsAdapter
-            layoutManager = LinearLayoutManager(requireContext())
-        }
-
-
-    }
+//    private fun setHighlightCommentAdapter(
+//        listComment: List<Comment>,
+//        listUser: List<User>,
+//        highlighCommentPosition: Int,
+//        usernameReply: String?
+//    ) {
+//        val commentsAdapter = CommentsHighlightAdapter(
+//            listComment,
+//            listUser,
+//            this,
+//            highlighCommentPosition,
+//            usernameReply
+//        )
+//
+//        recyclerview_post_detail_comments.apply {
+//            adapter = commentsAdapter
+//            layoutManager = LinearLayoutManager(requireContext())
+//            addItemDecoration(DividerItemDecoration(requireContext(), 0))
+//        }
+//    }
 
     private fun enablePostDetailOptionsMode(displayOptionsMode: Boolean) {
         if (displayOptionsMode) {
@@ -234,15 +239,15 @@ class PostDetailFragment :
         post_detail_text.text = post.text
         post_detail_title.text = post.title
 
-        val instantDate = Instant.ofEpochSecond(post.createdAt)
-        val zdt = ZoneId.systemDefault()
-        val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
+//        val instantDate = Instant.ofEpochSecond(post.createdAt)
+//        val zdt = ZoneId.systemDefault()
+//        val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
+//
+//        val fmtDate = DateTimeFormatter.ofPattern("dd/MM/yy")
+//        val fmtTime = DateTimeFormatter.ofPattern("HH:mm")
 
-        val fmtDate = DateTimeFormatter.ofPattern("dd/MM/yy")
-        val fmtTime = DateTimeFormatter.ofPattern("HH:mm")
-
-        val date = fmtDate.format(instantDateZoneId)
-        val time = fmtTime.format(instantDateZoneId)
+        val date = Utils.getDateDayMonthYearInSeconds(post.createdAt)
+        val time = Utils.getDateHourMinutesInSeconds(post.createdAt)
 
         post_detail_date.text = "${date}   |   ${time}"
     }
@@ -286,7 +291,6 @@ class PostDetailFragment :
             post_detail_button_reply.hide()
             post_detail_sending_reply_progressbar.hide()
         }
-
     }
 
     private fun goToProfileFragment(user: User) {
@@ -331,43 +335,43 @@ class PostDetailFragment :
 
     }
 
-    private fun displayHighlightCommentView(display: Boolean) {
-        if (display) {
-            post_detail_text.textSize = 14f
-            post_detail_username.textSize = 12f
-            post_detail_title.textSize = 12f
-
-            post_detail_container_post_selected_comment.show()
-            post_detail_container_post.hide()
-            val constraintLayoutParams =
-                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
-            constraintLayoutParams.topToBottom = R.id.post_detail_container_post_selected_comment
-            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
-
-        } else {
-
-            post_detail_heart_icon.show()
-            post_detail_heart_text.show()
-            post_detail_heart_number.show()
-            post_detail_comment_icon.show()
-            post_detail_top_divider.show()
-            post_detail_date.show()
-            post_detail_options.show()
-            post_detail_text.textSize = 16f
-            post_detail_username.textSize = 12f
-
-            post_detail_container_post_selected_comment.hide()
-            post_detail_container_post.show()
-            val constraintLayoutParams =
-                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
-            constraintLayoutParams.topToBottom = R.id.post_detail_container_post
-            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
-        }
-    }
+//    private fun displayHighlightCommentView(display: Boolean) {
+//        if (display) {
+//            post_detail_text.textSize = 14f
+//            post_detail_username.textSize = 12f
+//            post_detail_title.textSize = 12f
+//
+//            post_detail_container_post_selected_comment.show()
+//            post_detail_container_post.hide()
+//            val constraintLayoutParams =
+//                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
+//            constraintLayoutParams.topToBottom = R.id.post_detail_container_post_selected_comment
+//            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+//            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+//            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
+//
+//        } else {
+//
+//            post_detail_heart_icon.show()
+//            post_detail_heart_text.show()
+//            post_detail_heart_number.show()
+//            post_detail_comment_icon.show()
+//            post_detail_top_divider.show()
+//            post_detail_date.show()
+//            post_detail_options.show()
+//            post_detail_text.textSize = 16f
+//            post_detail_username.textSize = 12f
+//
+//            post_detail_container_post_selected_comment.hide()
+//            post_detail_container_post.show()
+//            val constraintLayoutParams =
+//                ConstraintLayout.LayoutParams(recyclerview_post_detail_comments.layoutParams)
+//            constraintLayoutParams.topToBottom = R.id.post_detail_container_post
+//            constraintLayoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+//            constraintLayoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+//            recyclerview_post_detail_comments.layoutParams = constraintLayoutParams
+//        }
+//    }
 
 
     private fun getParcelableUpdatedPostAndSetIntention() {

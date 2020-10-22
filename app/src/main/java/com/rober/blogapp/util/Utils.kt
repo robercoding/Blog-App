@@ -1,6 +1,8 @@
 package com.rober.blogapp.util
 
 import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -39,7 +41,26 @@ object Utils {
                 val diffDays = TimeUnit.DAYS.convert(diffMilliseconds, TimeUnit.MILLISECONDS).toInt()
                 return "${diffDays / 365}y"
             }
-
         }
+    }
+
+    fun getDateDayMonthYearInSeconds(seconds: Long): String {
+        val instantDate = Instant.ofEpochSecond(seconds)
+        val zdt = ZoneId.systemDefault()
+        val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
+
+        val fmtDate = DateTimeFormatter.ofPattern("dd/MM/yy")
+
+        return fmtDate.format(instantDateZoneId)
+    }
+
+    fun getDateHourMinutesInSeconds(seconds: Long): String {
+        val instantDate = Instant.ofEpochSecond(seconds)
+
+        val zdt = ZoneId.systemDefault()
+        val instantDateZoneId = instantDate.atZone(ZoneId.of(zdt.toString()))
+
+        val fmtTime = DateTimeFormatter.ofPattern("HH:mm")
+        return fmtTime.format(instantDateZoneId)
     }
 }

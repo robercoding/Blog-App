@@ -12,17 +12,32 @@
         android:layout_height="match_parent"
         android:background="@drawable/ripple_effect"
         android:visibility="visible">
+
         <View
+            android:id="@+id/row_comment_continue_reply_top"
             android:layout_width="3dp"
             android:layout_height="0dp"
+            android:layout_marginStart="35dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@color/grayLight"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/row_comment_uid_picture"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/row_comment_continue_reply_bottom"
+            android:layout_width="3dp"
+            android:layout_height="0dp"
             android:layout_marginStart="35dp"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="2dp"
-            app:layout_constraintBottom_toTopOf="@id/row_comment_uid_picture"
             android:background="@color/grayLight"
-            />
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_picture" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/row_comment_uid_picture"
@@ -70,33 +85,34 @@
             android:padding="7dp"
             android:src="@drawable/ic_options_arrow_down"
             android:tint="@color/grayLight"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/row_comment_reply_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name"
-            app:layout_constraintStart_toStartOf="@id/row_comment_uid_picture"
-            android:text="Replying to "
             android:layout_marginStart="20dp"
             android:layout_marginTop="15dp"
+            android:text="Replying to "
             android:textSize="12sp"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/row_comment_uid_picture"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name" />
+
         <TextView
             android:id="@+id/row_comment_reply_text_to_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name"
-            app:layout_constraintStart_toEndOf="@id/row_comment_reply_text"
-            android:text="Username"
-            android:textSize="12sp"
-            android:textColor="@color/blueTwitter"
-            android:textStyle="bold"
             android:layout_marginTop="15dp"
-            android:visibility="gone"/>
+            android:text="Username"
+            android:textColor="@color/blueTwitter"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/row_comment_reply_text"
+            app:layout_constraintTop_toBottomOf="@id/row_comment_uid_name" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/row_comment_text"
@@ -122,13 +138,14 @@
             android:text="date null"
             android:textColor="@color/grayLight"
             android:textSize="12sp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/row_comment_text"
-            app:layout_constraintWidth_percent="0.85"
-            android:visibility="gone"/>
+            app:layout_constraintWidth_percent="0.85" />
 
         <View
+            android:id="@+id/row_comment_top_divider"
             style="@style/Divider"
             tools:ignore="MissingConstraints" />
     </androidx.constraintlayout.widget.ConstraintLayout>

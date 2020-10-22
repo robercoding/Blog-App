@@ -10,11 +10,11 @@ import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.*
 import com.rober.blogapp.ui.base.BaseViewModel
 import com.rober.blogapp.ui.main.post.postdetail.utils.ArrayUtils
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.DELETE_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.EDIT_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.FOLLOW_USER
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.REPORT_POST
-import com.rober.blogapp.ui.main.post.postdetail.utils.Constants.UNFOLLOW_USER
+import com.rober.blogapp.ui.main.post.utils.Constants.DELETE_POST
+import com.rober.blogapp.ui.main.post.utils.Constants.EDIT_POST
+import com.rober.blogapp.ui.main.post.utils.Constants.FOLLOW_USER
+import com.rober.blogapp.ui.main.post.utils.Constants.REPORT_POST
+import com.rober.blogapp.ui.main.post.utils.Constants.UNFOLLOW_USER
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
@@ -146,7 +146,12 @@ class PostDetailViewModel @ViewModelInject constructor(
                 mutableListSelectedComments.clear()
                 mutableListSelectedComments.add(commentHighlight)
                 viewState =
-                    PostDetailState.SetSelectedCommentView(mutableListSelectedComments, mutableListUser, 0, userPost?.username)
+                    PostDetailState.SetSelectedCommentView(
+                        mutableListSelectedComments,
+                        mutableListUser,
+                        post!!,
+                        userPost!!
+                    )
             }
 
             is PostDetailFragmentEvent.AddReply -> {

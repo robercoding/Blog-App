@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
 
             if (destination.id in destinations.fragmentsWithoutBottomNavigationList) {
+                Log.i("SeeDestionationId", "${destination.id}")
                 displayBottomNavigation(false)
             } else {
                 displayBottomNavigation(true)

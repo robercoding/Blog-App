@@ -32,7 +32,7 @@
         android:id="@+id/post_detail_container_post"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/post_detail_app_bar">
@@ -165,9 +165,9 @@
             android:fontFamily="@font/roboto_bold"
             android:text="0"
             android:textColor="@color/primaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/post_detail_heart_text"
-            app:layout_constraintTop_toBottomOf="@id/post_detail_top_divider"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/post_detail_top_divider" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/post_detail_heart_text"
@@ -175,92 +175,11 @@
             android:layout_height="20dp"
             android:layout_marginEnd="5dp"
             android:text="Likes"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/post_detail_top_divider"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintWidth_percent="0.107" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/post_detail_container_post_selected_comment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_detail_app_bar">
-
-        <View
-            android:layout_width="3dp"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/post_detail_image_profile_selected_comment"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="35dp"
-            android:background="@color/grayLight"
-            />
-
-
-        <View
-            style="@style/Divider"
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/post_detail_image_profile_selected_comment"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/cat_sleep"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_detail_username_selected_comment"
-            style="@style/PostUserName"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="15dp"
-            android:text="Username"
-            android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/post_detail_image_profile_selected_comment"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_detail_title_selected_comment"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="5dp"
-            android:text="Title"
-            android:textColor="@color/secondaryText"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            app:layout_constraintStart_toEndOf="@id/post_detail_image_profile_selected_comment"
-            app:layout_constraintTop_toBottomOf="@id/post_detail_username_selected_comment" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_detail_text_selected_comment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginEnd="20dp"
-            android:padding="5dp"
-            android:scrollbarThumbVertical="@color/blueTwitter"
-            android:scrollbars="vertical"
-            android:text="Text from user!"
-            android:textColor="@color/primaryText"
-            android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/post_detail_image_profile_selected_comment"
-            app:layout_constraintTop_toBottomOf="@id/post_detail_title_selected_comment"
-            app:layout_constraintWidth_percent="0.8" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -271,11 +190,11 @@
         android:scrollbarSize="1dp"
         android:scrollbarThumbVertical="@color/blueTwitter"
         android:scrollbars="vertical"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/post_detail_container_reply"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_detail_container_post"
-        android:visibility="visible"/>
+        app:layout_constraintTop_toBottomOf="@id/post_detail_container_post" />
 
     <ProgressBar
         android:id="@+id/post_detail_comments_progressbar"
@@ -292,7 +211,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:elevation="3dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layoutDescription="@xml/fragment_post_detail_motion"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -346,7 +265,6 @@
         android:paddingStart="10dp"
         android:paddingTop="10dp"
         android:paddingEnd="10dp"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
