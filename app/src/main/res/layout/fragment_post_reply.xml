@@ -26,113 +26,148 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/post_reply_container_post"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_reply_app_bar">
-
-        <View
-            android:layout_width="3dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="35dp"
-            android:layout_marginTop="2dp"
-            android:background="@color/grayLight"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/post_reply_image_profile" />
-
-        <View
-            style="@style/Divider"
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/post_reply_image_profile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/cat_sleep"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_reply_username"
-            style="@style/PostUserName"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="15dp"
-            android:text="Username"
-            android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_reply_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="10dp"
-            android:padding="5dp"
-            android:text="time"
-            android:textColor="@color/grayLight"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_reply_title"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="5dp"
-            android:text="Title"
-            android:textColor="@color/secondaryText"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
-            app:layout_constraintTop_toBottomOf="@id/post_reply_username" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/post_reply_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginEnd="20dp"
-            android:padding="5dp"
-            android:scrollbarThumbVertical="@color/blueTwitter"
-            android:scrollbars="vertical"
-            android:text="Text from user!"
-            android:textColor="@color/primaryText"
-            android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
-            app:layout_constraintTop_toBottomOf="@id/post_reply_title"
-            app:layout_constraintWidth_percent="0.8" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/post_reply_recycler_highlight"
-        android:layout_width="match_parent"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/post_reply_nestedscrollview"
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_reply_container_post" />
+        app:layout_constraintTop_toBottomOf="@id/post_reply_app_bar"
+        android:scrollbars="vertical"
+        android:scrollbarThumbVertical="@color/blueTwitter"
+        android:scrollbarSize="1dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/post_reply_recycler_comments"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_reply_recycler_highlight" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/post_reply_wrap"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:descendantFocusability="blocksDescendants">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/post_reply_container_post"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                    android:layout_width="3dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginTop="2dp"
+                    android:background="@color/grayLight"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/post_reply_image_profile" />
+
+                <View
+                    style="@style/Divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="1dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/post_reply_image_profile"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/cat_sleep"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/post_reply_username"
+                    style="@style/PostUserName"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="15dp"
+                    android:text="Username"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/post_reply_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="10dp"
+                    android:padding="5dp"
+                    android:text="time"
+                    android:textColor="@color/grayLight"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/post_reply_title"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    android:text="Title"
+                    android:textColor="@color/secondaryText"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
+                    app:layout_constraintTop_toBottomOf="@id/post_reply_username" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/post_reply_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="20dp"
+                    android:padding="5dp"
+                    android:scrollbarThumbVertical="@color/blueTwitter"
+                    android:scrollbars="vertical"
+                    android:text="Text from user!"
+                    android:textColor="@color/primaryText"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/post_reply_image_profile"
+                    app:layout_constraintTop_toBottomOf="@id/post_reply_title"
+                    app:layout_constraintWidth_percent="0.8" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/post_reply_recycler_highlight"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_reply_container_post"
+                tools:itemCount="10"
+                tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/row_list_comments" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/post_reply_recycler_comments"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_reply_recycler_highlight" />
+
+            <View
+                android:id="@+id/post_reply_blank_space"
+                android:layout_width="match_parent"
+                android:layout_height="1000dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_reply_container_post" />
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/post_reply_container_reply"
         android:layout_width="match_parent"
@@ -197,6 +232,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.2" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

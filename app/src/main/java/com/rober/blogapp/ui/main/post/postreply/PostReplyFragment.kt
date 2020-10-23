@@ -2,11 +2,15 @@ package com.rober.blogapp.ui.main.post.postreply
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.widget.ScrollView
 import androidx.activity.OnBackPressedCallback
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,6 +24,7 @@ import com.rober.blogapp.entity.User
 import com.rober.blogapp.entity.Username
 import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.PostDetailFragmentArgs
+import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
 import com.rober.blogapp.ui.main.post.postreply.adapter.CommentsHighlightAdapter
 import com.rober.blogapp.ui.main.post.utils.Constants
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -70,15 +75,35 @@ class PostReplyFragment :
             Glide.with(requireView())
                 .load(postUser.profileImageUrl)
                 .into(post_reply_image_profile)
+//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
+
+
     }
 
     private fun setAdapterHighlights(listComments: List<Comment>, listUsers: List<User>, postUser: User) {
         val listCommentsMock = listComments.toMutableList()
         val listUsersMock = listUsers.toMutableList()
 
+        val comment = Comment(
+            "Edited to have more height so we can see if that works correctly, just checking out haha thank!",
+            "${listComments[0].commentId}",
+            "${listComments[0].commentUserId}",
+            "${listComments[0].replyToldId}",
+            listComments[0].repliedAt
+        )
+        listCommentsMock[0] = comment
         listCommentsMock.add(
             Comment(
-                "This is mocked",
+                "This is mocked but will be the second! now we will se if this works",
+                "0",
+                listUsers.get(0).userId,
+                listComments.get(0).commentId,
+                1603270909
+            )
+        )
+        listCommentsMock.add(
+            Comment(
+                "This is mocked ",
                 "0",
                 listUsers.get(0).userId,
                 listComments.get(0).commentId,
@@ -89,19 +114,111 @@ class PostReplyFragment :
         val replyingTo = getReplyingToUsername(listUsersMock, postUser)
 
         val highlightAdapter = CommentsHighlightAdapter(listCommentsMock, listUsersMock, this, replyingTo)
+        val linearLayoutManager = LinearLayoutManager(requireContext())
+        linearLayoutManager.scrollToPositionWithOffset(listCommentsMock.size - 1, 20)
         post_reply_recycler_highlight.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = highlightAdapter
-            addItemDecoration(DividerItemDecoration(requireContext(), 0))
         }
 
+        val listCommentsTest = listOf<Comment>(listCommentsMock[0])
+        val listUsersTest = listOf<User>(listUsers[0])
+        val commentsAdapter = CommentsAdapter(listCommentsTest, listUsersTest, this)
+        post_reply_recycler_comments.apply {
+            adapter = commentsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+
+            addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
+        }
+
+
+
+        post_reply_nestedscrollview.requestFocus()
+        post_reply_nestedscrollview.requestLayout()
+        post_reply_nestedscrollview.requestFocus()
+        post_reply_nestedscrollview.requestLayout()
+//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
+//        post_reply_nestedscrollview.scrollTo(700, 700)
+        post_reply_nestedscrollview.requestLayout()
+
+
+        post_reply_recycler_highlight.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val postHeight = post_reply_container_post.y
+                val recyclerHightlightHeight = post_reply_recycler_highlight.y
+                val childHeight = post_reply_recycler_highlight.getChildAt(0).height
+                Log.i("SeeHeight", "Post Height = ${postHeight}")
+                Log.i("SeeHeight", "RecyclerHighlight y= ${recyclerHightlightHeight}")
+                Log.i("SeeHeight", "Child 0 = ${childHeight}")
+                var childHeights = 0
+                for(index in 0..listCommentsMock.size-2){
+                    childHeights += post_reply_recycler_highlight.getChildAt(index).height
+                }
+                post_reply_recycler_highlight.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                post_reply_nestedscrollview.post {
+//            post_reply_nestedscrollview.fullScroll()
+                    Log.i("SeeHeight", "${postHeight + recyclerHightlightHeight + childHeights}")
+                    post_reply_nestedscrollview.scrollTo(
+                        0,
+                        (postHeight + recyclerHightlightHeight + childHeights).toInt()
+                    )
+                }
+
+            }
+        })
+
+//        post_reply_nestedscrollview.post {
+////            post_reply_nestedscrollview.fullScroll()
+//            Log.i("SeeHeight", "${postHeight + recyclerHightlightHeight}")
+//            post_reply_nestedscrollview.scrollTo(0, (postHeight + recyclerHightlightHeight).toInt())
+//        }
+//        post_reply_nestedscrollview.smoothScrollTo(0, 800)
+
+//        post_reply_nestedscrollview.scrollTo(0, 700)
+//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
+//        post_reply_nestedscrollview.scrollY = 700
+//        post_reply_nestedscrollview.smoothScrollTo(0, 1000)
+
+//        post_reply_nestedscrollview.smoothScrollTo(0, 700)
+//        post_reply_nestedscrollview.scrollTo(0, View.FOCUS_DOWN)
+//        post_reply_nestedscrollview.parent.requestChildFocus(post_reply_nestedscrollview, post_reply_nestedscrollview)
+//        post_reply_nestedscrollview.isSmoothScrollingEnabled = true
+//        post_reply_nestedscrollview.scrollTo(0, 300)
+//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
+
+//        post_reply_nestedscrollview.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+//
+//        }
+
+//        post_reply_nestedscrollview.setOnScrollChangeListener(object: ScrollView.OnScroll{
+//            override fun onScrollChange(
+//                v: NestedScrollView?,
+//                scrollX: Int,
+//                scrollY: Int,
+//                oldScrollX: Int,
+//                oldScrollY: Int
+//            ) {
+//                v?.scrollTo(0, 700)
+//                Log.i("SeeListen", "Listening to scroll ScrollY = ${scrollY} and old scrollY ${oldScrollY}")
+//            }
+//        })
+//        post_reply_nestedscrollview.scrollY = 700
+//        post_reply_recycler_comments.isFocusable = false
+//        post_reply_recycler_highlight.isFocusable = false
+//
+//        post_reply_nestedscrollview.invalidate()
+//        post_reply_nestedscrollview.requestFocus()
+//        post_reply_nestedscrollview.requestLayout()
+//        post_reply_nestedscrollview.scrollBy(0, 700)
+//        post_reply_nestedscrollview.scrollTo(0, 600)
     }
 
     private fun getReplyingToUsername(listUsers: List<User>, postUser: User): String {
-        if (listUsers.size > 1) {
-            return listUsers[listUsers.size - 2].username
+        return if (listUsers.size > 1) {
+            listUsers[listUsers.size - 2].username
         } else {
-            return postUser.username
+            postUser.username
         }
     }
 
