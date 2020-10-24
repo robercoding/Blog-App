@@ -30,13 +30,13 @@
         android:id="@+id/post_reply_nestedscrollview"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:scrollbarSize="1dp"
+        android:scrollbarThumbVertical="@color/blueTwitter"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/post_reply_app_bar"
-        android:scrollbars="vertical"
-        android:scrollbarThumbVertical="@color/blueTwitter"
-        android:scrollbarSize="1dp">
+        app:layout_constraintTop_toBottomOf="@id/post_reply_app_bar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/post_reply_wrap"
@@ -48,6 +48,7 @@
                 android:id="@+id/post_reply_container_post"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:overScrollMode="never"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -139,10 +140,11 @@
                 android:id="@+id/post_reply_recycler_highlight"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:overScrollMode="never"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/post_reply_container_post"
-                tools:itemCount="10"
+                tools:itemCount="3"
                 tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/row_list_comments" />
 
@@ -150,6 +152,7 @@
                 android:id="@+id/post_reply_recycler_comments"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:overScrollMode="never"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/post_reply_recycler_highlight" />
@@ -157,17 +160,17 @@
             <View
                 android:id="@+id/post_reply_blank_space"
                 android:layout_width="match_parent"
-                android:layout_height="1000dp"
+                android:layout_height="250dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/post_reply_container_post" />
-
+                app:layout_constraintTop_toBottomOf="@id/post_reply_recycler_comments" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </androidx.core.widget.NestedScrollView>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/post_reply_container_reply"
         android:layout_width="match_parent"
@@ -224,6 +227,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:backgroundTint="@color/primaryIcon"
+            android:enabled="false"
             android:gravity="center"
             android:text="reply"
             android:textColor="@color/white"
@@ -232,8 +236,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.2" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

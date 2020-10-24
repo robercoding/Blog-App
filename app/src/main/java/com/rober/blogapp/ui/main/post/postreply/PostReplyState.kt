@@ -12,4 +12,15 @@ sealed class PostReplyState {
         val listComments: List<Comment>,
         val listUsers: List<User>
     ) : PostReplyState()
+
+    data class SetCommentReplies(
+        val listComments: List<Comment>,
+        val listUsers: List<User>
+    ) : PostReplyState()
+
+    object CommentRepliesEmpty : PostReplyState()
+
+    //Reply
+    data class ReplySuccess(val listComment: List<Comment>, val listUser: List<User>) : PostReplyState()
+    data class Error(val message: String) : PostReplyState()
 }

@@ -14,7 +14,11 @@ import com.rober.blogapp.entity.User
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 
-class CommentsAdapter(val listComments: List<Comment>, val listUsers: List<User>, val recyclerViewActionInterface: RecyclerViewActionInterface) :
+class CommentsAdapter(
+    val listComments: List<Comment>,
+    val listUsers: List<User>,
+    val recyclerViewActionInterface: RecyclerViewActionInterface
+) :
     RecyclerView.Adapter<CommentsAdapter.CommentsViewHolder>() {
 
     class CommentsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

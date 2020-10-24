@@ -1,16 +1,9 @@
 package com.rober.blogapp.ui.main.post.postreply
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.widget.ScrollView
 import androidx.activity.OnBackPressedCallback
-import androidx.core.widget.NestedScrollView
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -21,16 +14,13 @@ import com.rober.blogapp.R
 import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
-import com.rober.blogapp.entity.Username
 import com.rober.blogapp.ui.base.BaseFragment
-import com.rober.blogapp.ui.main.post.postdetail.PostDetailFragmentArgs
 import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
 import com.rober.blogapp.ui.main.post.postreply.adapter.CommentsHighlightAdapter
 import com.rober.blogapp.ui.main.post.utils.Constants
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_post_detail.*
 import kotlinx.android.synthetic.main.fragment_post_reply.*
 
 @AndroidEntryPoint
@@ -52,6 +42,24 @@ class PostReplyFragment :
             is PostReplyState.SetSelectedCommentView -> {
                 setPostDetails(viewState.post, viewState.postUser)
                 setAdapterHighlights(viewState.listComments, viewState.listUsers, viewState.postUser)
+                viewModel.setIntention(PostReplyEvent.GetCommentReplies)
+            }
+
+            is PostReplyState.SetCommentReplies -> {
+                setAdapterCommentReplies(viewState.listComments, viewState.listUsers)
+            }
+
+            is PostReplyState.ReplySuccess -> {
+                setAdapterCommentReplies(viewState.listComment, viewState.listUser)
+                displayToast("Your reply is succesful!")
+            }
+
+            is PostReplyState.CommentRepliesEmpty -> {
+                //Nothing
+            }
+
+            is PostReplyState.Error -> {
+                displayToast(viewState.message)
             }
         }
     }
@@ -68,7 +76,7 @@ class PostReplyFragment :
     private fun setPostDetails(post: Post, postUser: User) {
         post_reply_username.text = postUser.username
         post_reply_title.text = post.title
-        post_reply_text.text = "hgeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        post_reply_text.text = post.text
         post_reply_time.text = Utils.getDifferenceTimeMilliseconds(post.createdAt, true)
 
         if (postUser.profileImageUrl.isNotEmpty())
@@ -81,137 +89,74 @@ class PostReplyFragment :
     }
 
     private fun setAdapterHighlights(listComments: List<Comment>, listUsers: List<User>, postUser: User) {
-        val listCommentsMock = listComments.toMutableList()
-        val listUsersMock = listUsers.toMutableList()
+//        val listCommentsMock = listComments.toMutableList()
+//        val listUsersMock = listUsers.toMutableList()
 
-        val comment = Comment(
-            "Edited to have more height so we can see if that works correctly, just checking out haha thank!",
-            "${listComments[0].commentId}",
-            "${listComments[0].commentUserId}",
-            "${listComments[0].replyToldId}",
-            listComments[0].repliedAt
-        )
-        listCommentsMock[0] = comment
-        listCommentsMock.add(
-            Comment(
-                "This is mocked but will be the second! now we will se if this works",
-                "0",
-                listUsers.get(0).userId,
-                listComments.get(0).commentId,
-                1603270909
-            )
-        )
-        listCommentsMock.add(
-            Comment(
-                "This is mocked ",
-                "0",
-                listUsers.get(0).userId,
-                listComments.get(0).commentId,
-                1603270909
-            )
-        )
-        listUsersMock.add(listUsers.get(0))
-        val replyingTo = getReplyingToUsername(listUsersMock, postUser)
+//        val comment = Comment(
+//            "Edited to have more height so we can see if that works correctly, just checking out haha thank!",
+//            "${listComments[0].commentId}",
+//            "${listComments[0].commentUserId}",
+//            "${listComments[0].replyToldId}",
+//            listComments[0].repliedAt
+//        )
+//        listCommentsMock[0] = comment
+//        listCommentsMock.add(
+//            Comment(
+//                "This is mocked but will be the second! now we will se if this works",
+//                "0",
+//                listUsers.get(0).userId,
+//                listComments.get(0).commentId,
+//                1603270909
+//            )
+//        )
+//        listCommentsMock.add(
+//            Comment(
+//                "This is mocked ",
+//                "0",
+//                listUsers.get(0).userId,
+//                listComments.get(0).commentId,
+//                1603270909
+//            )
+//        )
+//        listUsersMock.add(listUsers.get(0))
+        val replyingTo = getReplyingToUsername(listUsers, postUser)
 
-        val highlightAdapter = CommentsHighlightAdapter(listCommentsMock, listUsersMock, this, replyingTo)
-        val linearLayoutManager = LinearLayoutManager(requireContext())
-        linearLayoutManager.scrollToPositionWithOffset(listCommentsMock.size - 1, 20)
+        val highlightAdapter = CommentsHighlightAdapter(listComments, listUsers, this, replyingTo)
         post_reply_recycler_highlight.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = highlightAdapter
         }
 
-        val listCommentsTest = listOf<Comment>(listCommentsMock[0])
-        val listUsersTest = listOf<User>(listUsers[0])
-        val commentsAdapter = CommentsAdapter(listCommentsTest, listUsersTest, this)
+//        val listCommentsTest = listOf<Comment>(listCommentsMock[0])
+//        val listUsersTest = listOf<User>(listUsers[0])
+
+        post_reply_nestedscrollview.requestFocus()
+        post_reply_nestedscrollview.requestLayout()
+
+        post_reply_recycler_highlight.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                post_reply_recycler_highlight.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                val recyclerHightlightHeight = post_reply_recycler_highlight.y
+                var childHeights = 0
+                for (index in 0..listComments.size - 2) { //-2 to get the first child that selected comment is replying
+                    childHeights += post_reply_recycler_highlight.getChildAt(index).height
+                }
+                post_reply_nestedscrollview.post {
+                    post_reply_nestedscrollview.scrollTo(0, (recyclerHightlightHeight + childHeights).toInt())
+                }
+            }
+        })
+    }
+
+    private fun setAdapterCommentReplies(listComments: List<Comment>, listUsers: List<User>) {
+        val commentsAdapter = CommentsAdapter(listComments, listUsers, this)
         post_reply_recycler_comments.apply {
             adapter = commentsAdapter
             layoutManager = LinearLayoutManager(requireContext())
 
             addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
         }
-
-
-
-        post_reply_nestedscrollview.requestFocus()
-        post_reply_nestedscrollview.requestLayout()
-        post_reply_nestedscrollview.requestFocus()
-        post_reply_nestedscrollview.requestLayout()
-//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
-//        post_reply_nestedscrollview.scrollTo(700, 700)
-        post_reply_nestedscrollview.requestLayout()
-
-
-        post_reply_recycler_highlight.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                val postHeight = post_reply_container_post.y
-                val recyclerHightlightHeight = post_reply_recycler_highlight.y
-                val childHeight = post_reply_recycler_highlight.getChildAt(0).height
-                Log.i("SeeHeight", "Post Height = ${postHeight}")
-                Log.i("SeeHeight", "RecyclerHighlight y= ${recyclerHightlightHeight}")
-                Log.i("SeeHeight", "Child 0 = ${childHeight}")
-                var childHeights = 0
-                for(index in 0..listCommentsMock.size-2){
-                    childHeights += post_reply_recycler_highlight.getChildAt(index).height
-                }
-                post_reply_recycler_highlight.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                post_reply_nestedscrollview.post {
-//            post_reply_nestedscrollview.fullScroll()
-                    Log.i("SeeHeight", "${postHeight + recyclerHightlightHeight + childHeights}")
-                    post_reply_nestedscrollview.scrollTo(
-                        0,
-                        (postHeight + recyclerHightlightHeight + childHeights).toInt()
-                    )
-                }
-
-            }
-        })
-
-//        post_reply_nestedscrollview.post {
-////            post_reply_nestedscrollview.fullScroll()
-//            Log.i("SeeHeight", "${postHeight + recyclerHightlightHeight}")
-//            post_reply_nestedscrollview.scrollTo(0, (postHeight + recyclerHightlightHeight).toInt())
-//        }
-//        post_reply_nestedscrollview.smoothScrollTo(0, 800)
-
-//        post_reply_nestedscrollview.scrollTo(0, 700)
-//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
-//        post_reply_nestedscrollview.scrollY = 700
-//        post_reply_nestedscrollview.smoothScrollTo(0, 1000)
-
-//        post_reply_nestedscrollview.smoothScrollTo(0, 700)
-//        post_reply_nestedscrollview.scrollTo(0, View.FOCUS_DOWN)
-//        post_reply_nestedscrollview.parent.requestChildFocus(post_reply_nestedscrollview, post_reply_nestedscrollview)
-//        post_reply_nestedscrollview.isSmoothScrollingEnabled = true
-//        post_reply_nestedscrollview.scrollTo(0, 300)
-//        post_reply_nestedscrollview.fullScroll(View.FOCUS_DOWN)
-
-//        post_reply_nestedscrollview.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-//
-//        }
-
-//        post_reply_nestedscrollview.setOnScrollChangeListener(object: ScrollView.OnScroll{
-//            override fun onScrollChange(
-//                v: NestedScrollView?,
-//                scrollX: Int,
-//                scrollY: Int,
-//                oldScrollX: Int,
-//                oldScrollY: Int
-//            ) {
-//                v?.scrollTo(0, 700)
-//                Log.i("SeeListen", "Listening to scroll ScrollY = ${scrollY} and old scrollY ${oldScrollY}")
-//            }
-//        })
-//        post_reply_nestedscrollview.scrollY = 700
-//        post_reply_recycler_comments.isFocusable = false
-//        post_reply_recycler_highlight.isFocusable = false
-//
-//        post_reply_nestedscrollview.invalidate()
-//        post_reply_nestedscrollview.requestFocus()
-//        post_reply_nestedscrollview.requestLayout()
-//        post_reply_nestedscrollview.scrollBy(0, 700)
-//        post_reply_nestedscrollview.scrollTo(0, 600)
     }
 
     private fun getReplyingToUsername(listUsers: List<User>, postUser: User): String {
@@ -249,6 +194,39 @@ class PostReplyFragment :
                 restoreDefaultOnBackPressed()
             }
         }
+
+        post_reply_material_toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        post_reply_edittext.addTextChangedListener {
+            it?.let {
+                if (it.isEmpty()) {
+                    post_reply_button_reply.isEnabled = false
+                    post_reply_button_reply.setTextColor(getColor(R.color.secondaryText))
+                    post_reply_button_reply.background.setTint(getColor(R.color.blueGray))
+                } else {
+                    post_reply_button_reply.isEnabled = true
+                    post_reply_button_reply.setTextColor(getColor(R.color.primaryText))
+                    post_reply_button_reply.background.setTint(getColor(R.color.blueTwitter))
+                }
+            }
+        }
+
+        post_reply_button_reply.setOnClickListener {
+            val text = post_reply_edittext.text.toString()
+
+            if (text.isEmpty()) {
+                return@setOnClickListener
+            }
+
+            displayReplyView(false)
+            post_reply_edittext.clearFocus()
+            post_reply_edittext.setText("")
+            hideKeyBoard()
+
+            viewModel.setIntention(PostReplyEvent.ReplyComment(text))
+        }
     }
 
     override fun customActionOnBackPressed(action: Int) {
@@ -266,7 +244,7 @@ class PostReplyFragment :
     }
 
     override fun clickListenerOnItem(positionAdapter: Int) {
-        //
+        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter))
     }
 
     override fun clickListenerOnPost(positionAdapter: Int) {
@@ -290,4 +268,8 @@ sealed class PostReplyEvent {
         val listUsers: List<User>
     ) : PostReplyEvent()
 
+    object GetCommentReplies : PostReplyEvent()
+    data class SelectReplyComment(val positionAdapter: Int) : PostReplyEvent()
+
+    data class ReplyComment(val text: String) : PostReplyEvent()
 }

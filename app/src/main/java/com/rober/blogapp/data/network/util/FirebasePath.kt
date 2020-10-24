@@ -30,6 +30,7 @@ class FirebasePath @Inject constructor() {
     //Comments
     val comments_col = "comments"
     val comments_post = "comments_post"
+    val comments_comments = "comments_comments"
 
     //Disabled
     val disabled_col = "disabled"

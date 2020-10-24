@@ -22,7 +22,8 @@ constructor(
     private val firebaseSearchManager: FirebaseSearchManager,
     private val firebaseProfileDetailManager: FirebaseProfileDetailManager,
     private val firebaseProfileEditManager: FirebaseProfileEditManager,
-    private val firebaseSettingsManager: FirebaseSettingsManager
+    private val firebaseSettingsManager: FirebaseSettingsManager,
+    private val firebasePostReplyManager: FirebasePostReplyManager
 ) {
     val TAG = "FirebaseRepository"
 
@@ -105,6 +106,13 @@ constructor(
 
     suspend fun addReply(comment: Comment): Flow<ResultData<Boolean>> =
         firebasePostDetailManager.addReplyToPost(comment)
+
+    //PostReply
+    suspend fun getCommentRepliesById(commentId: String): Flow<ResultData<List<Comment>>> =
+        firebasePostReplyManager.getCommentRepliesById(commentId)
+
+    suspend fun addReplyToComment(comment: Comment): Flow<ResultData<Boolean>> =
+        firebasePostReplyManager.addReplyToComment(comment)
 
     //Search
     suspend fun getUserByString(searchUsername: String) =
