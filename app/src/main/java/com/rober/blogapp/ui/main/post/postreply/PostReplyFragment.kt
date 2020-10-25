@@ -1,9 +1,12 @@
 package com.rober.blogapp.ui.main.post.postreply
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -56,7 +59,6 @@ class PostReplyFragment :
             }
 
             is PostReplyState.RestoreCommentsAdapter -> {
-                Log.i("SeeRestore", "Restoring!")
                 setAdapterHighlights(viewState.listHighlightComments, viewState.listUsers, viewState.postUser)
                 setAdapterCommentReplies(viewState.listComments, viewState.listUsers)
 
@@ -66,7 +68,6 @@ class PostReplyFragment :
 
             is PostReplyState.ReplySuccess -> {
                 setAdapterCommentReplies(viewState.listComment, viewState.listUser)
-                displayToast("Your reply is succesful!")
             }
 
             is PostReplyState.CommentRepliesEmpty -> {
@@ -107,7 +108,6 @@ class PostReplyFragment :
     }
 
     private fun setAdapterHighlights(listComments: List<Comment>, listUsers: List<User>, postUser: User) {
-        Log.i("SeeRestore", "ListComments ${listComments}")
 //        val listCommentsMock = listComments.toMutableList()
 //        val listUsersMock = listUsers.toMutableList()
 
@@ -223,6 +223,11 @@ class PostReplyFragment :
     override fun setupViewDesign() {
         super.setupViewDesign()
         displayReplyView(false)
+
+        post_reply_material_toolbar.navigationIcon?.colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(requireContext(), R.color.blueTwitter),
+            PorterDuff.Mode.SRC_ATOP
+        )
     }
 
     override fun setupListeners() {
@@ -232,7 +237,8 @@ class PostReplyFragment :
                 customActionOnBackPressed(Constants.BACK_REPLY)
             } else {
                 displayReplyView(false)
-                restoreDefaultOnBackPressed()
+                customActionOnBackPressed(Constants.BACK_MANAGE_STACK_COMMENTS_REPLIES)
+//                restoreDefaultOnBackPressed()
             }
         }
 
@@ -269,7 +275,10 @@ class PostReplyFragment :
 
             viewModel.setIntention(PostReplyEvent.ReplyComment(text))
         }
+
+        customActionOnBackPressed(Constants.BACK_MANAGE_STACK_COMMENTS_REPLIES)
     }
+
 
     override fun customActionOnBackPressed(action: Int) {
         super.customActionOnBackPressed(action)
@@ -279,6 +288,9 @@ class PostReplyFragment :
                     Constants.BACK_REPLY -> {
                         post_reply_edittext.clearFocus()
                     }
+                    Constants.BACK_MANAGE_STACK_COMMENTS_REPLIES -> {
+                        viewModel.setIntention(PostReplyEvent.PopBackStack)
+                    }
                 }
             }
         }
@@ -286,11 +298,11 @@ class PostReplyFragment :
     }
 
     override fun onClickHighlightComment(positionAdapter: Int) {
-//        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter))
+        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter, true))
     }
 
     override fun onClickReplyComment(positionAdapter: Int) {
-        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter))
+        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter, false))
 
     }
 }
@@ -304,7 +316,8 @@ sealed class PostReplyEvent {
     ) : PostReplyEvent()
 
     object GetCommentReplies : PostReplyEvent()
-    data class SelectReplyComment(val positionAdapter: Int) : PostReplyEvent()
+    data class SelectReplyComment(val positionAdapter: Int, val isHighlightComment: Boolean) :
+        PostReplyEvent()
 
     object PopBackStack : PostReplyEvent()
 

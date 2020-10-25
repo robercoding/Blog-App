@@ -62,11 +62,16 @@ class PostReplyViewModel @ViewModelInject constructor(
             }
 
             is PostReplyEvent.SelectReplyComment -> {
-                Log.i("SeeRestore", "Before save ${mutableListHighlightsComments}")
                 saveHistory()
 
-                val nextCommentHighlight = mutableListComments[event.positionAdapter]
+                var nextCommentHighlight: Comment
+                if (event.isHighlightComment) {
+                    nextCommentHighlight = mutableListHighlightsComments[event.positionAdapter]
+                } else {
+                    nextCommentHighlight = mutableListComments[event.positionAdapter]
+                }
                 mutableListHighlightsComments.add(nextCommentHighlight)
+
 
                 val isUserInHighlightUsers =
                     mutableListUsers.any { user -> user.userId == nextCommentHighlight.commentUserId }
@@ -89,14 +94,12 @@ class PostReplyViewModel @ViewModelInject constructor(
                     mutableListUsers.toList()
                 )
             }
+
             is PostReplyEvent.PopBackStack -> {
                 if (mutableListHistoryHighlightComment.toList().isEmpty()) {
-                    Log.i("SeeListHistory", "Empty")
                     viewState = PostReplyState.PopBackStack
                     return
                 }
-
-                Log.i("SeeListHistory", "Before remove= ${mutableListHistoryHighlightComment}")
 
                 //Get comment state
                 mutableListHighlightsComments =
@@ -105,7 +108,6 @@ class PostReplyViewModel @ViewModelInject constructor(
                     mutableListHistoryComment[mutableListHistoryComment.lastIndex].toMutableList()
 
                 mutableListHistoryHighlightComment.removeAt(mutableListHistoryHighlightComment.lastIndex)
-                Log.i("SeeListHistory", "After remove= ${mutableListHistoryHighlightComment}")
                 mutableListHistoryComment.removeAt(mutableListHistoryComment.lastIndex)
 
                 viewState = PostReplyState.RestoreCommentsAdapter(
@@ -125,12 +127,10 @@ class PostReplyViewModel @ViewModelInject constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            Log.i("SeeGetReplies", "Success")
                             mutableListComments = resultData.data!!.toMutableList()
                         }
 
                         is ResultData.Error -> {
-                            Log.i("SeeGetReplies", "Error")
                         }
                     }
                 }
@@ -138,7 +138,6 @@ class PostReplyViewModel @ViewModelInject constructor(
         job?.join()
 
         if (mutableListComments.isEmpty()) {
-            Log.i("SeeGetReplies", "Empty")
             viewState = PostReplyState.CommentRepliesEmpty
             return
         }
@@ -148,11 +147,9 @@ class PostReplyViewModel @ViewModelInject constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            Log.i("SeeGetReplies", "Success users")
                             mutableListUsers.addAll(resultData.data!!)
                         }
                         is ResultData.Error -> {
-                            Log.i("SeeGetReplies", "Error users")
                         }
                     }
                 }
@@ -194,13 +191,11 @@ class PostReplyViewModel @ViewModelInject constructor(
                             }
                         }
                     }
-
                 }
         }
     }
 
     private fun saveHistory() {
-        Log.i("SeeRestore", "Save comments! ${mutableListHighlightsComments}")
         mutableListHistoryHighlightComment.add(mutableListHighlightsComments.toList())
         mutableListHistoryComment.add(mutableListComments.toList())
     }

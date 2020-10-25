@@ -8,13 +8,13 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.main.post.postreply.PostReplyClickListener
-import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 
 class CommentsHighlightAdapter(
@@ -59,7 +59,7 @@ class CommentsHighlightAdapter(
             user: User,
             postReplyClickListener: PostReplyClickListener,
             highlightedComment: Boolean,
-            usernameReply: String?
+            usernameReply: String
         ) {
             val profilePicture = user.profileImageUrl
             if (profilePicture.isNotEmpty())
@@ -82,35 +82,47 @@ class CommentsHighlightAdapter(
             continueReplyBottom?.visibility = View.VISIBLE
 
             if (highlightedComment) {
-                time?.visibility = View.GONE
-                continueReplyBottom?.visibility = View.GONE
-
-                options?.visibility = View.VISIBLE
-                dateTextView?.visibility = View.VISIBLE
-                replyingText?.visibility = View.VISIBLE
-                continueReplyTop?.visibility = View.VISIBLE
-                replyingToUsername?.visibility = View.VISIBLE
-                replyingToUsername?.text = "@${usernameReply}"
-
-                val date = Utils.getDateDayMonthYearInSeconds(comment.repliedAt)
-                val time = Utils.getDateHourMinutesInSeconds(comment.repliedAt)
-                dateTextView?.text = "${date}    |    ${time}"
-
-
-                userText?.textSize = 16f
-                val constraintLayout =
-                    ConstraintLayout.LayoutParams(
-                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                        ConstraintLayout.LayoutParams.WRAP_CONTENT
-                    )
-                constraintLayout.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
-                constraintLayout.topToBottom = R.id.row_comment_reply_text
-                constraintLayout.marginStart = 60
-
-                userText?.layoutParams = constraintLayout
+                setViewForHighlightedComment(comment, usernameReply)
             } else {
-                Log.i("SeeResize", "Not resized")
+                containerComments?.setOnClickListener {
+                    postReplyClickListener.onClickHighlightComment(adapterPosition)
+                }
             }
+        }
+
+        private fun setViewForHighlightedComment(comment: Comment, usernameReply: String) {
+            time?.visibility = View.GONE
+            continueReplyBottom?.visibility = View.GONE
+
+            options?.visibility = View.VISIBLE
+            dateTextView?.visibility = View.VISIBLE
+            replyingText?.visibility = View.VISIBLE
+            continueReplyTop?.visibility = View.VISIBLE
+            replyingToUsername?.visibility = View.VISIBLE
+            replyingToUsername?.text = "@${usernameReply}"
+
+            val date = Utils.getDateDayMonthYearInSeconds(comment.repliedAt)
+            val time = Utils.getDateHourMinutesInSeconds(comment.repliedAt)
+            dateTextView?.text = "${date}    |    ${time}"
+
+
+            userText?.textSize = 16f
+            val constraintLayout =
+                ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+            constraintLayout.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            constraintLayout.topToBottom = R.id.row_comment_reply_text
+            constraintLayout.marginStart = 60
+            containerComments?.setBackgroundColor(
+                ContextCompat.getColor(
+                    itemView.context,
+                    R.color.primaryBackground
+                )
+            )
+
+            userText?.layoutParams = constraintLayout
         }
     }
 

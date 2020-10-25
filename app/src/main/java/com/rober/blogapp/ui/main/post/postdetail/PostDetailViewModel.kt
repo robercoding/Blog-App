@@ -155,7 +155,7 @@ class PostDetailViewModel @ViewModelInject constructor(
             }
 
             is PostDetailFragmentEvent.AddReply -> {
-                addRepply(event.message)
+                addReply(event.message)
             }
         }
     }
@@ -509,9 +509,7 @@ class PostDetailViewModel @ViewModelInject constructor(
                     .collect { resultData ->
                         when (resultData) {
                             is ResultData.Success -> {
-                                Log.i("SeeComments", "Comments Success")
                                 mutableListComments = resultData.data!!.toMutableList()
-                                Log.i("SeeComments", "Added comments")
                             }
                             is ResultData.Error -> viewState = PostDetailState.Error(resultData.exception)
                         }
@@ -520,9 +518,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
         job?.join()
         job = viewModelScope.launch {
-            Log.i("SeeComments", "Start users")
             if (mutableListComments.isEmpty()) {
-                Log.i("SeeComments", "Start is empty")
                 viewState = PostDetailState.PostCommentsEmpty
                 return@launch
             }
@@ -531,11 +527,9 @@ class PostDetailViewModel @ViewModelInject constructor(
                 .collect { resultData ->
                     when (resultData) {
                         is ResultData.Success -> {
-                            Log.i("SeeComments", "Users Comments Success")
                             mutableListUser = resultData.data!!.toMutableList()
                         }
                         is ResultData.Error -> {
-                            Log.i("SeeComments", "Users Comments Error ${resultData.exception}")
                             viewState = PostDetailState.Error(resultData.exception)
                         }
                     }
@@ -551,8 +545,7 @@ class PostDetailViewModel @ViewModelInject constructor(
         }
     }
 
-    private fun addRepply(message: String) {
-        Log.i("SeeReply", "See reply ${message}")
+    private fun addReply(message: String) {
         val currentUser = firebaseRepository.getCurrentUser()
         if (currentUser.username.isEmpty())
             return
@@ -566,12 +559,10 @@ class PostDetailViewModel @ViewModelInject constructor(
                         when (resultData) {
 
                             is ResultData.Loading -> {
-                                Log.i("SeeReply", "See Loading")
                                 viewState = PostDetailState.LoadingReply
                             }
 
                             is ResultData.Success -> {
-                                Log.i("SeeReply", "See Success")
                                 mutableListComments.add(comment)
                                 mutableListUser.add(currentUser)
                                 viewState = PostDetailState.ReplySuccess(
@@ -581,7 +572,6 @@ class PostDetailViewModel @ViewModelInject constructor(
                             }
 
                             is ResultData.Error -> {
-                                Log.i("SeeReply", "SeeError")
                                 viewState = PostDetailState.Error(resultData.exception)
                             }
                         }

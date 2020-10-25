@@ -9,4 +9,5 @@ object Constants {
 
     val BACK_REPLY = 0
     val BACK_OPTION = 1
+    val BACK_MANAGE_STACK_COMMENTS_REPLIES = 2
 }
