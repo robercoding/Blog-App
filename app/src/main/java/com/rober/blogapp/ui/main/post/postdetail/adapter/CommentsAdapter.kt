@@ -11,13 +11,14 @@ import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.main.post.postreply.PostReplyClickListener
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 
 class CommentsAdapter(
-    val listComments: List<Comment>,
-    val listUsers: List<User>,
-    val recyclerViewActionInterface: RecyclerViewActionInterface
+    var listComments: List<Comment>,
+    var listUsers: List<User>,
+    val postReplyClickListener: PostReplyClickListener
 ) :
     RecyclerView.Adapter<CommentsAdapter.CommentsViewHolder>() {
 
@@ -36,7 +37,7 @@ class CommentsAdapter(
             time = itemView.findViewById(R.id.row_comment_time)
         }
 
-        fun bind(comment: Comment, user: User, recyclerViewActionInterface: RecyclerViewActionInterface) {
+        fun bind(comment: Comment, user: User, postReplyClickListener: PostReplyClickListener) {
             val profilePicture = user.profileImageUrl
             if (profilePicture.isNotEmpty())
                 userPicture?.apply {
@@ -50,7 +51,7 @@ class CommentsAdapter(
             time?.text = differenceText
 
             containerComments?.setOnClickListener {
-                recyclerViewActionInterface.clickListenerOnItem(adapterPosition)
+                postReplyClickListener.onClickReplyComment(adapterPosition)
             }
         }
     }
@@ -64,11 +65,17 @@ class CommentsAdapter(
         val userId = listComments[position].commentUserId
         val userComment = listUsers.find { user -> user.userId == userId }
         userComment?.let { tempUser ->
-            holder.bind(listComments[position], tempUser, recyclerViewActionInterface)
+            holder.bind(listComments[position], tempUser, postReplyClickListener)
         }
     }
 
     override fun getItemCount(): Int {
         return listComments.size
+    }
+
+    fun clear() {
+        listComments = listOf()
+        listUsers = listOf()
+        notifyDataSetChanged()
     }
 }

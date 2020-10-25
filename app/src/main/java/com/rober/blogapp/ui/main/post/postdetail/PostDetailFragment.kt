@@ -31,6 +31,7 @@ import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.ListOptionsAdapter
 import com.rober.blogapp.ui.main.post.postdetail.adapter.OnListOptionsClickInterface
+import com.rober.blogapp.ui.main.post.postreply.PostReplyClickListener
 import com.rober.blogapp.ui.main.post.utils.Constants
 import com.rober.blogapp.util.EmojiUtils.OK_HAND
 import com.rober.blogapp.util.RecyclerViewActionInterface
@@ -42,7 +43,7 @@ import kotlinx.android.synthetic.main.fragment_post_detail.*
 @AndroidEntryPoint
 class PostDetailFragment :
     BaseFragment<PostDetailState, PostDetailFragmentEvent, PostDetailViewModel>(R.layout.fragment_post_detail),
-    OnListOptionsClickInterface, RecyclerViewActionInterface {
+    OnListOptionsClickInterface, PostReplyClickListener {
 
     override val viewModel: PostDetailViewModel by viewModels()
     val args: PostDetailFragmentArgs by navArgs()
@@ -527,20 +528,10 @@ class PostDetailFragment :
         )
     }
 
-    override fun clickListenerOnItem(positionAdapter: Int) {
+    override fun onClickHighlightComment(positionAdapter: Int) {}
+
+    override fun onClickReplyComment(positionAdapter: Int) {
         viewModel.setIntention(PostDetailFragmentEvent.SelectComment(positionAdapter))
-    }
-
-    override fun clickListenerOnPost(positionAdapter: Int) {
-        //
-    }
-
-    override fun clickListenerOnUser(positionAdapter: Int) {
-        //
-    }
-
-    override fun requestMorePosts(actualRecyclerViewPosition: Int) {
-        //
     }
 }
 

@@ -1,6 +1,7 @@
 package com.rober.blogapp.ui.main.post.postreply
 
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewTreeObserver
 import androidx.activity.OnBackPressedCallback
 import androidx.core.widget.addTextChangedListener
@@ -26,10 +27,11 @@ import kotlinx.android.synthetic.main.fragment_post_reply.*
 @AndroidEntryPoint
 class PostReplyFragment :
     BaseFragment<PostReplyState, PostReplyEvent, PostReplyViewModel>(R.layout.fragment_post_reply),
-    RecyclerViewActionInterface {
+    PostReplyClickListener {
 
     override val viewModel: PostReplyViewModel by viewModels()
     val args: PostReplyFragmentArgs by navArgs()
+//    var commentAdapter = CommentsAdapter(listOf(), listOf(), this)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -42,10 +44,18 @@ class PostReplyFragment :
             is PostReplyState.SetSelectedCommentView -> {
                 setPostDetails(viewState.post, viewState.postUser)
                 setAdapterHighlights(viewState.listComments, viewState.listUsers, viewState.postUser)
+//                commentAdapter.clear()
+                cleanAdapterCommentReplies()
                 viewModel.setIntention(PostReplyEvent.GetCommentReplies)
             }
 
             is PostReplyState.SetCommentReplies -> {
+                setAdapterCommentReplies(viewState.listComments, viewState.listUsers)
+            }
+
+            is PostReplyState.RestoreCommentsAdapter -> {
+                Log.i("SeeRestore", "Restoring!")
+                setAdapterHighlights(viewState.listHighlightComments, viewState.listUsers, viewState.postUser)
                 setAdapterCommentReplies(viewState.listComments, viewState.listUsers)
             }
 
@@ -60,6 +70,9 @@ class PostReplyFragment :
 
             is PostReplyState.Error -> {
                 displayToast(viewState.message)
+            }
+            is PostReplyState.PopBackStack -> {
+                findNavController().popBackStack()
             }
         }
     }
@@ -89,6 +102,7 @@ class PostReplyFragment :
     }
 
     private fun setAdapterHighlights(listComments: List<Comment>, listUsers: List<User>, postUser: User) {
+        Log.i("SeeRestore", "ListComments ${listComments}")
 //        val listCommentsMock = listComments.toMutableList()
 //        val listUsersMock = listUsers.toMutableList()
 
@@ -143,7 +157,11 @@ class PostReplyFragment :
                     childHeights += post_reply_recycler_highlight.getChildAt(index).height
                 }
                 post_reply_nestedscrollview.post {
-                    post_reply_nestedscrollview.scrollTo(0, (recyclerHightlightHeight + childHeights).toInt())
+                    post_reply_nestedscrollview.smoothScrollBy(
+                        0,
+                        (recyclerHightlightHeight + childHeights).toInt(),
+                        2000
+                    )
                 }
             }
         })
@@ -156,6 +174,14 @@ class PostReplyFragment :
             layoutManager = LinearLayoutManager(requireContext())
 
             addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
+        }
+    }
+
+    private fun cleanAdapterCommentReplies() {
+        val commentsAdapter = CommentsAdapter(listOf(), listOf(), this)
+        post_reply_recycler_comments.apply {
+            adapter = commentsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
         }
     }
 
@@ -196,7 +222,8 @@ class PostReplyFragment :
         }
 
         post_reply_material_toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            viewModel.setIntention(PostReplyEvent.PopBackStack)
+//            findNavController().popBackStack()
         }
 
         post_reply_edittext.addTextChangedListener {
@@ -243,20 +270,13 @@ class PostReplyFragment :
         requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
     }
 
-    override fun clickListenerOnItem(positionAdapter: Int) {
+    override fun onClickHighlightComment(positionAdapter: Int) {
+//        viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter))
+    }
+
+    override fun onClickReplyComment(positionAdapter: Int) {
         viewModel.setIntention(PostReplyEvent.SelectReplyComment(positionAdapter))
-    }
 
-    override fun clickListenerOnPost(positionAdapter: Int) {
-        //
-    }
-
-    override fun clickListenerOnUser(positionAdapter: Int) {
-        //
-    }
-
-    override fun requestMorePosts(actualRecyclerViewPosition: Int) {
-        //
     }
 }
 
@@ -270,6 +290,8 @@ sealed class PostReplyEvent {
 
     object GetCommentReplies : PostReplyEvent()
     data class SelectReplyComment(val positionAdapter: Int) : PostReplyEvent()
+
+    object PopBackStack : PostReplyEvent()
 
     data class ReplyComment(val text: String) : PostReplyEvent()
 }

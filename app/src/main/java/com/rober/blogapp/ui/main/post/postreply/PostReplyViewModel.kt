@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.rober.blogapp.data.ResultData
 import com.rober.blogapp.data.network.repository.FirebaseRepository
 import com.rober.blogapp.entity.Comment
+import com.rober.blogapp.entity.Post
 import com.rober.blogapp.entity.User
 import com.rober.blogapp.ui.base.BaseViewModel
 import kotlinx.coroutines.flow.collect
@@ -19,19 +20,28 @@ class PostReplyViewModel @ViewModelInject constructor(
     lateinit var highlightComment: Comment
 
     var mutableListHighlightsComments = mutableListOf<Comment>()
-    var mutableListHighlightsUsers = mutableListOf<User>()
-
     var mutableListComments = mutableListOf<Comment>()
+
     var mutableListUsers = mutableListOf<User>()
 
+    var mutableListHistoryHighlightComment = mutableListOf<List<Comment>>()
+    var mutableListHistoryComment = mutableListOf<List<Comment>>()
+
     var user: User = firebaseRepository.getCurrentUser()
+
+    lateinit var post: Post
+    lateinit var postUser: User
 
     override fun setIntention(event: PostReplyEvent) {
         when (event) {
             is PostReplyEvent.SetDetails -> {
                 mutableListHighlightsComments = event.listComments.toMutableList()
-                mutableListHighlightsUsers = event.listUsers.toMutableList()
+                mutableListUsers = event.listUsers.toMutableList()
                 highlightComment = event.listComments[event.listComments.lastIndex]
+
+                post = event.post
+                postUser = event.postUser
+
 
                 viewState = PostReplyState.SetSelectedCommentView(
                     event.post,
@@ -52,12 +62,64 @@ class PostReplyViewModel @ViewModelInject constructor(
             }
 
             is PostReplyEvent.SelectReplyComment -> {
+                Log.i("SeeRestore", "Before save ${mutableListHighlightsComments}")
+                saveHistory()
 
+                val nextCommentHighlight = mutableListComments[event.positionAdapter]
+                mutableListHighlightsComments.add(nextCommentHighlight)
+
+                val isUserInHighlightUsers =
+                    mutableListUsers.any { user -> user.userId == nextCommentHighlight.commentUserId }
+                if (!isUserInHighlightUsers) {
+                    val user =
+                        mutableListUsers.firstOrNull { user -> user.userId == nextCommentHighlight.commentUserId }
+
+                    if (user == null) {
+                        mutableListHighlightsComments.remove(nextCommentHighlight)
+                        return
+                    }
+                    mutableListUsers.add(user)
+                }
+
+                highlightComment = nextCommentHighlight
+                viewState = PostReplyState.SetSelectedCommentView(
+                    post,
+                    postUser,
+                    mutableListHighlightsComments.toList(),
+                    mutableListUsers.toList()
+                )
+            }
+            is PostReplyEvent.PopBackStack -> {
+                if (mutableListHistoryHighlightComment.toList().isEmpty()) {
+                    Log.i("SeeListHistory", "Empty")
+                    viewState = PostReplyState.PopBackStack
+                    return
+                }
+
+                Log.i("SeeListHistory", "Before remove= ${mutableListHistoryHighlightComment}")
+
+                //Get comment state
+                mutableListHighlightsComments =
+                    mutableListHistoryHighlightComment[mutableListHistoryHighlightComment.lastIndex].toMutableList()
+                mutableListComments =
+                    mutableListHistoryComment[mutableListHistoryComment.lastIndex].toMutableList()
+
+                mutableListHistoryHighlightComment.removeAt(mutableListHistoryHighlightComment.lastIndex)
+                Log.i("SeeListHistory", "After remove= ${mutableListHistoryHighlightComment}")
+                mutableListHistoryComment.removeAt(mutableListHistoryComment.lastIndex)
+
+                viewState = PostReplyState.RestoreCommentsAdapter(
+                    mutableListHighlightsComments.toList(),
+                    mutableListComments.toList(),
+                    mutableListUsers.toList(),
+                    postUser
+                )
             }
         }
     }
 
     private suspend fun getCommentReplies() {
+        mutableListComments.clear()
         job = viewModelScope.launch {
             firebaseRepository.getCommentRepliesById(highlightComment.commentId)
                 .collect { resultData ->
@@ -87,13 +149,12 @@ class PostReplyViewModel @ViewModelInject constructor(
                     when (resultData) {
                         is ResultData.Success -> {
                             Log.i("SeeGetReplies", "Success users")
-                            mutableListUsers = resultData.data!!.toMutableList()
+                            mutableListUsers.addAll(resultData.data!!)
                         }
                         is ResultData.Error -> {
                             Log.i("SeeGetReplies", "Error users")
                         }
                     }
-
                 }
         }
         job?.join()
@@ -136,6 +197,12 @@ class PostReplyViewModel @ViewModelInject constructor(
 
                 }
         }
+    }
+
+    private fun saveHistory() {
+        Log.i("SeeRestore", "Save comments! ${mutableListHighlightsComments}")
+        mutableListHistoryHighlightComment.add(mutableListHighlightsComments.toList())
+        mutableListHistoryComment.add(mutableListComments.toList())
     }
 
 }

@@ -13,13 +13,14 @@ import com.bumptech.glide.Glide
 import com.rober.blogapp.R
 import com.rober.blogapp.entity.Comment
 import com.rober.blogapp.entity.User
+import com.rober.blogapp.ui.main.post.postreply.PostReplyClickListener
 import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 
 class CommentsHighlightAdapter(
     val listHighlightComments: List<Comment>,
     val listUsers: List<User>,
-    val recyclerViewActionInterface: RecyclerViewActionInterface,
+    val postReplyClickListener: PostReplyClickListener,
     val usernameReply: String
 ) :
     RecyclerView.Adapter<CommentsHighlightAdapter.CommentsViewHolder>() {
@@ -51,13 +52,12 @@ class CommentsHighlightAdapter(
             continueReplyTop = itemView.findViewById(R.id.row_comment_continue_reply_top)
             continueReplyBottom = itemView.findViewById(R.id.row_comment_continue_reply_bottom)
             topDivider = itemView.findViewById(R.id.row_comment_top_divider)
-
         }
 
         fun bind(
             comment: Comment,
             user: User,
-            recyclerViewActionInterface: RecyclerViewActionInterface,
+            postReplyClickListener: PostReplyClickListener,
             highlightedComment: Boolean,
             usernameReply: String?
         ) {
@@ -74,7 +74,7 @@ class CommentsHighlightAdapter(
             time?.text = differenceText
 
             containerComments?.setOnClickListener {
-                recyclerViewActionInterface.clickListenerOnItem(adapterPosition)
+                postReplyClickListener.onClickHighlightComment(adapterPosition)
             }
 
             topDivider?.visibility = View.GONE
@@ -132,7 +132,7 @@ class CommentsHighlightAdapter(
             holder.bind(
                 listHighlightComments[position],
                 tempUser,
-                recyclerViewActionInterface,
+                postReplyClickListener,
                 highlightedComment,
                 usernameReply
             )

@@ -18,7 +18,15 @@ sealed class PostReplyState {
         val listUsers: List<User>
     ) : PostReplyState()
 
+    data class RestoreCommentsAdapter(
+        val listHighlightComments: List<Comment>,
+        val listComments: List<Comment>,
+        val listUsers: List<User>,
+        val postUser: User
+    ) : PostReplyState()
+
     object CommentRepliesEmpty : PostReplyState()
+    object PopBackStack : PostReplyState()
 
     //Reply
     data class ReplySuccess(val listComment: List<Comment>, val listUser: List<User>) : PostReplyState()
