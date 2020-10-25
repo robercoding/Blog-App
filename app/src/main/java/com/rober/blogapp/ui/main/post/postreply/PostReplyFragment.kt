@@ -19,7 +19,6 @@ import com.rober.blogapp.ui.base.BaseFragment
 import com.rober.blogapp.ui.main.post.postdetail.adapter.CommentsAdapter
 import com.rober.blogapp.ui.main.post.postreply.adapter.CommentsHighlightAdapter
 import com.rober.blogapp.ui.main.post.utils.Constants
-import com.rober.blogapp.util.RecyclerViewActionInterface
 import com.rober.blogapp.util.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_post_reply.*
@@ -46,6 +45,9 @@ class PostReplyFragment :
                 setAdapterHighlights(viewState.listComments, viewState.listUsers, viewState.postUser)
 //                commentAdapter.clear()
                 cleanAdapterCommentReplies()
+
+                post_reply_textview_username.text =
+                    getHighlightReplyingToUsername(viewState.listComments, viewState.listUsers)
                 viewModel.setIntention(PostReplyEvent.GetCommentReplies)
             }
 
@@ -57,6 +59,9 @@ class PostReplyFragment :
                 Log.i("SeeRestore", "Restoring!")
                 setAdapterHighlights(viewState.listHighlightComments, viewState.listUsers, viewState.postUser)
                 setAdapterCommentReplies(viewState.listComments, viewState.listUsers)
+
+                post_reply_textview_username.text =
+                    getHighlightReplyingToUsername(viewState.listComments, viewState.listUsers)
             }
 
             is PostReplyState.ReplySuccess -> {
@@ -133,7 +138,7 @@ class PostReplyFragment :
 //            )
 //        )
 //        listUsersMock.add(listUsers.get(0))
-        val replyingTo = getReplyingToUsername(listUsers, postUser)
+        val replyingTo = getHighlightReplyingToUsername(listUsers, postUser)
 
         val highlightAdapter = CommentsHighlightAdapter(listComments, listUsers, this, replyingTo)
         post_reply_recycler_highlight.apply {
@@ -185,12 +190,22 @@ class PostReplyFragment :
         }
     }
 
-    private fun getReplyingToUsername(listUsers: List<User>, postUser: User): String {
+    private fun getHighlightReplyingToUsername(listUsers: List<User>, postUser: User): String {
         return if (listUsers.size > 1) {
             listUsers[listUsers.size - 2].username
         } else {
             postUser.username
         }
+    }
+
+    private fun getHighlightReplyingToUsername(
+        listCommentHightlights: List<Comment>,
+        listUsers: List<User>
+    ): String {
+        val commentUserId = listCommentHightlights[listCommentHightlights.lastIndex].commentUserId
+
+        val user = listUsers.find { user -> user.userId == commentUserId } ?: return "Who's the person!?"
+        return user.username
     }
 
     private fun displayReplyView(display: Boolean) {
