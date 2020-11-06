@@ -2,7 +2,7 @@
 
 Blog App is an app to let users create an account to share their thoughts and interact with other people, it's inspired in Twitter.
 
-The app is built with **Kotlin** and **Firebase** using _Cloud Firestore_ to store the data, _Firebase Storage_ to save data images and _Cloud Functions_ to execute the work on server-side. Client-side uses Kotlin and server-side use Node.js.
+The app is built with **Kotlin** and **Firebase** using _Cloud Firestore_ to store the data, _Firebase Storage_ to save data images and _Cloud Functions_ to execute the work on server-side. Client-side uses Kotlin and server-side use Node.js (Cloud Functions from Firebase).
 
 #### Features 
 * Authentication
