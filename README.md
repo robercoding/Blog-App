@@ -1,3 +1,8 @@
+## App is functional and you can try it. 
+* Right now this project is on stand-by since this requires more time and attention for every feature you add and right now I'm busy developing an app for <i>Play Store</i>, but below you can see the functions and all the things you can do.
+* There may be unexpected bugs (for example a basic one is rotating). Sorry about that I'll fix it as soon as I have free time.
+* This project was made when I was less experienced and knew a lot less but I learnt so much from this!🙂.
+
 # Blog-App
 
 Blog App is an app to let users create an account to share their thoughts and interact with other people, it's inspired in Twitter.
